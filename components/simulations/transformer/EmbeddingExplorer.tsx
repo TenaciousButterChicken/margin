@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  coordsBounds,
   coordsFor,
   findTokenId,
   loadCoords,
@@ -163,11 +162,34 @@ export function EmbeddingExplorer() {
     setArithResult(top);
   }
 
-  /* -------- Plot scaling ----------------------------------------- */
+  /* -------- Plot scaling -----------------------------------------
+   *
+   * Bounds are computed from JUST the points we're showing (searched
+   * word + neighbors), padded by 15%. This is honest — every point is
+   * still placed at its global 2D PCA coordinate, we're just zooming
+   * the viewport so the cluster fills the canvas instead of getting
+   * lost in a corner of the full-vocabulary projection. */
   const bounds = useMemo(() => {
-    if (load.kind === "loading-light" || load.kind === "idle") return null;
-    return coordsBounds();
-  }, [load.kind]);
+    if (searchedId === null) return null;
+    const ids = [searchedId, ...neighbors.map((n) => n.id)];
+    let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+    for (const id of ids) {
+      const [x, y] = coordsFor(id);
+      if (x < xmin) xmin = x;
+      if (x > xmax) xmax = x;
+      if (y < ymin) ymin = y;
+      if (y > ymax) ymax = y;
+    }
+    // Pad by 15% on each side so labels near the edge don't clip.
+    const xpad = (xmax - xmin) * 0.15 || 1;
+    const ypad = (ymax - ymin) * 0.15 || 1;
+    return {
+      xmin: xmin - xpad,
+      xmax: xmax + xpad,
+      ymin: ymin - ypad,
+      ymax: ymax + ypad,
+    };
+  }, [searchedId, neighbors]);
 
   function project(x: number, y: number): [number, number] {
     if (!bounds) return [PLOT_WIDTH / 2, PLOT_HEIGHT / 2];
