@@ -11,7 +11,7 @@ export function TopNav({
   current,
   signedIn,
 }: {
-  current?: "sessions" | "about";
+  current?: "sessions" | "simulations" | "about";
   signedIn: boolean;
 }) {
   return (
@@ -22,6 +22,9 @@ export function TopNav({
       <nav style={{ marginLeft: 40, display: "flex", alignItems: "center", gap: 28 }}>
         <NavLink href="/sessions" active={current === "sessions"}>
           Sessions
+        </NavLink>
+        <NavLink href="/simulations" active={current === "simulations"}>
+          Simulations
         </NavLink>
         <NavLink href="/about" active={current === "about"}>
           About
