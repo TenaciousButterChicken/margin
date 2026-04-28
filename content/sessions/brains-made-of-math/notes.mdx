@@ -1,0 +1,37 @@
+By Session 11 we have fit lines through points (Session 4), found the best line by descending a cost surface (Session 6), and drawn boundaries through clouds of dots (Sessions 8 and 9). Today we stack those ideas on top of each other and end up with something that does not look like the sum of its parts.
+
+## A neuron is one regression
+
+The basic computation inside a neural network is shockingly familiar. A neuron takes some inputs, multiplies each by a weight, adds them up, and runs the sum through a small nonlinear function. That is it. Algebraically:
+
+```python
+def neuron(inputs, weights, bias, activation):
+    z = sum(w * x for w, x in zip(weights, inputs)) + bias
+    return activation(z)
+```
+
+The activation function is the only thing that distinguishes a neuron from the linear regression you built three weeks ago. Drop the activation, and a neuron *is* a linear model.
+
+<Callout variant="note">
+Common activation choices: **ReLU** (`max(0, z)`) is the workhorse — fast, well-behaved gradients. **Sigmoid** squishes its input into (0,1) and shows up in classification. **Tanh** is the older sibling of sigmoid.
+</Callout>
+
+## Stacking neurons makes layers
+
+A *layer* is just a column of neurons that all see the same inputs. A *network* is a stack of layers, where each layer's outputs become the next layer's inputs. The first layer sees the raw data; the last layer outputs the prediction. Everything in between is the network's internal vocabulary, learned from the gradients.
+
+The depth — how many layers — is what makes networks expressive. A single layer of neurons can carve up the input space with hyperplanes. Two layers can compose those hyperplanes into shapes. Three layers compose the shapes into more complicated shapes. By layer ten, the network is doing things you could not write down by hand.
+
+## Today's activity
+
+The Lab gives you a drag-and-drop network builder. You pick a dataset (XOR, two moons, spirals), drop in some hidden layers, and hit Train. The network trains live in your browser. You can watch the loss go down. You can watch the decision boundary morph, frame by frame, into the shape that fits the data. You can pause, add a layer, and resume.
+
+Three things to try, in order:
+
+1. Build a network that *cannot* solve the spiral dataset (one hidden layer, two neurons). Watch it fail.
+2. Add capacity until it succeeds. Note what changed.
+3. Inspect a single neuron in a successful network. What pattern does it light up for?
+
+<Callout variant="boss">
+**Boss Mode.** Derive what a single neuron computes (Wx + b → activation), then what two stacked layers compute. The math is easy; the implication — that depth is what gives the model expressivity — is not.
+</Callout>

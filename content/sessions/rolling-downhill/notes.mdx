@@ -1,0 +1,37 @@
+Imagine you are dropped onto a hillside, blindfolded, and told there is a valley somewhere below. You can feel the slope under your feet. You take a small step downhill, then another. Eventually, you reach the bottom — or somewhere flat enough that one more step does nothing. That is the entire idea.
+
+## The hiker's problem
+
+Last session we drew a cost surface — a landscape where every point is a possible model, and the elevation is how wrong that model is on the data. The best model lives at the lowest elevation. Our job is to find it without ever seeing the whole map.
+
+We have one tool: the gradient. At any point on the surface, the gradient tells us which direction goes *up* the steepest. So we walk the other way.
+
+<Callout variant="note">
+The gradient is a vector of partial derivatives — one per parameter. For a model with two weights, the gradient at any point is a 2D arrow on the surface.
+</Callout>
+
+## Writing the update rule
+
+At each step, we compute the gradient and move a small distance in the opposite direction. That distance is controlled by a number called the *learning rate*. Too small and we crawl. Too large and we overshoot the valley entirely. In code:
+
+```python
+# one step of gradient descent
+def step(w, X, y, lr=0.01):
+    preds = w * X
+    grad  = 2 * np.mean((preds - y) * X)
+    return w - lr * grad
+```
+
+Run that line in a loop a few hundred times, and you have trained your first model. Open the Lab and try it — you'll see the hiker make their way down a real cost surface, with a slider for the learning rate. Three minutes well spent.
+
+<Callout variant="warning">
+A learning rate above ~0.3 on this surface will overshoot every step and diverge. The Lab will let you do it on purpose — it is genuinely funny to watch.
+</Callout>
+
+<Callout variant="boss">
+**Boss Mode.** Derive the gradient of mean squared error with respect to `w` from first principles. You'll need the chain rule but nothing more. Optional, but the moment it clicks is the moment everything else clicks.
+</Callout>
+
+## What can go wrong
+
+On a convex surface — like the one we built last session — gradient descent always finds the bottom, eventually. But most surfaces in the wild are not convex. They have ridges, plateaus, and saddle points. The hiker can get stuck in places that are not the actual valley. Modern training is, in large part, the art of not getting stuck.
