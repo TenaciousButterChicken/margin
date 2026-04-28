@@ -14,96 +14,114 @@ export default async function LandingPage() {
     <main style={{ background: "var(--neutral-0)" }}>
       <TopNav signedIn={!!user} />
 
-      {/* Hero */}
+      {/* Hero — FaultyTerminal as full-width background, foreground text on top */}
       <section
         style={{
-          padding: "96px 56px 80px",
-          borderBottom: "1px solid var(--neutral-200)",
+          position: "relative",
+          padding: "120px 56px 220px",
+          background: "#000",
+          overflow: "hidden",
+          isolation: "isolate",
         }}
       >
+        {/* Animated CRT background, fills the whole section */}
+        <div
+          aria-hidden
+          style={{ position: "absolute", inset: 0, zIndex: 0 }}
+        >
+          <FaultyTerminal
+            scale={1.5}
+            gridMul={[2, 1]}
+            digitSize={1.2}
+            timeScale={0.5}
+            pause={false}
+            scanlineIntensity={0.5}
+            glitchAmount={1}
+            flickerAmount={1}
+            noiseAmp={1}
+            chromaticAberration={0}
+            dither={0}
+            curvature={0.1}
+            tint="#B5532A"
+            mouseReact
+            mouseStrength={0.5}
+            pageLoadAnimation
+            brightness={0.8}
+          />
+        </div>
+
+        {/* Bottom fade — softens the transition into the white page below */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 220,
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 55%, var(--neutral-0) 100%)",
+            zIndex: 1,
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Foreground content */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 360px",
-            gap: 80,
-            alignItems: "flex-end",
+            position: "relative",
+            zIndex: 2,
             maxWidth: 1280,
             margin: "0 auto",
           }}
         >
-          <div>
-            <span className="t-meta" style={{ color: "var(--accent)" }}>
-              16 sessions · self-paced
-            </span>
-            <h1
-              style={{
-                fontSize: 72,
-                fontWeight: 600,
-                lineHeight: 1.02,
-                letterSpacing: "-0.025em",
-                margin: "12px 0 24px",
-                maxWidth: 820,
-              }}
-            >
-              Machine learning,
-              <br />
-              <span style={{ color: "var(--accent)" }}>by hand,</span> from scratch.
-            </h1>
-            <p
-              style={{
-                fontSize: 19,
-                lineHeight: 1.55,
-                color: "var(--neutral-700)",
-                margin: 0,
-                maxWidth: 560,
-                textWrap: "pretty",
-              }}
-            >
-              A 16-session course where every concept lands twice — once in the lesson, once in a Lab where you write code that runs. No black boxes.
-            </p>
-            <div style={{ display: "flex", gap: 12, marginTop: 36 }}>
-              <Link href="/sessions/machines-that-learn">
-                <button className="btn btn-primary btn-lg">Start with Session 01</button>
-              </Link>
-              <Link href="/sessions/rolling-downhill">
-                <button className="btn btn-secondary btn-lg">
-                  See Session 06 — gradient descent
-                </button>
-              </Link>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12 }}>
-            <div
-              style={{
-                width: 320,
-                height: 220,
-                borderRadius: 4,
-                position: "relative",
-                overflow: "hidden",
-                background: "#000",
-                border: "1px solid var(--neutral-200)",
-              }}
-            >
-              <FaultyTerminal
-                scale={1.5}
-                gridMul={[2, 1]}
-                digitSize={1.2}
-                timeScale={0.5}
-                pause={false}
-                scanlineIntensity={0.5}
-                glitchAmount={1}
-                flickerAmount={1}
-                noiseAmp={1}
-                chromaticAberration={0}
-                dither={0}
-                curvature={0.1}
-                tint="#B5532A"
-                mouseReact
-                mouseStrength={0.5}
-                pageLoadAnimation
-                brightness={0.7}
-              />
-            </div>
+          <span className="t-meta" style={{ color: "var(--accent)" }}>
+            16 sessions · self-paced
+          </span>
+          <h1
+            style={{
+              fontSize: 72,
+              fontWeight: 600,
+              lineHeight: 1.02,
+              letterSpacing: "-0.025em",
+              margin: "12px 0 24px",
+              maxWidth: 980,
+              color: "#fff",
+            }}
+          >
+            Machine learning,
+            <br />
+            <span style={{ color: "var(--accent)" }}>by hand,</span> from scratch.
+          </h1>
+          <p
+            style={{
+              fontSize: 19,
+              lineHeight: 1.55,
+              color: "rgba(255,255,255,0.78)",
+              margin: 0,
+              maxWidth: 600,
+              textWrap: "pretty",
+            }}
+          >
+            A 16-session course where every concept lands twice — once in the lesson, once in a Lab where you write code that runs. No black boxes.
+          </p>
+          <div style={{ display: "flex", gap: 12, marginTop: 36 }}>
+            <Link href="/sessions/machines-that-learn">
+              <button className="btn btn-primary btn-lg">Start with Session 01</button>
+            </Link>
+            <Link href="/sessions/rolling-downhill">
+              <button
+                className="btn btn-lg"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  color: "#fff",
+                  border: "1px solid rgba(255,255,255,0.35)",
+                  backdropFilter: "blur(2px)",
+                }}
+              >
+                See Session 06 — gradient descent
+              </button>
+            </Link>
           </div>
         </div>
       </section>
