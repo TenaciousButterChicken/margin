@@ -34,3 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Pre-extracted GPT-2 embeddings for the Transformer Explorer (large
+# binaries; live on the Pi at public/embeddings/, regenerated via
+# scripts/extract_gpt2_embeddings.py)
+/public/embeddings/*.bin
+/public/embeddings/*.json
+/scripts/.cache/

@@ -23,7 +23,19 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/((?!_next/static|_next/image|favicon.ico).*)",
+        // Pre-extracted GPT-2 embedding binaries: ~77 MB, deterministic by
+        // filename. Let browsers cache them indefinitely so the embedding
+        // visualizer is instant on repeat visits.
+        source: "/embeddings/:file*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/((?!_next/static|_next/image|favicon.ico|embeddings).*)",
         headers: [
           {
             key: "Cache-Control",

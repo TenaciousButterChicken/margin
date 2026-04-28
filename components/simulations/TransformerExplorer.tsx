@@ -5,6 +5,8 @@ import { Tokens } from "./transformer/Tokens";
 import { AttentionGraph } from "./transformer/AttentionGraph";
 import { Predictions } from "./transformer/Predictions";
 import { Generate } from "./transformer/Generate";
+import { PromptChips } from "./transformer/PromptChips";
+import { EmbeddingExplorer } from "./transformer/EmbeddingExplorer";
 import {
   decodeTokenId,
   loadModel,
@@ -23,6 +25,25 @@ const DEFAULT_LAYER = 5; // Layer 6 (0-indexed)
 const DEFAULT_HEAD = 0; // Head 1
 const DEFAULT_TEMP = 1.0;
 const TOP_K = 10;
+
+// Tight client-side blocklist. Substring match (case-insensitive). Only
+// obvious slurs / explicit profanity — kept short to avoid false positives
+// on normal academic words.
+const BLOCKED_TERMS = [
+  "nigger", "nigga",
+  "faggot",
+  "kike", "spic", "chink", "wetback",
+  "retard",
+  "fuck", "shit", "cunt", "pussy", "cock", "bitch", "asshole", "bastard",
+  "porn",
+];
+
+const FILTER_TOAST_MS = 4000;
+
+function isBlocked(text: string): boolean {
+  const lower = text.toLowerCase();
+  return BLOCKED_TERMS.some((t) => lower.includes(t));
+}
 
 type ModelStage =
   | { kind: "loading"; progress: LoadProgress }
@@ -46,6 +67,7 @@ export function TransformerExplorer() {
   const [headIdx, setHeadIdx] = useState(DEFAULT_HEAD);
   const [temperature, setTemperature] = useState(DEFAULT_TEMP);
   const [generating, setGenerating] = useState(false);
+  const [filterToast, setFilterToast] = useState<string | null>(null);
 
   /* -------- Load model on mount + auto-run with default text ------ */
   const didAutoRun = useRef(false);
@@ -92,7 +114,27 @@ export function TransformerExplorer() {
     }
   }, []);
 
+  function showFilterToast() {
+    setFilterToast("Let's keep this school-appropriate — try a different prompt.");
+  }
+
+  // Auto-dismiss the filter toast after a few seconds.
+  useEffect(() => {
+    if (!filterToast) return;
+    const t = setTimeout(() => setFilterToast(null), FILTER_TOAST_MS);
+    return () => clearTimeout(t);
+  }, [filterToast]);
+
+  function handlePickTemplate(template: string) {
+    setDraft(template);
+    setFilterToast(null);
+  }
+
   function handleRun() {
+    if (isBlocked(draft)) {
+      showFilterToast();
+      return;
+    }
     setText(draft);
     setOriginalText(draft);
     runOn(draft, true);
@@ -107,6 +149,10 @@ export function TransformerExplorer() {
   /* -------- Generate next token ----------------------------------- */
   const handleGenerate = useCallback(async () => {
     if (!result) return;
+    if (isBlocked(text)) {
+      showFilterToast();
+      return;
+    }
     setGenerating(true);
     try {
       const probs = softmaxWithTemperature(result.lastLogits, temperature);
@@ -161,6 +207,27 @@ export function TransformerExplorer() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      {/* Filter toast — appears above input when blocked content is detected */}
+      {filterToast && (
+        <div
+          role="status"
+          style={{
+            padding: "12px 16px",
+            background: "var(--accent-subtle)",
+            border: "1px solid var(--accent)",
+            borderRadius: 10,
+            fontSize: 13,
+            lineHeight: 1.5,
+            color: "var(--neutral-900)",
+          }}
+        >
+          {filterToast}
+        </div>
+      )}
+
+      {/* Prompt template chips */}
+      <PromptChips onPick={handlePickTemplate} />
+
       {/* Input */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <span style={metaLabel}>INPUT TEXT</span>
@@ -260,6 +327,17 @@ export function TransformerExplorer() {
             onGenerate={handleGenerate}
             generating={generating || inferring}
           />
+
+          {/* Embedding visualizer — lazy-loaded when scrolled into view */}
+          <div
+            style={{
+              marginTop: 16,
+              paddingTop: 24,
+              borderTop: "1px solid var(--neutral-200)",
+            }}
+          >
+            <EmbeddingExplorer />
+          </div>
         </>
       )}
     </div>
