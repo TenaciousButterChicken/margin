@@ -48,12 +48,18 @@ const nextConfig = {
         ...config.resolve.alias,
         "@huggingface/transformers$": webBundle,
       };
-      // The web bundle dynamic-imports its WASM files; let them be
-      // fetched at runtime instead of bundled.
+      // The web bundle uses `import.meta` and ES module syntax. Webpack
+      // defaults to parsing `.js` as CommonJS for packages whose
+      // package.json doesn't set `"type": "module"`, which fails on
+      // import.meta. Force ESM parsing for this specific file.
       config.module = {
         ...config.module,
         rules: [
           ...(config.module?.rules ?? []),
+          {
+            test: /transformers\.web\.js$/,
+            type: "javascript/esm",
+          },
           {
             test: /\.wasm$/,
             type: "asset/resource",
