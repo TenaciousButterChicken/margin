@@ -28,29 +28,28 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // @huggingface/transformers ships two builds: a Node variant that
     // pulls in the native onnxruntime-node binaries (.node files) and a
-    // browser variant that loads WASM via fetch. The package's exports
-    // field selects "node" by default, which webpack respects on both
-    // client AND server, and chokes on the .node binary imports. Alias
-    // the bare module name to the absolute path of the web bundle to
-    // bypass exports resolution entirely.
-    const webBundle = path.resolve(
-      __dirname,
-      "node_modules/@huggingface/transformers/dist/transformers.web.js"
-    );
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@huggingface/transformers$": webBundle,
-    };
-    // The web bundle references onnxruntime-node only as a fallback; tell
-    // webpack to treat it as empty so the server bundle stops bundling
-    // the native binaries.
-    config.resolve.fallback = {
-      ...(config.resolve.fallback ?? {}),
-      "onnxruntime-node": false,
-    };
-    if (!isServer) {
-      // The web bundle dynamic-imports its WASM files relative to itself.
-      // Tell webpack not to try to bundle them; they're fetched at runtime.
+    // browser variant that uses `import.meta` and loads WASM via fetch.
+    // The component that imports it is `ssr: false`, so the server bundle
+    // never actually runs this code — we just need webpack to stop trying
+    // to parse it. Externalize on the server, alias to the web build on
+    // the client.
+    if (isServer) {
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : [config.externals].filter(Boolean)),
+        "@huggingface/transformers",
+        "onnxruntime-node",
+      ];
+    } else {
+      const webBundle = path.resolve(
+        __dirname,
+        "node_modules/@huggingface/transformers/dist/transformers.web.js"
+      );
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "@huggingface/transformers$": webBundle,
+      };
+      // The web bundle dynamic-imports its WASM files; let them be
+      // fetched at runtime instead of bundled.
       config.module = {
         ...config.module,
         rules: [
