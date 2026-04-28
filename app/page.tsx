@@ -2,7 +2,7 @@ import Link from "next/link";
 import { TopNav } from "@/components/public/TopNav";
 import { SessionCard } from "@/components/public/SessionCard";
 import { Wordmark } from "@/components/illustrations/Wordmark";
-import { HikerMark } from "@/components/illustrations/HikerMark";
+import FaultyTerminal from "@/components/FaultyTerminal";
 import { PHASES, sessionsByPhase } from "@/lib/sessions";
 import { getCurrentUser } from "@/lib/supabase/server";
 
@@ -77,59 +77,33 @@ export default async function LandingPage() {
               style={{
                 width: 320,
                 height: 220,
-                background: "var(--accent-subtle)",
                 borderRadius: 4,
                 position: "relative",
                 overflow: "hidden",
+                background: "#000",
+                border: "1px solid var(--neutral-200)",
               }}
             >
-              <svg viewBox="0 0 320 220" width="320" height="220" style={{ position: "absolute", inset: 0 }}>
-                {[0.2, 0.55, 1.0, 1.6, 2.4].map((lvl, i) => (
-                  <ellipse
-                    key={i}
-                    cx="160"
-                    cy="130"
-                    rx={lvl * 70}
-                    ry={lvl * 32}
-                    fill="none"
-                    stroke="var(--accent)"
-                    strokeWidth="0.85"
-                    opacity={0.6 - i * 0.08}
-                  />
-                ))}
-                <path
-                  d="M250 60 L210 80 L185 95 L168 108 L162 118 L160 128 L160 130"
-                  stroke="var(--accent)"
-                  strokeWidth="1.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  opacity="0.7"
-                />
-                {[
-                  [250, 60],
-                  [210, 80],
-                  [185, 95],
-                  [168, 108],
-                  [162, 118],
-                ].map(([x, y], i) => (
-                  <circle key={i} cx={x} cy={y} r="2.5" fill="var(--accent)" opacity={0.4 + i * 0.1} />
-                ))}
-                <circle cx="160" cy="130" r="3" fill="var(--neutral-900)" />
-              </svg>
-              <div style={{ position: "absolute", bottom: 12, right: 16 }}>
-                <HikerMark size={56} color="var(--accent)" />
-              </div>
+              <FaultyTerminal
+                scale={1.5}
+                gridMul={[2, 1]}
+                digitSize={1.2}
+                timeScale={0.5}
+                pause={false}
+                scanlineIntensity={0.5}
+                glitchAmount={1}
+                flickerAmount={1}
+                noiseAmp={1}
+                chromaticAberration={0}
+                dither={0}
+                curvature={0.1}
+                tint="#B5532A"
+                mouseReact
+                mouseStrength={0.5}
+                pageLoadAnimation
+                brightness={0.7}
+              />
             </div>
-            <span
-              style={{
-                fontSize: 11,
-                color: "var(--neutral-500)",
-                fontFamily: "var(--font-mono)",
-                letterSpacing: 0.3,
-              }}
-            >
-              session 06 · cost surface
-            </span>
           </div>
         </div>
       </section>
