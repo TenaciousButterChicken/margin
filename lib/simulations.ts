@@ -54,8 +54,8 @@ export const SIMULATIONS: SimulationMeta[] = [
     title: "Transformer Explorer",
     description: "Type a sentence. Watch attention flow between words in real time.",
     phase: 5,
-    attribution: "Inspired by exBERT and Distill's attention articles",
-    status: "coming_soon",
+    attribution: "Inspired by Cho et al.'s Transformer Explainer (Polo Club, GA Tech)",
+    status: "live",
   },
   {
     slug: "diffusion-explorer",
