@@ -73,6 +73,10 @@ export function EmbeddingExplorer() {
     try {
       await Promise.all([loadVocab(), loadCoords()]);
       setLoad({ kind: "ready-light" });
+      // Kick off the heavy embedding download in the background so the
+      // default "king" plot can show its neighbors without requiring a
+      // click. Don't await — the section is interactive in light mode.
+      void ensureHeavyLoaded();
     } catch (e) {
       setLoad({
         kind: "error",
