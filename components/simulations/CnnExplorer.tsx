@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import { FilterLab } from "./cnn/FilterLab";
+import { FilterBank } from "./cnn/FilterBank";
 import { LayerExplorer } from "./cnn/LayerExplorer";
 
 // CNN Explorer — top-level shell. Mode toggle (segmented control,
 // matches the Classification/Regression toggle in NeuralNetPlayground)
-// switches between two complementary views:
-//   • Filter Lab    — manual 3×3 convolution kernel + grayscale demo image
+// switches between three complementary views:
+//   • Filter Lab     — manual 3×3 convolution kernel + grayscale demo image
+//   • Filter Bank    — six 3×3 kernels in parallel, six feature maps at once
 //   • Layer Explorer — pretrained MobileNet feature maps on preset images
 
-type Mode = "filter" | "layer";
+type Mode = "filter" | "bank" | "layer";
 
 export function CnnExplorer() {
   const [mode, setMode] = useState<Mode>("filter");
@@ -19,7 +21,9 @@ export function CnnExplorer() {
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <ModeToggle mode={mode} onChange={setMode} />
       </div>
-      {mode === "filter" ? <FilterLab /> : <LayerExplorer />}
+      {mode === "filter" && <FilterLab />}
+      {mode === "bank" && <FilterBank />}
+      {mode === "layer" && <LayerExplorer />}
     </div>
   );
 }
@@ -36,6 +40,7 @@ function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
       }}
     >
       <Segment active={mode === "filter"} onClick={() => onChange("filter")} label="Filter Lab" />
+      <Segment active={mode === "bank"} onClick={() => onChange("bank")} label="Filter Bank" />
       <Segment active={mode === "layer"} onClick={() => onChange("layer")} label="Layer Explorer" />
     </div>
   );
