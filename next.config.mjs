@@ -1,9 +1,3 @@
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Self-hosted on a Pi, no CDN in front. The default 1-year SSG cache
@@ -25,48 +19,15 @@ const nextConfig = {
     ];
   },
 
-  webpack: (config, { isServer }) => {
-    // @huggingface/transformers ships two builds: a Node variant that
-    // pulls in the native onnxruntime-node binaries (.node files) and a
-    // browser variant that uses `import.meta` and loads WASM via fetch.
-    // The component that imports it is `ssr: false`, so the server bundle
-    // never actually runs this code — we just need webpack to stop trying
-    // to parse it. Externalize on the server, alias to the web build on
-    // the client.
-    if (isServer) {
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : [config.externals].filter(Boolean)),
-        "@huggingface/transformers",
-        "onnxruntime-node",
-      ];
-    } else {
-      const webBundle = path.resolve(
-        __dirname,
-        "node_modules/@huggingface/transformers/dist/transformers.web.js"
-      );
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "@huggingface/transformers$": webBundle,
-      };
-      // The web bundle uses `import.meta` and ES module syntax. Webpack
-      // defaults to parsing `.js` as CommonJS for packages whose
-      // package.json doesn't set `"type": "module"`, which fails on
-      // import.meta. Force ESM parsing for this specific file.
-      config.module = {
-        ...config.module,
-        rules: [
-          ...(config.module?.rules ?? []),
-          {
-            test: /transformers\.web\.js$/,
-            type: "javascript/esm",
-          },
-          {
-            test: /\.wasm$/,
-            type: "asset/resource",
-          },
-        ],
-      };
-    }
+  webpack: (config) => {
+    // `@huggingface/transformers` is loaded at runtime via a CDN ESM URL
+    // import (see lib/simulations/transformer-core.ts) and is NOT
+    // bundled. Just make sure stray references to onnxruntime-node (the
+    // package's Node-only optional dep) don't break the server build.
+    config.resolve.fallback = {
+      ...(config.resolve.fallback ?? {}),
+      "onnxruntime-node": false,
+    };
     return config;
   },
 };

@@ -66,7 +66,16 @@ export async function loadModel(
   }
 
   onProgress({ stage: "runtime" });
-  const transformers = await import("@huggingface/transformers");
+  // Load transformers.js directly from a CDN as native browser ESM. We
+  // tried bundling via webpack alias to `transformers.web.js`, but
+  // Next.js's SWC loader runs before our `javascript/esm` rule and bails
+  // on `import.meta` in the package. The `webpackIgnore` magic comment
+  // tells webpack to leave this dynamic import alone and emit it
+  // verbatim — the browser handles it natively. Same package, same
+  // version we have in node_modules for type-checking.
+  const transformersUrl =
+    "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
+  const transformers = await import(/* webpackIgnore: true */ transformersUrl);
   const { AutoTokenizer, AutoModelForCausalLM, env } = transformers as any;
 
   // Force browser-cache; never look for local model files.
