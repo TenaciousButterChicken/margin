@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  coordsFor,
   findTokenId,
   loadCoords,
   loadEmbeddings,
   loadVocab,
+  localProjection,
   nearestNeighbors,
   vectorArithmetic,
   vocabAt,
@@ -162,34 +162,44 @@ export function EmbeddingExplorer() {
     setArithResult(top);
   }
 
-  /* -------- Plot scaling -----------------------------------------
+  /* -------- Local 2D projection -----------------------------------
    *
-   * Bounds are computed from JUST the points we're showing (searched
-   * word + neighbors), padded by 15%. This is honest — every point is
-   * still placed at its global 2D PCA coordinate, we're just zooming
-   * the viewport so the cluster fills the canvas instead of getting
-   * lost in a corner of the full-vocabulary projection. */
-  const bounds = useMemo(() => {
+   * We compute PCA on just the 31 selected vectors (searched + 30
+   * neighbors), not the global vocabulary. Global GPT-2 PCA captures
+   * only ~2.6% of variance in PC1+PC2, so a tight cluster like "king
+   * + its neighbors" collapses to a single dot. Local PCA chooses axes
+   * that maximize variance WITHIN the cluster, so the points spread
+   * out optimally. The math (n×n Gram matrix + power iteration) lives
+   * in embedding-core; n ≈ 31 → milliseconds. */
+  const localCoords = useMemo(() => {
+    if (load.kind !== "ready") return null;
     if (searchedId === null) return null;
+    if (neighbors.length === 0) return null;
     const ids = [searchedId, ...neighbors.map((n) => n.id)];
+    return { ids, xy: localProjection(ids) };
+  }, [load.kind, searchedId, neighbors]);
+
+  const bounds = useMemo(() => {
+    if (!localCoords) return null;
+    const xy = localCoords.xy;
     let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
-    for (const id of ids) {
-      const [x, y] = coordsFor(id);
+    for (let i = 0; i < xy.length; i += 2) {
+      const x = xy[i];
+      const y = xy[i + 1];
       if (x < xmin) xmin = x;
       if (x > xmax) xmax = x;
       if (y < ymin) ymin = y;
       if (y > ymax) ymax = y;
     }
-    // Pad by 15% on each side so labels near the edge don't clip.
-    const xpad = (xmax - xmin) * 0.15 || 1;
-    const ypad = (ymax - ymin) * 0.15 || 1;
+    const xpad = (xmax - xmin) * 0.12 || 1;
+    const ypad = (ymax - ymin) * 0.12 || 1;
     return {
       xmin: xmin - xpad,
       xmax: xmax + xpad,
       ymin: ymin - ypad,
       ymax: ymax + ypad,
     };
-  }, [searchedId, neighbors]);
+  }, [localCoords]);
 
   function project(x: number, y: number): [number, number] {
     if (!bounds) return [PLOT_WIDTH / 2, PLOT_HEIGHT / 2];
@@ -198,6 +208,15 @@ export function EmbeddingExplorer() {
     const sx = PLOT_PAD + ((x - bounds.xmin) / (bounds.xmax - bounds.xmin)) * w;
     const sy = PLOT_PAD + ((y - bounds.ymin) / (bounds.ymax - bounds.ymin)) * h;
     return [sx, sy];
+  }
+
+  /** Coordinate lookup by token id, scoped to the current local layout.
+   *  Returns null if the id isn't in the current cluster. */
+  function localCoordsFor(id: number): [number, number] | null {
+    if (!localCoords) return null;
+    const idx = localCoords.ids.indexOf(id);
+    if (idx < 0) return null;
+    return [localCoords.xy[idx * 2], localCoords.xy[idx * 2 + 1]];
   }
 
   /* -------- Render --------------------------------------------- */
@@ -334,10 +353,12 @@ export function EmbeddingExplorer() {
           {/* Scatter plot */}
           <ScatterPlot
             project={project}
+            coordFor={localCoordsFor}
             searchedId={searchedId}
             neighbors={neighbors}
             hoverId={hoverId}
             onHover={setHoverId}
+            heavyReady={load.kind === "ready"}
           />
 
           {/* Vector arithmetic */}
@@ -405,16 +426,20 @@ function LoadingBanner({ label, pct }: { label: string; pct: number | null }) {
 
 function ScatterPlot({
   project,
+  coordFor,
   searchedId,
   neighbors,
   hoverId,
   onHover,
+  heavyReady,
 }: {
   project: (x: number, y: number) => [number, number];
+  coordFor: (id: number) => [number, number] | null;
   searchedId: number | null;
   neighbors: { id: number; sim: number }[];
   hoverId: number | null;
   onHover: (id: number | null) => void;
+  heavyReady: boolean;
 }) {
   if (searchedId === null) {
     return (
@@ -434,9 +459,9 @@ function ScatterPlot({
       </div>
     );
   }
-  // The center point is the searched word; surrounding points are its
-  // 30 nearest neighbors in 768D. We render at 2D PCA coordinates.
-  const [cx, cy] = project(...coordsFor(searchedId));
+  // Searched word at the local cluster's center after PCA. Neighbors
+  // around it. Color/opacity scale with similarity rank.
+  const center = coordFor(searchedId);
   return (
     <div
       style={{
@@ -453,66 +478,138 @@ function ScatterPlot({
         style={{ display: "block", maxWidth: "100%" }}
         viewBox={`0 0 ${PLOT_WIDTH} ${PLOT_HEIGHT}`}
       >
-        {/* Neighbors */}
-        {neighbors.map((n) => {
-          const [x, y] = project(...coordsFor(n.id));
-          const hovered = hoverId === n.id;
-          return (
-            <g key={n.id}>
-              <line
-                x1={cx}
-                y1={cy}
-                x2={x}
-                y2={y}
-                stroke="var(--neutral-300)"
-                strokeWidth={0.5}
-                opacity={hovered ? 0.6 : 0.18}
-              />
-              <circle
-                cx={x}
-                cy={y}
-                r={hovered ? 4.5 : 3}
-                fill="var(--neutral-700)"
-                opacity={hovered ? 1 : 0.78}
-                onMouseEnter={() => onHover(n.id)}
-                onMouseLeave={() => onHover(null)}
-                style={{ cursor: "pointer" }}
-              />
-              <text
-                x={x + 6}
-                y={y + 3}
-                fontFamily="var(--font-mono)"
-                fontSize={hovered ? 13 : 10}
-                fill={hovered ? "var(--neutral-900)" : "var(--neutral-600)"}
-                fontWeight={hovered ? 600 : 400}
-                style={{ pointerEvents: "none" }}
-              >
-                {renderToken(vocabAt(n.id))}
-              </text>
-            </g>
-          );
-        })}
-        {/* Searched word — clay accent */}
-        <circle
-          cx={cx}
-          cy={cy}
-          r={6}
-          fill="var(--accent)"
-        />
-        <text
-          x={cx + 8}
-          y={cy + 4}
-          fontFamily="var(--font-mono)"
-          fontSize={14}
-          fontWeight={700}
-          fill="var(--accent)"
-          style={{ pointerEvents: "none" }}
-        >
-          {renderToken(vocabAt(searchedId))}
-        </text>
+        {!heavyReady && (
+          <text
+            x={PLOT_WIDTH / 2}
+            y={PLOT_HEIGHT / 2}
+            textAnchor="middle"
+            fontFamily="var(--font-mono)"
+            fontSize={12}
+            fill="var(--neutral-500)"
+          >
+            loading 768-D vectors…
+          </text>
+        )}
+        {center && (
+          <>
+            {/* Neighbors — lines first, then circles, then labels */}
+            {neighbors.map((n, rank) => {
+              const co = coordFor(n.id);
+              if (!co) return null;
+              const [x, y] = project(co[0], co[1]);
+              const [cx, cy] = project(center[0], center[1]);
+              const hovered = hoverId === n.id;
+              const dimByHover = hoverId !== null && !hovered;
+              const palette = neighborPalette(rank, n.sim);
+              return (
+                <line
+                  key={`l-${n.id}`}
+                  x1={cx}
+                  y1={cy}
+                  x2={x}
+                  y2={y}
+                  stroke={palette.line}
+                  strokeWidth={hovered ? 2 : 1}
+                  opacity={dimByHover ? 0.08 : palette.lineOpacity}
+                />
+              );
+            })}
+            {neighbors.map((n, rank) => {
+              const co = coordFor(n.id);
+              if (!co) return null;
+              const [x, y] = project(co[0], co[1]);
+              const hovered = hoverId === n.id;
+              const dimByHover = hoverId !== null && !hovered;
+              const palette = neighborPalette(rank, n.sim);
+              return (
+                <g key={`p-${n.id}`}>
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={hovered ? 6 : 4.5}
+                    fill={palette.fill}
+                    stroke="var(--cream, #faf6ee)"
+                    strokeWidth={1.5}
+                    opacity={dimByHover ? 0.3 : 1}
+                    onMouseEnter={() => onHover(n.id)}
+                    onMouseLeave={() => onHover(null)}
+                    style={{ cursor: "pointer" }}
+                  />
+                  <text
+                    x={x + 8}
+                    y={y + 3}
+                    fontFamily="var(--font-mono)"
+                    fontSize={hovered ? 13 : 10.5}
+                    fill={
+                      hovered
+                        ? "var(--neutral-900)"
+                        : dimByHover
+                        ? "var(--neutral-400)"
+                        : palette.label
+                    }
+                    fontWeight={hovered ? 700 : 500}
+                    style={{ pointerEvents: "none" }}
+                  >
+                    {renderToken(vocabAt(n.id))}
+                  </text>
+                </g>
+              );
+            })}
+            {/* Searched word — large clay accent */}
+            <circle
+              cx={project(center[0], center[1])[0]}
+              cy={project(center[0], center[1])[1]}
+              r={8}
+              fill="var(--accent)"
+              stroke="var(--cream, #faf6ee)"
+              strokeWidth={2}
+            />
+            <text
+              x={project(center[0], center[1])[0] + 11}
+              y={project(center[0], center[1])[1] + 4}
+              fontFamily="var(--font-mono)"
+              fontSize={15}
+              fontWeight={700}
+              fill="var(--accent)"
+              style={{ pointerEvents: "none" }}
+            >
+              {renderToken(vocabAt(searchedId))}
+            </text>
+          </>
+        )}
       </svg>
     </div>
   );
+}
+
+/** Per-rank styling. Top neighbors are clay-accent, mid-rank are
+ *  lab-cyan, low-rank fade to neutral. Lines are clay-tinted. */
+function neighborPalette(rank: number, sim: number) {
+  // Closer in cosine = darker line (more visible). Map sim ∈ ~[0.3, 0.9]
+  // to opacity ∈ [0.18, 0.55].
+  const lineOpacity = Math.max(0.18, Math.min(0.55, (sim - 0.25) * 0.9));
+  if (rank < 5) {
+    return {
+      fill: "var(--accent)",
+      label: "var(--neutral-900)",
+      line: "var(--accent)",
+      lineOpacity,
+    };
+  }
+  if (rank < 15) {
+    return {
+      fill: "var(--lab-cyan)",
+      label: "var(--neutral-800)",
+      line: "var(--lab-cyan)",
+      lineOpacity: lineOpacity * 0.85,
+    };
+  }
+  return {
+    fill: "var(--neutral-600)",
+    label: "var(--neutral-700)",
+    line: "var(--neutral-400)",
+    lineOpacity: lineOpacity * 0.7,
+  };
 }
 
 function ArithmeticBlock({
