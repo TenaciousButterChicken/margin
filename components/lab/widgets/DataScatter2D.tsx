@@ -70,6 +70,9 @@ export function DataScatter2D({
   pulseOnce = false,
   successThreshold,
   onLineDragged,
+  highlightDotIndex = null,
+  showAllPullArrows = false,
+  boldErrorBars = false,
 }: {
   draggable?: boolean;
   /** Fires the bright flash once. Parent toggles true→false to retrigger. */
@@ -77,6 +80,13 @@ export function DataScatter2D({
   /** While currentLoss < threshold, the line/dots/loss render in green. */
   successThreshold?: number;
   onLineDragged?: () => void;
+  /** When set, this single dot stays bold; the other 9 fade. Its error
+   *  bar is drawn with a labeled value. Used by beats 4.5 / 4.6. */
+  highlightDotIndex?: number | null;
+  /** Beat 4.6: render a small arrowhead on each error bar pointing toward the dot. */
+  showAllPullArrows?: boolean;
+  /** Beat 4.6 / 4.8: render error bars in cyan even outside highlight mode. */
+  boldErrorBars?: boolean;
 }) {
   const pub = usePublish();
   const channelPos = useChannel<Pos>("w_position");
@@ -275,31 +285,131 @@ export function DataScatter2D({
           </text>
         </g>
 
-        {/* residual ticks */}
-        {draggable && (
+        {/* residual ticks (faint, all dots) — drawn while dragging or when
+            we're in highlight-one-dot mode so the dimmed-out dots still
+            have visual context. Bold cyan when boldErrorBars is on. */}
+        {(draggable || highlightDotIndex !== null || boldErrorBars) && (
           <g style={{ pointerEvents: "none" }}>
             {DATASET.map(([x, y], i) => {
+              if (highlightDotIndex !== null && i === highlightDotIndex) return null;
               const sx = xToScreen(x);
               const yPred = lineAt(slopeOrig, interceptOrig, x);
               const syDot = yToScreen(y);
               const syLine = yToScreen(
                 Math.max(Y_DOMAIN[0], Math.min(Y_DOMAIN[1], yPred))
               );
+              const stroke = boldErrorBars ? "var(--lab-cyan)" : "var(--neutral-200)";
+              const strokeWidth = boldErrorBars ? 1.5 : 1;
+              const dash = boldErrorBars ? "3 3" : "2 3";
+
+              // Pull arrow: chevron with the APEX at the dot, legs flaring
+              // back along the residual toward the line. The student reads
+              // this as "the line wants to move TOWARD this dot" — apex
+              // points in the direction of motion.
+              //   dot below line (syDot > syLine) → apex at dot, legs up → ↓ arrow
+              //   dot above line (syDot < syLine) → apex at dot, legs down → ↑ arrow
+              let arrow = null;
+              if (showAllPullArrows) {
+                const apexY = syDot;
+                // The legs extend back along the residual (toward the line).
+                const back = syLine > syDot ? 1 : -1; // +1 if line is below apex
+                const arrowSize = 5;
+                arrow = (
+                  <path
+                    d={`M ${sx} ${apexY} L ${sx - arrowSize} ${apexY + arrowSize * back} M ${sx} ${apexY} L ${sx + arrowSize} ${apexY + arrowSize * back}`}
+                    stroke="var(--lab-cyan)"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                );
+              }
               return (
-                <line
-                  key={`r${i}`}
-                  x1={sx}
-                  y1={syDot}
-                  x2={sx}
-                  y2={syLine}
-                  stroke="var(--neutral-300)"
-                  strokeWidth="1"
-                  strokeDasharray="2 3"
-                />
+                <g key={`r${i}`} style={{ transition: "all 200ms ease" }}>
+                  <line
+                    x1={sx}
+                    y1={syDot}
+                    x2={sx}
+                    y2={syLine}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={dash}
+                  />
+                  {arrow}
+                </g>
               );
             })}
           </g>
         )}
+
+        {/* HIGHLIGHTED dot's error bar — bold, with a label */}
+        {highlightDotIndex !== null && (() => {
+          const [x, y] = DATASET[highlightDotIndex];
+          const sx = xToScreen(x);
+          const yPred = lineAt(slopeOrig, interceptOrig, x);
+          const syDot = yToScreen(y);
+          const syLine = yToScreen(
+            Math.max(Y_DOMAIN[0] - 60, Math.min(Y_DOMAIN[1] + 60, yPred))
+          );
+          // Error in original units: positive = dot is above line.
+          const err = y - yPred;
+          const errAbs = Math.abs(err);
+          const labelY = (syDot + syLine) / 2;
+          // Label sits to the right of the bar.
+          return (
+            <g style={{ pointerEvents: "none" }}>
+              <line
+                x1={sx}
+                y1={syDot}
+                x2={sx}
+                y2={syLine}
+                stroke="var(--lab-cyan)"
+                strokeWidth="2"
+                strokeDasharray="3 3"
+              />
+              <rect
+                x={sx + 8}
+                y={labelY - 11}
+                width={92}
+                height={22}
+                rx={4}
+                fill="var(--neutral-0)"
+                stroke="var(--lab-cyan)"
+                strokeWidth="1"
+              />
+              <text
+                x={sx + 14}
+                y={labelY + 4}
+                fontSize="11"
+                fontFamily="var(--font-mono)"
+                fill="var(--neutral-700)"
+              >
+                error =
+              </text>
+              <text
+                x={sx + 96}
+                y={labelY + 4}
+                fontSize="12"
+                fontFamily="var(--font-mono)"
+                fill="var(--lab-cyan)"
+                fontWeight={600}
+                textAnchor="end"
+              >
+                {err >= 0 ? "+" : ""}
+                {err.toFixed(2)}
+              </text>
+              <text
+                x={sx + 14}
+                y={labelY + 22}
+                fontSize="10"
+                fontFamily="var(--font-mono)"
+                fill="var(--neutral-500)"
+              >
+                {errAbs < 0.05 ? "on the line" : err > 0 ? "above line" : "below line"}
+              </text>
+            </g>
+          );
+        })()}
 
         {/* the line */}
         {(() => {
@@ -325,18 +435,26 @@ export function DataScatter2D({
 
         {/* dots */}
         <g style={{ pointerEvents: "none" }}>
-          {DATASET.map(([x, y], i) => (
-            <circle
-              key={`d${i}`}
-              cx={xToScreen(x)}
-              cy={yToScreen(y)}
-              r="4"
-              fill={dotColor}
-              stroke="var(--neutral-0)"
-              strokeWidth="1.5"
-              style={{ ...flashStyle, transition: "fill 200ms ease" }}
-            />
-          ))}
+          {DATASET.map(([x, y], i) => {
+            const isHighlight = highlightDotIndex !== null && i === highlightDotIndex;
+            const dimmed = highlightDotIndex !== null && !isHighlight;
+            return (
+              <circle
+                key={`d${i}`}
+                cx={xToScreen(x)}
+                cy={yToScreen(y)}
+                r={isHighlight ? 6 : 4}
+                fill={isHighlight ? "var(--lab-cyan)" : dotColor}
+                stroke="var(--neutral-0)"
+                strokeWidth={isHighlight ? 2 : 1.5}
+                opacity={dimmed ? 0.25 : 1}
+                style={{
+                  ...flashStyle,
+                  transition: "fill 200ms ease, opacity 200ms ease, r 200ms ease",
+                }}
+              />
+            );
+          })}
         </g>
 
         {/* drag handles */}
@@ -359,7 +477,9 @@ export function DataScatter2D({
           </>
         )}
 
-        {/* loss readout */}
+        {/* loss readout — hidden when one dot is highlighted (math strip
+            owns the readout in that mode) */}
+        {highlightDotIndex === null && (
         <g style={{ pointerEvents: "none" }}>
           <rect
             x={VB_W - 142}
@@ -393,6 +513,7 @@ export function DataScatter2D({
             {lossDisplay}
           </text>
         </g>
+        )}
       </svg>
 
       <style jsx>{`

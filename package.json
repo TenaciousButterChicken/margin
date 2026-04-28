@@ -13,6 +13,7 @@
     "@react-three/fiber": "^8.18.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.0",
+    "katex": "^0.16.45",
     "next": "14.2.35",
     "next-mdx-remote": "^6.0.0",
     "react": "^18",
@@ -22,6 +23,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/katex": "^0.16.8",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

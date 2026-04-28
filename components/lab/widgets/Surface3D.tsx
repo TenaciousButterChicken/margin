@@ -4,25 +4,36 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { OrbitControls, Line, Html } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { loss } from "@/lib/lab/sim/gradient-descent";
+import { gradient, loss } from "@/lib/lab/sim/gradient-descent";
 import { useChannel, usePublish, usePulseToken } from "@/lib/lab/LabContext";
 
-// 3D MSE bowl. Two modes:
-//  • "marker"      — a small handle at (w0,w1) the user can drag along the
-//                    surface; publishes new w_position on drag.
-//  • "trail"       — same marker, plus the trail of past positions.
-//                    Used during stepping (beats 4+) and especially for the
-//                    cliff dive in beat 6 where the trail flies up.
-// `shake` triggers a brief, large camera shake.
+// 3D MSE bowl. Modes & overlays:
+//  • draggable        — drag the marker on the surface (publishes w_position)
+//  • mode = "trail"   — render the trail of past w_history positions
+//  • showGradient     — visible 3D arrow at hiker pointing in -gradient
+//                       direction. Length proportional to |gradient|. Used
+//                       by beats 3 and 4 to make the gradient visible.
+//  • fogIntensity ∈[0,1]  — blacks out the bowl outside a radius around
+//                       the hiker. Used by beat 3 (blindfolded).
+//  • shake on `camera_shake` channel pulse — beat 6 cliff dive
 
 type Mode = "marker" | "trail";
+type ArrowVariant = "none" | "single";
 
 const W_MIN = -3;
 const W_MAX = 3;
 const RES = 36;
-const HEIGHT_CLAMP = 8; // visually clamp loss height for sane proportions
+const HEIGHT_CLAMP = 8;
 
-function buildBowlGeometry(): THREE.BufferGeometry {
+// --- Bowl geometry + colors --------------------------------------------------
+
+type BowlData = {
+  geom: THREE.BufferGeometry;
+  baseColors: Float32Array;
+  positions: Float32Array;
+};
+
+function buildBowlData(): BowlData {
   const verts: number[] = [];
   const indices: number[] = [];
   const colors: number[] = [];
@@ -68,32 +79,89 @@ function buildBowlGeometry(): THREE.BufferGeometry {
   }
 
   const geom = new THREE.BufferGeometry();
-  geom.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
-  geom.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  const positions = new Float32Array(verts);
+  geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  const baseColors = new Float32Array(colors);
+  // Allocate a separate color buffer that we'll overwrite each frame for fog.
+  geom.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(colors), 3));
   geom.setIndex(indices);
   geom.computeVertexNormals();
-  return geom;
+  return { geom, baseColors, positions };
 }
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v));
 }
 
+// --- Bowl mesh with fog modulation -------------------------------------------
+
 function Bowl({
   draggable,
+  fogIntensity,
+  fogCenter,
   onDragStart,
   onDrag,
   onDragEnd,
 }: {
   draggable: boolean;
+  fogIntensity: number;     // 0 = no fog, 1 = max fog
+  fogCenter: [number, number]; // (w0, w1)
   onDragStart?: () => void;
   onDrag?: (w0: number, w1: number) => void;
   onDragEnd?: () => void;
 }) {
-  const geom = useMemo(buildBowlGeometry, []);
-  // For drag we use a flat plane raycast at y=HEIGHT_CLAMP/2 so the cursor
-  // maps cleanly to (w0, w1) regardless of where on the bowl they aim.
-  // Simpler than ray-against-mesh and feels intuitive.
+  const data = useMemo(buildBowlData, []);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const wireRef = useRef<THREE.Mesh>(null);
+
+  // Fog math: each frame, lerp each vertex's color toward dark based on
+  // its distance from the fog center. Within VISIBLE_RADIUS = full color.
+  // Outside FADE_RADIUS = fully dark. In between, smooth transition.
+  useFrame(() => {
+    if (fogIntensity <= 0.001) {
+      // Reset to base colors and skip per-vertex math.
+      const colorAttr = data.geom.attributes.color as THREE.BufferAttribute;
+      const arr = colorAttr.array as Float32Array;
+      // Only do the copy if it was modified.
+      if (arr[0] !== data.baseColors[0]) {
+        arr.set(data.baseColors);
+        colorAttr.needsUpdate = true;
+      }
+      return;
+    }
+
+    const VISIBLE_RADIUS = 0.45 + 1.6 * (1 - fogIntensity); // grows as fog clears
+    const FADE_RADIUS = VISIBLE_RADIUS + 0.7;
+
+    const colorAttr = data.geom.attributes.color as THREE.BufferAttribute;
+    const arr = colorAttr.array as Float32Array;
+    const positions = data.positions;
+    const dark = 0.06; // dark gray brightness target
+
+    for (let i = 0, p = 0; i < positions.length; i += 3, p += 3) {
+      const vx = positions[i];
+      const vz = positions[i + 2];
+      const dx = vx - fogCenter[0];
+      const dz = vz - fogCenter[1];
+      const d = Math.hypot(dx, dz);
+
+      let attenuation: number;
+      if (d <= VISIBLE_RADIUS) attenuation = 1;
+      else if (d >= FADE_RADIUS) attenuation = 0;
+      else attenuation = 1 - (d - VISIBLE_RADIUS) / (FADE_RADIUS - VISIBLE_RADIUS);
+      // Smoothstep for nicer transition
+      attenuation = attenuation * attenuation * (3 - 2 * attenuation);
+
+      const baseR = data.baseColors[p];
+      const baseG = data.baseColors[p + 1];
+      const baseB = data.baseColors[p + 2];
+      arr[p]     = dark + (baseR - dark) * attenuation;
+      arr[p + 1] = dark + (baseG - dark) * attenuation;
+      arr[p + 2] = dark + (baseB - dark) * attenuation;
+    }
+    colorAttr.needsUpdate = true;
+  });
+
   function pointer(e: ThreeEvent<PointerEvent>): { w0: number; w1: number } | null {
     const p = e.point;
     return { w0: clamp(p.x, W_MIN, W_MAX), w1: clamp(p.z, W_MIN, W_MAX) };
@@ -102,7 +170,8 @@ function Bowl({
   return (
     <>
       <mesh
-        geometry={geom}
+        ref={meshRef}
+        geometry={data.geom}
         onPointerDown={(e) => {
           if (!draggable) return;
           (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -126,15 +195,24 @@ function Bowl({
           metalness={0}
         />
       </mesh>
-      <mesh geometry={geom}>
+      <mesh ref={wireRef} geometry={data.geom}>
         <meshBasicMaterial color="#3F3F3B" wireframe transparent opacity={0.18} />
       </mesh>
     </>
   );
 }
 
-function Marker({ position, dragging }: { position: [number, number, number]; dragging: boolean }) {
-  // The position handle: hiker silhouette + ring on the surface.
+// --- Hiker + minimum + axes (small visuals) ---------------------------------
+
+function Marker({
+  position,
+  dragging,
+  glow = false,
+}: {
+  position: [number, number, number];
+  dragging: boolean;
+  glow?: boolean;
+}) {
   return (
     <group position={position}>
       <mesh position={[0, 0.18, 0]}>
@@ -147,16 +225,22 @@ function Marker({ position, dragging }: { position: [number, number, number]; dr
       </mesh>
       <mesh position={[0, 0.42, 0]}>
         <torusGeometry args={[0.07, 0.014, 8, 16]} />
-        <meshStandardMaterial color="#C2410C" emissive="#C2410C" emissiveIntensity={0.3} />
+        <meshStandardMaterial color="#C2410C" emissive="#C2410C" emissiveIntensity={glow ? 0.9 : 0.3} />
       </mesh>
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.05, 0.1, 32]} />
         <meshBasicMaterial color="#C2410C" side={THREE.DoubleSide} transparent opacity={dragging ? 1 : 0.8} />
       </mesh>
-      {dragging && (
+      {(dragging || glow) && (
         <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.13, 0.18, 32]} />
-          <meshBasicMaterial color="#C2410C" side={THREE.DoubleSide} transparent opacity={0.4} />
+          <ringGeometry args={[0.13, 0.22, 32]} />
+          <meshBasicMaterial color="#C2410C" side={THREE.DoubleSide} transparent opacity={glow ? 0.6 : 0.4} />
+        </mesh>
+      )}
+      {glow && (
+        <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.26, 0.36, 32]} />
+          <meshBasicMaterial color="#C2410C" side={THREE.DoubleSide} transparent opacity={0.18} />
         </mesh>
       )}
     </group>
@@ -168,7 +252,8 @@ function Trail({ points }: { points: [number, number, number][] }) {
   return <Line points={points} color="#C2410C" lineWidth={2.2} transparent opacity={0.75} />;
 }
 
-function Minimum() {
+function Minimum({ visible }: { visible: boolean }) {
+  if (!visible) return null;
   return (
     <group position={[0, 0.04, 1]}>
       <mesh>
@@ -190,6 +275,71 @@ function Minimum() {
     </group>
   );
 }
+
+// --- Gradient arrow ---------------------------------------------------------
+//
+// A 3D arrow at the hiker, pointing in the *downhill* direction (= -gradient).
+// Length is proportional to |gradient| (with a min/max). This is the visible
+// expression of "the gradient is what you feel under your feet."
+
+function GradientArrow({
+  pos,
+  color = "#0891B2",
+  direction = "downhill",
+}: {
+  pos: { w0: number; w1: number };
+  color?: string;
+  direction?: "downhill" | "uphill";
+}) {
+  const [g0, g1] = gradient(pos.w0, pos.w1);
+  const mag = Math.hypot(g0, g1);
+  if (mag < 0.01) return null; // tiny arrow at the bottom looks bad
+
+  // Downhill = -gradient direction. Uphill = +gradient (the descent⇄ascent toggle).
+  const sign = direction === "downhill" ? -1 : 1;
+  const dirX = (sign * g0) / mag;
+  const dirZ = (sign * g1) / mag;
+
+  // Length: scale magnitude into a sensible visual range.
+  const length = clamp(mag * 0.35, 0.18, 1.2);
+  const headLen = clamp(length * 0.32, 0.08, 0.3);
+  const shaftLen = length - headLen;
+
+  // Position the arrow so its tail starts at the hiker and tip points downhill.
+  const hikerY = clamp(loss(pos.w0, pos.w1), 0, HEIGHT_CLAMP) + 0.04;
+  // Midpoint of the shaft
+  const midX = pos.w0 + (dirX * shaftLen) / 2;
+  const midZ = pos.w1 + (dirZ * shaftLen) / 2;
+  // Tip position
+  const tipX = pos.w0 + dirX * (shaftLen + headLen / 2);
+  const tipZ = pos.w1 + dirZ * (shaftLen + headLen / 2);
+
+  // Quaternion to point cylinder/cone along the (dirX, 0, dirZ) direction.
+  // Default cylinder/cone orient along +Y. We need to align +Y → (dirX, 0, dirZ).
+  const quat = new THREE.Quaternion();
+  quat.setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    new THREE.Vector3(dirX, 0, dirZ)
+  );
+  const euler = new THREE.Euler().setFromQuaternion(quat);
+
+  return (
+    <group>
+      {/* Shaft */}
+      <mesh position={[midX, hikerY, midZ]} rotation={euler}>
+        <cylinderGeometry args={[0.025, 0.025, shaftLen, 12]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+      </mesh>
+      {/* Head */}
+      <mesh position={[tipX, hikerY, tipZ]} rotation={euler}>
+        <coneGeometry args={[0.07, headLen, 16]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+// --- Frame & shake ---------------------------------------------------------
 
 function FrameAxes() {
   const c = "#D4D4CE";
@@ -230,9 +380,6 @@ const labelStyle: React.CSSProperties = {
 };
 
 function CameraSetup() {
-  // Frame the whole bowl with the minimum visible. Looking down-and-into
-  // the bowl from a comfortable angle — the previous default was zoomed
-  // in too far and clipped the minimum.
   const { camera } = useThree();
   useEffect(() => {
     camera.position.set(5.5, 6.5, 6.5);
@@ -244,7 +391,6 @@ function CameraSetup() {
 }
 
 function CameraShake({ active }: { active: boolean }) {
-  // Brief, decaying shake added to the camera position.
   const { camera } = useThree();
   const startTime = useRef<number | null>(null);
 
@@ -271,14 +417,27 @@ function CameraShake({ active }: { active: boolean }) {
   return null;
 }
 
+// --- Main exported component ------------------------------------------------
+
 type Pos = { w0: number; w1: number };
 
 export function Surface3D({
   draggable = false,
   mode = "marker",
+  showGradient = "none" as ArrowVariant,
+  arrowDirection = "downhill",
+  fogIntensity = 0,
+  showMinimumMarker = true,
+  hikerGlow = false,
 }: {
   draggable?: boolean;
   mode?: Mode;
+  showGradient?: ArrowVariant;
+  arrowDirection?: "downhill" | "uphill";
+  /** 0 = no fog (full bowl visible). 1 = max fog (only hiker's vicinity). */
+  fogIntensity?: number;
+  showMinimumMarker?: boolean;
+  hikerGlow?: boolean;
 }) {
   const pub = usePublish();
   const [dragging, setDragging] = useState(false);
@@ -288,7 +447,6 @@ export function Surface3D({
   const shakeToken = usePulseToken("camera_shake");
   const [shaking, setShaking] = useState(false);
 
-  // Trigger shake when the channel pulses. Run for ~600ms.
   useEffect(() => {
     if (shakeToken === 0) return;
     setShaking(true);
@@ -299,7 +457,6 @@ export function Surface3D({
   const pos: Pos = channelPos ?? { w0: 0, w1: 0 };
   const markerY = clamp(loss(pos.w0, pos.w1), 0, HEIGHT_CLAMP);
 
-  // Trail uses w_history when available, otherwise just the current position.
   const trailPoints: [number, number, number][] = mode === "trail" && history.length > 1
     ? history.map((p) => [
         clamp(p.w0, W_MIN, W_MAX),
@@ -323,15 +480,24 @@ export function Surface3D({
         <FrameAxes />
         <Bowl
           draggable={draggable}
+          fogIntensity={fogIntensity}
+          fogCenter={[clamp(pos.w0, W_MIN, W_MAX), clamp(pos.w1, W_MIN, W_MAX)]}
           onDragStart={() => setDragging(true)}
           onDrag={(w0, w1) => {
             pub.set("w_position", { w0, w1 });
           }}
           onDragEnd={() => setDragging(false)}
         />
-        <Minimum />
+        <Minimum visible={showMinimumMarker && fogIntensity < 0.5} />
         {trailPoints.length > 1 && <Trail points={trailPoints} />}
-        <Marker position={[clamp(pos.w0, W_MIN, W_MAX), markerY, clamp(pos.w1, W_MIN, W_MAX)]} dragging={dragging} />
+        <Marker
+          position={[clamp(pos.w0, W_MIN, W_MAX), markerY, clamp(pos.w1, W_MIN, W_MAX)]}
+          dragging={dragging}
+          glow={hikerGlow}
+        />
+        {showGradient === "single" && (
+          <GradientArrow pos={pos} direction={arrowDirection} />
+        )}
         <AxisLabels />
         <OrbitControls
           enablePan={false}
