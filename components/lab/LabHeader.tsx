@@ -1,14 +1,8 @@
 "use client";
 
-import { useChannel, usePublish } from "@/lib/lab/LabContext";
+import { usePublish } from "@/lib/lab/LabContext";
 
-// Lab chrome — 48px header per design brief §9.3. Activity title left,
-// status indicator (cyan dot when "live"), Reset/Hint/Settings on the right.
-
-type SimSnapshot = {
-  step: number;
-  status: "idle" | "running" | "converged" | "diverged" | "max_steps";
-};
+// Lab chrome — 48px header per design brief §9.3.
 
 export function LabHeader({
   title,
@@ -19,9 +13,7 @@ export function LabHeader({
   sessionN: number;
   onClose?: () => void;
 }) {
-  const sim = useChannel<SimSnapshot>("sim_snapshot");
   const pub = usePublish();
-  const isLive = sim?.status === "running" || (sim && sim.step > 0 && sim.status !== "converged" && sim.status !== "diverged");
 
   return (
     <div
@@ -50,36 +42,17 @@ export function LabHeader({
       </span>
       <div style={{ width: 1, height: 16, background: "var(--neutral-200)" }} />
       <span style={{ fontSize: 14, fontWeight: 600, color: "var(--neutral-900)" }}>{title}</span>
-      {isLive && (
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 11,
-            color: "var(--lab-cyan)",
-            fontWeight: 600,
-          }}
-        >
-          <span style={{ width: 6, height: 6, borderRadius: 3, background: "var(--lab-cyan)" }} />
-          training · step {sim?.step}
-        </span>
-      )}
-      {sim?.status === "converged" && (
-        <span style={{ fontSize: 11, color: "var(--success)", fontWeight: 600 }}>
-          ● converged · step {sim.step}
-        </span>
-      )}
-      {sim?.status === "diverged" && (
-        <span style={{ fontSize: 11, color: "var(--danger)", fontWeight: 600 }}>
-          ● diverged · step {sim.step}
-        </span>
-      )}
+
       <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
         <button
           className="btn btn-ghost btn-sm"
-          title="Reset the run"
-          onClick={() => pub.pulse("do_reset")}
+          title="Reset the current beat"
+          onClick={() => {
+            // Clear position + history; the BeatJourney will republish defaults.
+            pub.set("w_position", { w0: 2, w1: -1 });
+            pub.set("w_history", []);
+            pub.pulse("do_reset");
+          }}
         >
           <ResetIcon />
           Reset

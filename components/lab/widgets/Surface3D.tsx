@@ -1,20 +1,26 @@
 "use client";
 
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Line, Html } from "@react-three/drei";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { loss } from "@/lib/lab/sim/gradient-descent";
-import { useChannel } from "@/lib/lab/LabContext";
+import { useChannel, usePublish, usePulseToken } from "@/lib/lab/LabContext";
 
-// Real-3D MSE bowl. Renders the loss surface for the linear-regression
-// dataset over a (w0,w1) range, plus the hiker's current position and the
-// trail of past positions. Per design brief §9.3 — buttery smooth, drag
-// to rotate, scroll to zoom, "physics textbook diagram, but interactive."
+// 3D MSE bowl. Two modes:
+//  • "marker"      — a small handle at (w0,w1) the user can drag along the
+//                    surface; publishes new w_position on drag.
+//  • "trail"       — same marker, plus the trail of past positions.
+//                    Used during stepping (beats 4+) and especially for the
+//                    cliff dive in beat 6 where the trail flies up.
+// `shake` triggers a brief, large camera shake.
 
-const W_MIN = -1.7;
-const W_MAX = 1.7;
-const RES = 36; // grid resolution per axis — 36² = 1,296 verts; cheap.
+type Mode = "marker" | "trail";
+
+const W_MIN = -3;
+const W_MAX = 3;
+const RES = 36;
+const HEIGHT_CLAMP = 8; // visually clamp loss height for sane proportions
 
 function buildBowlGeometry(): THREE.BufferGeometry {
   const verts: number[] = [];
@@ -22,7 +28,6 @@ function buildBowlGeometry(): THREE.BufferGeometry {
   const colors: number[] = [];
 
   const span = W_MAX - W_MIN;
-  // Compute losses + min/max for color mapping
   const Z: number[][] = [];
   let zmin = Infinity;
   let zmax = -Infinity;
@@ -31,16 +36,13 @@ function buildBowlGeometry(): THREE.BufferGeometry {
     Z[i] = [];
     for (let j = 0; j <= RES; j++) {
       const w1 = W_MIN + (j / RES) * span;
-      const z = Math.min(loss(w0, w1), 6); // clamp the visual height
+      const z = Math.min(loss(w0, w1), HEIGHT_CLAMP);
       Z[i][j] = z;
       if (z < zmin) zmin = z;
       if (z > zmax) zmax = z;
     }
   }
 
-  // Two warm colors for height shading — pulled from token palette.
-  // Low (--accent-subtle) → high (--accent at lower opacity via vertex alpha
-  // baked as color blend).
   const cLow = new THREE.Color("#FCF4EE");
   const cHigh = new THREE.Color("#B5532A");
 
@@ -55,7 +57,6 @@ function buildBowlGeometry(): THREE.BufferGeometry {
       colors.push(c.r, c.g, c.b);
     }
   }
-
   for (let i = 0; i < RES; i++) {
     for (let j = 0; j < RES; j++) {
       const a = i * (RES + 1) + j;
@@ -74,12 +75,48 @@ function buildBowlGeometry(): THREE.BufferGeometry {
   return geom;
 }
 
-function Bowl() {
+function clamp(v: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, v));
+}
+
+function Bowl({
+  draggable,
+  onDragStart,
+  onDrag,
+  onDragEnd,
+}: {
+  draggable: boolean;
+  onDragStart?: () => void;
+  onDrag?: (w0: number, w1: number) => void;
+  onDragEnd?: () => void;
+}) {
   const geom = useMemo(buildBowlGeometry, []);
+  // For drag we use a flat plane raycast at y=HEIGHT_CLAMP/2 so the cursor
+  // maps cleanly to (w0, w1) regardless of where on the bowl they aim.
+  // Simpler than ray-against-mesh and feels intuitive.
+  function pointer(e: ThreeEvent<PointerEvent>): { w0: number; w1: number } | null {
+    const p = e.point;
+    return { w0: clamp(p.x, W_MIN, W_MAX), w1: clamp(p.z, W_MIN, W_MAX) };
+  }
+
   return (
     <>
-      {/* Filled surface — vertex-colored, slightly transparent so wireframe shows */}
-      <mesh geometry={geom}>
+      <mesh
+        geometry={geom}
+        onPointerDown={(e) => {
+          if (!draggable) return;
+          (e.target as Element).setPointerCapture?.(e.pointerId);
+          onDragStart?.();
+          const w = pointer(e);
+          if (w) onDrag?.(w.w0, w.w1);
+        }}
+        onPointerMove={(e) => {
+          if (!draggable || (e.buttons & 1) === 0) return;
+          const w = pointer(e);
+          if (w) onDrag?.(w.w0, w.w1);
+        }}
+        onPointerUp={() => onDragEnd?.()}
+      >
         <meshStandardMaterial
           vertexColors
           transparent
@@ -89,7 +126,6 @@ function Bowl() {
           metalness={0}
         />
       </mesh>
-      {/* Wireframe overlay — quiet brown */}
       <mesh geometry={geom}>
         <meshBasicMaterial color="#3F3F3B" wireframe transparent opacity={0.18} />
       </mesh>
@@ -97,49 +133,50 @@ function Bowl() {
   );
 }
 
-function Hiker({ position }: { position: [number, number, number] }) {
+function Marker({ position, dragging }: { position: [number, number, number]; dragging: boolean }) {
+  // The position handle: hiker silhouette + ring on the surface.
   return (
     <group position={position}>
-      {/* Vertical pole pointing up from the surface — visible against the bowl */}
       <mesh position={[0, 0.18, 0]}>
-        <cylinderGeometry args={[0.012, 0.012, 0.36, 8]} />
+        <cylinderGeometry args={[0.018, 0.018, 0.36, 8]} />
         <meshStandardMaterial color="#1A1A18" />
       </mesh>
-      {/* Hiker head */}
-      <mesh position={[0, 0.4, 0]}>
-        <sphereGeometry args={[0.055, 16, 16]} />
+      <mesh position={[0, 0.42, 0]}>
+        <sphereGeometry args={[0.07, 16, 16]} />
         <meshStandardMaterial color="#FAFAF9" />
       </mesh>
-      {/* Blindfold band (the recurring motif) */}
-      <mesh position={[0, 0.4, 0]}>
-        <torusGeometry args={[0.055, 0.011, 8, 16]} />
-        <meshStandardMaterial color="#C2410C" />
+      <mesh position={[0, 0.42, 0]}>
+        <torusGeometry args={[0.07, 0.014, 8, 16]} />
+        <meshStandardMaterial color="#C2410C" emissive="#C2410C" emissiveIntensity={0.3} />
       </mesh>
-      {/* Footprint marker on the surface */}
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.04, 0.07, 24]} />
-        <meshBasicMaterial color="#C2410C" side={THREE.DoubleSide} />
+        <ringGeometry args={[0.05, 0.1, 32]} />
+        <meshBasicMaterial color="#C2410C" side={THREE.DoubleSide} transparent opacity={dragging ? 1 : 0.8} />
       </mesh>
+      {dragging && (
+        <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.13, 0.18, 32]} />
+          <meshBasicMaterial color="#C2410C" side={THREE.DoubleSide} transparent opacity={0.4} />
+        </mesh>
+      )}
     </group>
   );
 }
 
 function Trail({ points }: { points: [number, number, number][] }) {
   if (points.length < 2) return null;
-  return (
-    <Line points={points} color="#C2410C" lineWidth={2} transparent opacity={0.7} />
-  );
+  return <Line points={points} color="#C2410C" lineWidth={2.2} transparent opacity={0.75} />;
 }
 
-function Minimum({ position }: { position: [number, number, number] }) {
+function Minimum() {
   return (
-    <group position={position}>
+    <group position={[0, 0.04, 1]}>
       <mesh>
-        <sphereGeometry args={[0.05, 16, 16]} />
-        <meshStandardMaterial color="#0D9488" emissive="#0D9488" emissiveIntensity={0.4} />
+        <sphereGeometry args={[0.07, 16, 16]} />
+        <meshStandardMaterial color="#0D9488" emissive="#0D9488" emissiveIntensity={0.5} />
       </mesh>
       <Html
-        position={[0.12, 0.06, 0]}
+        position={[0.16, 0.06, 0]}
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: 11,
@@ -154,19 +191,33 @@ function Minimum({ position }: { position: [number, number, number] }) {
   );
 }
 
-function AxisLabels() {
-  // Lightweight floating axis labels using HTML so they always face camera.
+function FrameAxes() {
+  const c = "#D4D4CE";
+  const len = (W_MAX - W_MIN) * 1.05;
   return (
     <>
-      <Html position={[W_MAX + 0.1, 0, 0]} style={labelStyle}>
-        w₀
-      </Html>
-      <Html position={[0, 0, W_MAX + 0.1]} style={labelStyle}>
-        w₁
-      </Html>
-      <Html position={[0, 6.1, 0]} style={labelStyle}>
-        cost
-      </Html>
+      <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.005, 0.005, len, 8]} />
+        <meshBasicMaterial color={c} />
+      </mesh>
+      <mesh position={[0, HEIGHT_CLAMP / 2, 0]}>
+        <cylinderGeometry args={[0.005, 0.005, HEIGHT_CLAMP, 8]} />
+        <meshBasicMaterial color={c} />
+      </mesh>
+      <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.005, 0.005, len, 8]} />
+        <meshBasicMaterial color={c} />
+      </mesh>
+    </>
+  );
+}
+
+function AxisLabels() {
+  return (
+    <>
+      <Html position={[W_MAX + 0.2, 0, 0]} style={labelStyle}>w₀</Html>
+      <Html position={[0, 0, W_MAX + 0.2]} style={labelStyle}>w₁</Html>
+      <Html position={[0, HEIGHT_CLAMP + 0.3, 0]} style={labelStyle}>cost</Html>
     </>
   );
 }
@@ -178,80 +229,119 @@ const labelStyle: React.CSSProperties = {
   pointerEvents: "none",
 };
 
-function FrameAxes() {
-  // Three thin cylinders for x, y (cost), z axes.
-  const c = "#D4D4CE";
-  return (
-    <>
-      <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.005, 0.005, W_MAX * 2, 8]} />
-        <meshBasicMaterial color={c} />
-      </mesh>
-      <mesh position={[0, 3, 0]}>
-        <cylinderGeometry args={[0.005, 0.005, 6, 8]} />
-        <meshBasicMaterial color={c} />
-      </mesh>
-      <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.005, 0.005, W_MAX * 2, 8]} />
-        <meshBasicMaterial color={c} />
-      </mesh>
-    </>
-  );
-}
-
 function CameraSetup() {
+  // Frame the whole bowl with the minimum visible. Looking down-and-into
+  // the bowl from a comfortable angle — the previous default was zoomed
+  // in too far and clipped the minimum.
   const { camera } = useThree();
-  // Set a pleasing initial isometric-ish angle.
-  useMemo(() => {
-    camera.position.set(2.6, 3.4, 3.6);
-    camera.lookAt(0, 1.2, 0);
-  }, [camera]);
+  useEffect(() => {
+    camera.position.set(5.5, 6.5, 6.5);
+    camera.lookAt(0, HEIGHT_CLAMP * 0.4, 0);
+    camera.updateProjectionMatrix();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return null;
 }
 
-export function Surface3D() {
+function CameraShake({ active }: { active: boolean }) {
+  // Brief, decaying shake added to the camera position.
+  const { camera } = useThree();
+  const startTime = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (active) startTime.current = performance.now();
+  }, [active]);
+
+  useFrame(() => {
+    if (startTime.current === null) return;
+    const elapsed = performance.now() - startTime.current;
+    const duration = 600;
+    if (elapsed > duration) {
+      startTime.current = null;
+      return;
+    }
+    const t = elapsed / duration;
+    const decay = (1 - t) ** 2;
+    const amp = 0.18 * decay;
+    camera.position.x += (Math.random() - 0.5) * amp;
+    camera.position.y += (Math.random() - 0.5) * amp;
+    camera.position.z += (Math.random() - 0.5) * amp;
+  });
+
+  return null;
+}
+
+type Pos = { w0: number; w1: number };
+
+export function Surface3D({
+  draggable = false,
+  mode = "marker",
+}: {
+  draggable?: boolean;
+  mode?: Mode;
+}) {
+  const pub = usePublish();
+  const [dragging, setDragging] = useState(false);
+  const channelPos = useChannel<Pos>("w_position");
   const history =
     useChannel<{ w0: number; w1: number; loss: number }[]>("w_history") ?? [];
+  const shakeToken = usePulseToken("camera_shake");
+  const [shaking, setShaking] = useState(false);
 
-  const trailPoints: [number, number, number][] = history.map((p) => [
-    clamp(p.w0, W_MIN, W_MAX),
-    Math.min(p.loss, 6) + 0.02,
-    clamp(p.w1, W_MIN, W_MAX),
-  ]);
-  const last = history[history.length - 1];
-  const hikerPos: [number, number, number] = last
-    ? [clamp(last.w0, W_MIN, W_MAX), Math.min(last.loss, 6), clamp(last.w1, W_MIN, W_MAX)]
-    : [-1.4, Math.min(loss(-1.4, -1.2), 6), -1.2];
+  // Trigger shake when the channel pulses. Run for ~600ms.
+  useEffect(() => {
+    if (shakeToken === 0) return;
+    setShaking(true);
+    const t = setTimeout(() => setShaking(false), 650);
+    return () => clearTimeout(t);
+  }, [shakeToken]);
+
+  const pos: Pos = channelPos ?? { w0: 0, w1: 0 };
+  const markerY = clamp(loss(pos.w0, pos.w1), 0, HEIGHT_CLAMP);
+
+  // Trail uses w_history when available, otherwise just the current position.
+  const trailPoints: [number, number, number][] = mode === "trail" && history.length > 1
+    ? history.map((p) => [
+        clamp(p.w0, W_MIN, W_MAX),
+        Math.min(p.loss, HEIGHT_CLAMP) + 0.02,
+        clamp(p.w1, W_MIN, W_MAX),
+      ])
+    : [];
 
   return (
-    <div style={{ width: "100%", height: 360, background: "var(--neutral-50)" }}>
+    <div style={{ width: "100%", height: 380, background: "var(--neutral-50)" }}>
       <Canvas
         dpr={[1, 2]}
-        camera={{ fov: 38, near: 0.1, far: 50 }}
+        camera={{ fov: 38, near: 0.1, far: 80 }}
         gl={{ antialias: true, alpha: true }}
       >
         <CameraSetup />
+        <CameraShake active={shaking} />
         <ambientLight intensity={0.7} />
         <directionalLight position={[5, 8, 5]} intensity={0.6} />
         <directionalLight position={[-3, 4, -2]} intensity={0.25} />
         <FrameAxes />
-        <Bowl />
-        <Minimum position={[0, 0.02, 1]} />
-        <Trail points={trailPoints} />
-        <Hiker position={hikerPos} />
+        <Bowl
+          draggable={draggable}
+          onDragStart={() => setDragging(true)}
+          onDrag={(w0, w1) => {
+            pub.set("w_position", { w0, w1 });
+          }}
+          onDragEnd={() => setDragging(false)}
+        />
+        <Minimum />
+        {trailPoints.length > 1 && <Trail points={trailPoints} />}
+        <Marker position={[clamp(pos.w0, W_MIN, W_MAX), markerY, clamp(pos.w1, W_MIN, W_MAX)]} dragging={dragging} />
         <AxisLabels />
         <OrbitControls
           enablePan={false}
-          minDistance={3}
-          maxDistance={10}
+          minDistance={5}
+          maxDistance={14}
           maxPolarAngle={Math.PI / 2 - 0.05}
-          target={[0, 1.2, 0]}
+          target={[0, HEIGHT_CLAMP * 0.4, 0]}
+          enabled={!dragging}
         />
       </Canvas>
     </div>
   );
-}
-
-function clamp(v: number, lo: number, hi: number): number {
-  return Math.max(lo, Math.min(hi, v));
 }
