@@ -157,7 +157,12 @@ export function BeatJourney() {
           <PanelFrame title="Data" kicker="study hours × exam score">
             <DataScatter2D
               draggable={cfg.unlocks.lineDraggable}
-              pulseGreen={pulseGreen}
+              pulseOnce={pulseGreen}
+              successThreshold={
+                cfg.completion.kind === "loss_below"
+                  ? cfg.completion.threshold
+                  : undefined
+              }
               onLineDragged={() =>
                 setProgress((p) => (p.draggedLine ? p : { ...p, draggedLine: true }))
               }

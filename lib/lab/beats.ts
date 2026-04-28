@@ -54,7 +54,7 @@ export const BEATS: Record<BeatId, Beat> = {
       fogged: false,
       showHikerTrail: false,
     },
-    completion: { kind: "loss_below", threshold: 5 },
+    completion: { kind: "loss_below", threshold: 0.05 },
   },
 
   2: {
