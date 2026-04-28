@@ -18,6 +18,8 @@ const FEATURE_GRID_COLS = 4;           // 4×4 grid of mini heatmaps
 const SELECTED_IMAGE_PX = 200;
 const NUM_LAYERS_TO_SHOW = 4;
 const TOP_K_PREDICTIONS = 3;
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+const MOBILENET_INPUT_PX = 224;
 
 type ModelState = "idle" | "loading" | "ready" | "error";
 
@@ -44,7 +46,9 @@ type LayerActivation = {
 type Prediction = { className: string; probability: number };
 
 export function LayerExplorer() {
-  const [imageKind, setImageKind] = useState<LayerExplorerImageKind>("face-stylized");
+  const [imageKind, setImageKind] = useState<LayerExplorerImageKind | "upload">("face-stylized");
+  const [uploadedImage, setUploadedImage] = useState<HTMLCanvasElement | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [modelState, setModelState] = useState<ModelState>("idle");
   const [modelProgress, setModelProgress] = useState<string>("");
   const [activations, setActivations] = useState<LayerActivation[]>([]);
@@ -57,6 +61,7 @@ export function LayerExplorer() {
   const layerNamesRef = useRef<string[]>([]);
 
   const selectedCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   /* -------- Load MobileNet (lazily, on mount) -----------------------
    *
@@ -167,14 +172,18 @@ export function LayerExplorer() {
   useEffect(() => {
     const target = selectedCanvasRef.current;
     if (!target) return;
-    const src = generateLayerExplorerImage(imageKind, 224);
+    const src =
+      imageKind === "upload"
+        ? uploadedImage
+        : generateLayerExplorerImage(imageKind, MOBILENET_INPUT_PX);
+    if (!src) return;
     target.width = SELECTED_IMAGE_PX;
     target.height = SELECTED_IMAGE_PX;
     const ctx = target.getContext("2d");
     if (ctx) {
       ctx.drawImage(src, 0, 0, SELECTED_IMAGE_PX, SELECTED_IMAGE_PX);
     }
-  }, [imageKind]);
+  }, [imageKind, uploadedImage]);
 
   /* -------- Run inference whenever ready + image is selected -------- */
 
@@ -192,7 +201,11 @@ export function LayerExplorer() {
       // Render the chosen preset image to a 224×224 canvas, then feed it
       // to MobileNet. Each call disposes its tensors — TF.js is leaky
       // otherwise.
-      const sourceCanvas = generateLayerExplorerImage(imageKind, 224);
+      const sourceCanvas =
+        imageKind === "upload"
+          ? uploadedImage
+          : generateLayerExplorerImage(imageKind, MOBILENET_INPUT_PX);
+      if (!sourceCanvas) return;
 
       const inputTensor = tf.tidy(() => {
         const t = tf.browser.fromPixels(sourceCanvas);
@@ -258,7 +271,43 @@ export function LayerExplorer() {
     return () => {
       cancelled = true;
     };
-  }, [imageKind, modelState]);
+  }, [imageKind, modelState, uploadedImage]);
+
+  /* -------- File upload handler ------------------------------------- */
+
+  const handleUploadClick = () => {
+    setUploadError(null);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Reset value so picking the same file again still triggers a change.
+    e.target.value = "";
+    if (!file) return;
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setUploadError("Image too large — try one under 10MB.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setUploadError("That doesn't look like an image. Try a JPG, PNG, or WebP.");
+      return;
+    }
+
+    let img: HTMLImageElement;
+    try {
+      img = await loadImageFromFile(file);
+    } catch {
+      setUploadError("Couldn't read that image. Try a different file.");
+      return;
+    }
+
+    const canvas = centerCropToSquare(img, MOBILENET_INPUT_PX);
+    setUploadError(null);
+    setUploadedImage(canvas);
+    setImageKind("upload");
+  };
 
   /* -------- Render --------------------------------------------------- */
 
@@ -274,10 +323,48 @@ export function LayerExplorer() {
               kind={opt.kind}
               label={opt.label}
               active={opt.kind === imageKind}
-              onClick={() => setImageKind(opt.kind)}
+              onClick={() => {
+                setUploadError(null);
+                setImageKind(opt.kind);
+              }}
             />
           ))}
+          <UploadTile active={imageKind === "upload"} onClick={handleUploadClick} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
         </div>
+        <span
+          style={{
+            fontSize: 11,
+            fontFamily: "var(--font-mono)",
+            color: "var(--neutral-500)",
+            marginTop: 2,
+          }}
+        >
+          🔒 Your image stays on your device.
+        </span>
+        {uploadError && (
+          <div
+            role="alert"
+            style={{
+              marginTop: 4,
+              padding: "10px 14px",
+              background: "var(--accent-subtle)",
+              border: "1px dashed var(--accent)",
+              borderRadius: 8,
+              fontSize: 12,
+              color: "var(--neutral-900)",
+            }}
+          >
+            {uploadError}
+          </div>
+        )}
       </div>
 
       {/* Selected image + state */}
@@ -456,6 +543,67 @@ function ImageThumbnailTile({
         }}
       >
         {label}
+      </span>
+    </button>
+  );
+}
+
+function UploadTile({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: active ? "var(--neutral-0)" : "var(--neutral-50)",
+        border: "1px solid",
+        borderColor: active ? "var(--accent)" : "var(--neutral-200)",
+        borderRadius: 8,
+        padding: 8,
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        alignItems: "center",
+        cursor: "pointer",
+        transition: "border-color 120ms",
+      }}
+    >
+      <div
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: 4,
+          background: "var(--neutral-0)",
+          border: "1px dashed var(--neutral-300)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: active ? "var(--accent)" : "var(--neutral-500)",
+        }}
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+      </div>
+      <span
+        style={{
+          fontSize: 11,
+          fontFamily: "var(--font-mono)",
+          fontWeight: active ? 600 : 400,
+          color: active ? "var(--accent)" : "var(--neutral-700)",
+        }}
+      >
+        Upload
       </span>
     </button>
   );
@@ -706,4 +854,35 @@ function prettyLayerName(name: string): string {
     .replace(/_BN$/i, "")
     .replace(/_project$/i, "")
     .replace(/_/g, " ");
+}
+
+function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("decode failed"));
+    };
+    img.src = url;
+  });
+}
+
+function centerCropToSquare(img: HTMLImageElement, size: number): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  const sw = img.naturalWidth;
+  const sh = img.naturalHeight;
+  const side = Math.min(sw, sh);
+  const sx = (sw - side) / 2;
+  const sy = (sh - side) / 2;
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+  return canvas;
 }
