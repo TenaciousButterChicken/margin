@@ -1,5 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Canonicalise www.margin.school → margin.school. The www DNS still
+  // points at the tunnel (so links don't dead-end), but anyone who lands
+  // on www gets a permanent redirect to the apex so the address bar
+  // always says margin.school.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.margin.school" }],
+        destination: "https://margin.school/:path*",
+        permanent: true,
+      },
+    ];
+  },
+
   // Self-hosted on a Pi, no CDN in front. The default 1-year SSG cache
   // header for HTML means browsers cling to stale pages even after we
   // ship a new build. Override Cache-Control for HTML routes so updates
