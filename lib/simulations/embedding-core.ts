@@ -150,16 +150,6 @@ export function vocabAt(id: number): string {
   return vocabCache?.[id] ?? "";
 }
 
-/** Cosine similarity between two token ids. Both must have been loaded. */
-function cosine(a: number, b: number): number {
-  if (!embeddingsCache || !embeddingNorms) return 0;
-  const oa = a * HIDDEN;
-  const ob = b * HIDDEN;
-  let dot = 0;
-  for (let d = 0; d < HIDDEN; d++) dot += embeddingsCache[oa + d] * embeddingsCache[ob + d];
-  return dot / (embeddingNorms[a] * embeddingNorms[b]);
-}
-
 /** Top-K nearest neighbors of a token id by cosine similarity in 768D.
  *  Skips the token itself unless `includeSelf` is true. */
 export function nearestNeighbors(
