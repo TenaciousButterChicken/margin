@@ -1,0 +1,153 @@
+<BigIdea>
+ML doesn't have opinions, it has data. If the data is biased, broken, or unrepresentative, the model's predictions will be too. "Garbage in, garbage out" isn't a slogan — it's the most common cause of ML failure in the real world.
+</BigIdea>
+
+<Objectives>
+  <Objective>Explain "garbage in, garbage out" with a real example</Objective>
+  <Objective>Use pandas to inspect a dataset for problems</Objective>
+  <Objective>Identify three kinds of bias that can sneak into a dataset</Objective>
+</Objectives>
+
+## Opening hook — the Amazon hiring AI story
+
+In 2014, Amazon started building an internal ML tool to screen resumes. They fed it ten years of resumes from hires and the people they'd rated highly. The model was supposed to learn what a "good" Amazon engineer's resume looked like and rank new applicants automatically.
+
+By 2015, the team noticed something disturbing. The model was systematically penalizing resumes that contained the word "women's," as in "women's chess club captain" or "women's college." It was downgrading graduates of two all-women's colleges. It had taught itself to prefer male candidates.
+
+Why? The training data. Amazon's tech workforce in the previous decade had been heavily male. The model learned the pattern: *successful Amazon engineers have these features, so male-coded features are predictive of success.* The model wasn't sexist on purpose. It was doing what we asked it to: find the pattern in the historical data. The historical data was sexist.
+
+Amazon scrapped the project in 2018.
+
+## Garbage in, garbage out
+
+**The metaphor.** Imagine learning a language only by reading shampoo bottles. You'd technically be "fluent." You'd be very good at predicting what comes after "for" ("smoother, healthier hair"). Try to have a conversation, you'd sound bizarre. The data shaped the language ability into a weird, narrow shape.
+
+ML models are exactly like this. Their entire understanding of the world is whatever was in their training data.
+
+**The principle.** *A model is the average of its training data.* Slight oversimplification, right intuition. There's no magic. There's no "common sense" hiding in the algorithm. The model only knows what it saw.
+
+## Three kinds of bias
+
+**1. Historical bias — the data reflects an unfair world.** Amazon's hiring example. Even with perfect data collection, if the historical world was biased, the patterns the model learns will be biased.
+
+**2. Sampling bias — your data isn't representative.** Train a face-detection model on photos scraped from Western websites in 2010, the dataset will be heavily skewed toward light-skinned faces. The model will detect those faces well and others badly.
+
+**3. Label bias — the labels themselves are subjective or wrong.** Labeling tweets as "toxic." Different labelers draw the line in different places. If your labelers happen to share a particular cultural background, the model inherits their definition.
+
+## Why this matters now
+
+ML systems make real decisions about real people. Loan approvals. Resume screening. Court bail recommendations. School admissions. Medical diagnoses. Insurance pricing. Each has had documented cases of ML bias causing real harm.
+
+Takeaways:
+
+- **Models are tools.** They reflect the assumptions and limitations of the people who built them.
+- **The data is the foundation.** A clever algorithm trained on bad data is worse than a simple algorithm trained on good data. *Always.*
+- **"The algorithm decided" is not an excuse.** Someone chose the data, the labels, the success metric, and the deployment. That someone is responsible.
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Bias (ML/societal sense)">A systematic skew in a model's behavior. *Note: in Session 4 we'll meet "bias" in a totally different mathematical sense (the b in y = mx + b). Same word, different meanings.*</Term>
+  <Term name="Representative data">A dataset that proportionally reflects the real-world population the model will be used on.</Term>
+</Vocab>
+
+## Code companion — inspect a dataset like a journalist
+
+Open Colab. Load the California housing dataset (a real public dataset; the "median income" feature has known socioeconomic correlations).
+
+```python
+import pandas as pd
+from sklearn.datasets import fetch_california_housing
+
+# Load the dataset.
+data = fetch_california_housing(as_frame=True)
+df = data.frame
+
+# Step 1: How big is it? What columns does it have?
+print("Shape:", df.shape)         # (rows, columns)
+print("Columns:", df.columns.tolist())
+print()
+
+# Step 2: Sample of the data.
+print(df.head())
+print()
+
+# Step 3: Summary statistics. Look for weird ranges.
+print(df.describe())
+```
+
+Walk the room through the output. Things to point out:
+
+- `MedInc` (median income in the block) ranges from about 0.5 to 15. Those aren't dollars; they're tens of thousands of dollars. Knowing the *units* of your features matters.
+- `HouseAge` has a max of 52. That's a hard cap, suggesting older houses got binned together, which means you can't tell a 52-year-old house from a 100-year-old one. Information loss baked in.
+- `Population` has a max of 35,682 in a single block. That's huge. Probably an outlier. Could distort a model.
+
+```python
+# Step 4: Check for missing data.
+print(df.isnull().sum())
+```
+
+This dataset has no missing values. Most real-world datasets do. Show what missing data looks like by deliberately introducing some:
+
+```python
+# Make a copy and corrupt 10% of the AveRooms column.
+import numpy as np
+df_messy = df.copy()
+random_indices = np.random.choice(df_messy.index, size=int(len(df_messy) * 0.1), replace=False)
+df_messy.loc[random_indices, 'AveRooms'] = np.nan
+
+print("Missing values per column after corruption:")
+print(df_messy.isnull().sum())
+```
+
+```python
+# Step 5: Look for a possible proxy for protected attributes.
+# This dataset doesn't have race or gender, but it has Latitude and Longitude.
+# Location correlates strongly with race in California.
+# A model that uses Latitude/Longitude is implicitly using race.
+
+import matplotlib.pyplot as plt
+plt.scatter(df['Longitude'], df['Latitude'], c=df['MedHouseVal'],
+            cmap='RdYlGn', s=2, alpha=0.5)
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.title('California: house value by location')
+plt.colorbar(label='Median house value (×$100k)')
+plt.show()
+```
+
+The output shows the shape of California, with green dots concentrated along the coast (high values) and red dots in the central valley (low values). *"This map looks just like a map of California's racial and economic geography. A model trained on this data will use location to predict price, which means it'll inherit those patterns. Removing the explicit race column wouldn't help; latitude and longitude carry the same information."*
+
+<Activity title="Bias hunt" duration="15 min">
+
+**Setup.** Print or project a fictional dataset called "Top Students," 30 made-up student records used by a fictional ML system to predict who'll get into a top university. Columns: GPA, SAT, extracurriculars, family income, zip code, parent's education, school district funding.
+
+Have it visibly skewed. Successful rows concentrated in high-income zip codes. Subtle issues: missing data on first-gen students, a "leadership score" that's clearly subjective, a 70/30 male/female split.
+
+**Instructions.** Groups of 3, 10 minutes, find as many problems as possible. Playing the role of a journalist about to publish.
+
+**Debrief:**
+
+- *If we trained an admissions predictor on this data, who'd it favor? Punish?*
+- *What would you need to fix to make it fairer?*
+- *Even after fixing the obvious problems, what biases might remain invisible?*
+
+</Activity>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="Can we just remove the race / gender columns to fix bias?">
+No. Models pick up the same bias through correlated features (zip code → race, height → gender). This is an active research area called *fairness in ML*.
+  </Q>
+  <Q q="Is all bias bad?">
+"Bias" has two meanings. Mathematically, every model has a bias term — that's fine. The harmful kind is *systematic unfairness toward a group of people*.
+  </Q>
+  <Q q="Couldn't humans make these decisions instead?">
+Sometimes. Humans have biases too, often the same ones. The goal isn't ML or humans; it's the right tool with the right oversight.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 4 — Drawing lines through dots">
+We've spent three weeks talking about ML at a high level. Next week, you build your first real model. Linear regression: drawing a line through some dots. It's the foundation for almost everything that comes after. We'll derive the math from y = mx + b, write the code, and have a working predictor by the end of the hour.
+</Bridge>

@@ -1,0 +1,269 @@
+<BigIdea>
+Before a model can learn, it needs a way to measure how wrong it is. The cost function is that measure. We'll derive Mean Squared Error from a simple question: "given a guessed line, how badly does it miss the data points?"
+</BigIdea>
+
+<Objectives>
+  <Objective>Compute the error for a single prediction (predicted minus actual)</Objective>
+  <Objective>Explain why we square errors instead of just adding them up</Objective>
+  <Objective>Write the MSE formula from memory and explain each symbol</Objective>
+  <Objective>Implement MSE in numpy and use it to compare two lines</Objective>
+</Objectives>
+
+## Opening hook
+
+Show two scatter plots side by side. Same dots. Each has a different line drawn through it. One line is clearly worse than the other.
+
+Ask: *"This line is bad. That line is good. But how bad is bad? Can you put a number on it?"*
+
+Wait. Let students suggest. Someone will say "measure the distance from each dot to the line." *"Exactly. That's what a cost function does. Today we make it precise, derive it from scratch, and code it."*
+
+## The error of a single prediction
+
+For each data point, the model has a prediction (<Math tex="\hat{y}_i" />) and an actual value (<Math tex="y_i" />). The **error** for that point is:
+
+<Math tex="\text{error}_i = \hat{y}_i - y_i" display />
+
+Visually, the error is the *vertical gap* between the dot and the line. Big gap means big error. Dots on the line have zero error.
+
+**Quick concrete example.** Suppose your line predicts ŷ = 80 for some student, but the student actually got y = 75. The error is ŷ − y = 80 − 75 = +5. The model overshot by 5.
+
+For another student, ŷ = 70 but y = 75. Error is 70 − 75 = −5. The model undershot by 5.
+
+Both predictions were *equally wrong* (off by 5 units), but their errors have opposite signs. This will matter in a moment.
+
+## Why we can't just add the errors
+
+Naive idea: total error = sum of all errors.
+
+<Math tex="\text{Total error} = \sum_i (\hat{y}_i - y_i)" display />
+
+(Σ is the Greek letter sigma, pronounced "sigma." It means "add up." The little "i" underneath says "for each example, indexed by i.")
+
+**Why this fails.** Suppose we have just two data points. Our line overshoots one by 5 and undershoots the other by 5. Errors: +5 and −5. Sum: 0.
+
+The line looks "perfect" by this measure. It is not. It missed both points equally badly. We just have positives and negatives canceling out.
+
+We need a fix.
+
+## Two options for fixing the sign problem
+
+**Option A: take the absolute value.** <Math tex="|\hat{y}_i - y_i|" />. Always positive.
+
+This works mathematically. Cost function: average of the absolute errors. This is called **Mean Absolute Error** (MAE).
+
+<Math tex="\text{MAE} = \tfrac{1}{N} \sum_i |\hat{y}_i - y_i|" display />
+
+Downside: |x| has a sharp corner at x = 0. The function is not smooth there. In Session 6, we'll need to take *derivatives* of the cost function, and derivatives of functions with sharp corners are problematic.
+
+**Option B: square the errors.** <Math tex="(\hat{y}_i - y_i)^2" />. Squaring makes any number non-negative.
+
+<Math tex="\text{MSE} = \tfrac{1}{N} \sum_i (\hat{y}_i - y_i)^2" display />
+
+Smooth (no sharp corners). Easy to take derivatives of. Has the side effect of *punishing big errors more than small ones*: an error of 10 contributes 100 to the cost, but an error of 1 contributes only 1. This is often what we want.
+
+**We pick Option B.** MSE is the workhorse of regression. Lock in the formula:
+
+<Math tex="\text{MSE}(w, b) = \tfrac{1}{N} \sum_i (\hat{y}_i - y_i)^2 = \tfrac{1}{N} \sum_i (wx_i + b - y_i)^2" display />
+
+Notice MSE is a function of **w and b**. Different (w, b) pairs give different MSEs. The whole game of training will be: *find the (w, b) that minimizes MSE.*
+
+## Working an example by hand
+
+Make this concrete. Tiny dataset with 3 points:
+
+| i | xᵢ (hours) | yᵢ (score) |
+|---|---|---|
+| 1 | 2 | 60 |
+| 2 | 5 | 75 |
+| 3 | 8 | 90 |
+
+**Try line 1: w = 5, b = 50.** Predictions and errors:
+
+| i | xᵢ | yᵢ | ŷᵢ = 5xᵢ + 50 | error | error² |
+|---|---|---|---|---|---|
+| 1 | 2 | 60 | 60 | 0 | 0 |
+| 2 | 5 | 75 | 75 | 0 | 0 |
+| 3 | 8 | 90 | 90 | 0 | 0 |
+
+MSE = (1/3) × (0 + 0 + 0) = **0**. This line goes through every point exactly. Best possible MSE.
+
+**Try line 2: w = 4, b = 55.**
+
+| i | xᵢ | yᵢ | ŷᵢ = 4xᵢ + 55 | error | error² |
+|---|---|---|---|---|---|
+| 1 | 2 | 60 | 63 | 3 | 9 |
+| 2 | 5 | 75 | 75 | 0 | 0 |
+| 3 | 8 | 90 | 87 | -3 | 9 |
+
+MSE = (1/3) × (9 + 0 + 9) = **6**. Worse than line 1.
+
+**Try line 3: w = 0, b = 75 (a flat line at the average).**
+
+| i | xᵢ | yᵢ | ŷᵢ | error | error² |
+|---|---|---|---|---|---|
+| 1 | 2 | 60 | 75 | 15 | 225 |
+| 2 | 5 | 75 | 75 | 0 | 0 |
+| 3 | 8 | 90 | 75 | -15 | 225 |
+
+MSE = (1/3) × (225 + 0 + 225) = **150**. Much worse.
+
+The MSE numbers (0, 6, 150) capture our intuition: line 1 is the best fit, line 2 is decent, line 3 is bad. We've turned "fits well" into a number.
+
+## The cost function defines "best"
+
+Here's the move that makes it all click:
+
+> **Finding the best line is the same as finding the (w, b) with the lowest MSE.**
+
+Whichever (w, b) gives the smallest MSE is, by definition, the best fit. The cost function turned the fuzzy goal "fit well" into the precise math problem "minimize this number."
+
+This is the central trick of all of machine learning. Every algorithm we'll see does:
+
+1. Define a model with adjustable parameters.
+2. Define a cost function that measures wrongness.
+3. Adjust parameters to minimize the cost.
+
+Linear regression, neural networks, ChatGPT, all of it. The model gets fancier, the cost function changes (we'll meet log loss in Session 8), the optimization gets cleverer, but the recipe is the same.
+
+## Implement MSE from scratch
+
+```python
+import numpy as np
+
+# Three data points.
+X = np.array([2, 5, 8])
+y = np.array([60, 75, 90])
+
+# A guessed line.
+w = 4
+b = 55
+
+# Step 1: Compute predictions.
+y_hat = w * X + b
+print("Predictions:", y_hat)
+
+# Step 2: Compute errors.
+errors = y_hat - y
+print("Errors:", errors)
+
+# Step 3: Square them.
+squared_errors = errors ** 2
+print("Squared errors:", squared_errors)
+
+# Step 4: Take the mean.
+mse = squared_errors.mean()
+print("MSE:", mse)
+```
+
+<Output>{`Predictions:    [63 75 87]
+Errors:         [3 0 -3]
+Squared errors: [9 0 9]
+MSE:            6.0`}</Output>
+
+That's MSE. Five lines. Now wrap it as a reusable function:
+
+```python
+def mse(w, b, X, y):
+    """Return the mean squared error of line y = wx + b on data (X, y)."""
+    y_hat = w * X + b
+    return ((y_hat - y) ** 2).mean()
+
+# Compare three lines from our worked example.
+print("Line 1 (w=5, b=50):", mse(5, 50, X, y))     # 0.0
+print("Line 2 (w=4, b=55):", mse(4, 55, X, y))     # 6.0
+print("Line 3 (w=0, b=75):", mse(0, 75, X, y))     # 150.0
+```
+
+The numbers match the table we did by hand.
+
+## Visualize the cost surface
+
+Here's the visual that makes the next session click. Compute MSE for many (w, b) pairs and plot the surface.
+
+```python
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# Real-ish data with a bit of noise.
+np.random.seed(42)
+X = np.array([1, 2, 4, 6, 8, 10, 12])
+y = np.array([55, 65, 70, 78, 90, 96, 113])
+
+# Sweep over many w, b values.
+w_range = np.linspace(0, 10, 50)
+b_range = np.linspace(30, 70, 50)
+W, B = np.meshgrid(w_range, b_range)
+
+# Compute MSE for each (w, b) pair.
+Z = np.zeros_like(W)
+for i in range(W.shape[0]):
+    for j in range(W.shape[1]):
+        Z[i, j] = mse(W[i, j], B[i, j], X, y)
+
+# Plot.
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(W, B, Z, cmap='viridis', alpha=0.7)
+ax.set_xlabel('w (slope)')
+ax.set_ylabel('b (intercept)')
+ax.set_zlabel('MSE')
+ax.set_title('Cost surface: MSE as a function of w and b')
+plt.show()
+```
+
+The output: a smooth bowl. Every point on the bowl floor represents a different (w, b). The height of the bowl at that point is the MSE.
+
+*"The lowest point of the bowl is the best line. Finding it visually is easy. Finding it algorithmically is what gradient descent does. That's next session."*
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Error / residual">The difference between a prediction and the actual value, for one example. ŷᵢ − yᵢ.</Term>
+  <Term name="Cost function (or loss function)">A formula that measures how wrong a model is, as a function of its parameters. People say "cost" and "loss" interchangeably; pedantically, "loss" is per-example and "cost" is averaged.</Term>
+  <Term name="Mean Squared Error (MSE)">The cost function for regression.</Term>
+  <Term name="Cost surface">The graph of cost as a function of parameters. For 2 parameters, it's a 3D surface.</Term>
+</Vocab>
+
+<Activity title="Drag the line, watch the cost" duration="20 min">
+
+The Lab marquee activity. A draggable line over a scatter plot. As students drag the slope handle and intercept handle:
+
+- A red vertical bar appears between each dot and the line, showing each error.
+- A live "MSE: XX.X" updates in the corner.
+- A side panel shows the cost surface (heatmap) with the current (w, b) marked.
+
+**Challenges:**
+
+1. Find (w, b) with MSE under 5.
+2. Without changing slope, change only intercept. Lowest MSE you can get?
+3. Look at the cost-surface heatmap. There's a clear "valley." Drop the line at the bottom of the valley. What's special?
+
+**Aha moment.** The cost is a *surface*. The best line corresponds to its lowest point. Our job is to find that point.
+
+</Activity>
+
+<Callout variant="note">
+**Optional math aside — the 1/2 convention.** Some textbooks (and Andrew Ng) write MSE with a 1/2 in front:
+
+<Math tex="J(w, b) = \tfrac{1}{2N} \sum_i (\hat{y}_i - y_i)^2" display />
+
+The 1/2 is a math convenience. When we take the derivative for gradient descent, the chain rule will produce a factor of 2 from the squared term, and the 1/2 cancels it out, giving cleaner formulas. The 1/2 doesn't change which (w, b) is best; it just rescales the cost. We'll often write it both ways in this club. Don't be surprised when you see the 1/2.
+</Callout>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="Why squared instead of cubed or to the fourth power?">
+Squared is enough to make everything positive and to punish big errors. Cubed would let positives and negatives cancel again. Fourth power would over-punish outliers. Squared is the Goldilocks choice. Plus the math comes out clean for derivatives next session.
+  </Q>
+  <Q q="What if my data has outliers?">
+MSE is sensitive to outliers (one extreme point dominates the cost). For data with lots of outliers, people use MAE or other "robust" losses. Real practical concern.
+  </Q>
+  <Q q="Why is it called a 'cost'?">
+Mental model: every wrong prediction "costs" you something. The model is trying to be cheap.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 6 — Rolling downhill">
+We can score any line. The best line minimizes MSE. But how do we *find* the (w, b) with the lowest MSE? With infinite possible (w, b) combinations, we can't check them all. Next session: gradient descent. The blindfolded hiker. We'll write it from scratch and watch our MSE drop with every step.
+</Bridge>

@@ -1,0 +1,249 @@
+<BigIdea>
+Transformers are the architecture behind every flagship AI in 2026: GPT, Claude, Gemini, Llama, image generators, code completers. The key idea (attention) sounds simple: every token in a sequence looks at every other token and decides what to pay attention to. We'll derive the math of self-attention and code a baby attention block.
+</BigIdea>
+
+<Objectives>
+  <Objective>Explain what a language model is doing when it generates text</Objective>
+  <Objective>Write the self-attention formula and explain queries, keys, and values</Objective>
+  <Objective>Implement self-attention in numpy</Objective>
+  <Objective>Recognize how transformer layers stack and what makes them powerful</Objective>
+</Objectives>
+
+## Opening hook
+
+Pull up Claude or ChatGPT. Type: "Write a haiku about machine learning." Read it.
+
+Now: "Now write it as a 3-year-old who just learned what a computer is." Read.
+
+Now: "Now write it as Yoda." Read.
+
+*"What's actually happening? The model isn't pulling pre-written haikus from a database. It's computing, one word at a time, what word should come next given everything that's come before. Today, you'll know the architecture that makes that possible."*
+
+## Language models are next-token predictors
+
+Strip away the chatbot UI. What is ChatGPT actually doing?
+
+When you send a prompt, the model:
+
+1. Takes your prompt.
+2. Predicts the most likely *next token* (a token is roughly a word or word-piece).
+3. Adds that token to the input.
+4. Predicts the next token.
+5. Repeats until it predicts an "end of response" signal.
+
+That's it. The model is a *next-token predictor*. Trained on huge amounts of text (much of the public internet), it learned the statistical patterns of language.
+
+This sounds too simple to produce something like ChatGPT. But scale and architecture change everything. With enough data, enough parameters, and a clever architecture (the transformer), "predicting the next token" produces behaviors that look like reasoning, knowledge, and language use.
+
+## Why old approaches failed
+
+Before transformers, sequence models used **recurrent neural networks (RNNs)** that processed text one token at a time, maintaining a "memory" of what came before. RNNs had two problems:
+
+1. **They forgot.** The "memory" got blurry as sequences got long. By the end of a paragraph, the start was hazy.
+2. **They couldn't be parallelized.** Each token had to be processed after the previous one. Training was slow.
+
+Attention fixed both. Every token looks directly at every other token, no matter how far away. And all tokens can be processed simultaneously. Goodbye RNNs.
+
+## Attention, derived
+
+When predicting the next token, not all earlier tokens matter equally. Take:
+
+> "The trophy didn't fit in the brown suitcase because it was too big."
+
+What does "it" refer to? The trophy. How do you know? Looking at context: the trophy is the thing that "didn't fit," and "too big" matches the trophy's likely problem. When predicting the next word after "big," the model should look at "trophy" more than at "suitcase," more than at "brown."
+
+That looking-at-other-tokens is **attention**. Each token computes an "attention score" for every other token, deciding how much to weight each when figuring out what to say next.
+
+**The math.** Each token gets three vectors derived from its embedding:
+
+- **q** (query): "what am I looking for?"
+- **k** (key): "what do I have to offer?"
+- **v** (value): "if you find me relevant, here's what I contribute."
+
+These come from learned linear transformations of the embedding. If x is a token's embedding:
+
+<Math tex="q = x \cdot W_q" display />
+<Math tex="k = x \cdot W_k" display />
+<Math tex="v = x \cdot W_v" display />
+
+where <Math tex="W_q, W_k, W_v" /> are learned weight matrices.
+
+**For one token (say, "it" in our example), how to compute its attention output:**
+
+1. Compute the dot product of "it"'s query with every other token's key.
+
+<Math tex="\text{score}(\text{it}, j) = q_{\text{it}} \cdot k_j" display />
+
+The dot product measures alignment between query and key. High value = "this key is relevant to my query."
+
+2. Normalize the scores into probabilities using softmax.
+
+<Math tex="\text{attention\_weights} = \text{softmax}(\text{scores})" display />
+
+This makes them sum to 1, so they're proportions of attention to distribute.
+
+3. Take the weighted average of all the value vectors, using the attention weights.
+
+<Math tex="\text{output} = \sum_j \text{attention\_weights}_j \cdot v_j" display />
+
+The output is a vector that captures "what 'it' should pay attention to in this context."
+
+**For all tokens at once (matrix form).** Stack all queries into a matrix Q, all keys into K, all values into V. Then:
+
+<Math tex="\text{scores} = Q \cdot K^T" display />
+<Math tex="\text{attention\_weights} = \text{softmax}(\text{scores} / \sqrt{d})" display />
+<Math tex="\text{output} = \text{attention\_weights} \cdot V" display />
+
+(The √d divisor stabilizes training when d is big.)
+
+This is the **scaled dot-product attention** formula from the original Transformer paper:
+
+<Math tex="\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{Q K^T}{\sqrt{d}}\right) \cdot V" display />
+
+That single formula is the heart of every modern AI system. Stare at it for a second.
+
+## Stacking attention into a transformer
+
+A single attention step is useful but limited. Transformers stack many.
+
+A typical transformer layer:
+
+1. Self-attention (each token looks at every other token).
+2. A small feedforward network applied to each token independently.
+3. Skip connections and layer normalization (stability tricks).
+
+Stack many layers (GPT-3 had 96; modern frontier models have around 100). Each layer's output is the next layer's input. After many layers, every token's representation is incredibly rich, informed by every other token at multiple levels of abstraction. The final layer outputs a probability distribution over the next token.
+
+The whole thing is trained with gradient descent on the next-token-prediction objective, on enormous amounts of text. Backprop computes the gradients (Session 13's algorithm, scaled up). With enough data and compute: GPT-4, Claude, Gemini.
+
+The architecture is from "Attention Is All You Need" (Vaswani et al., 2017). That paper kicked off the modern AI era.
+
+## Implement self-attention from scratch
+
+```python
+import numpy as np
+
+def softmax(x, axis=-1):
+    x = x - x.max(axis=axis, keepdims=True)   # for numerical stability
+    e_x = np.exp(x)
+    return e_x / e_x.sum(axis=axis, keepdims=True)
+
+def self_attention(X, Wq, Wk, Wv):
+    """
+    X:  (n_tokens, embed_dim) input embeddings
+    Wq, Wk, Wv: weight matrices, each (embed_dim, head_dim)
+    Returns: (n_tokens, head_dim) attention output
+    """
+    Q = X @ Wq
+    K = X @ Wk
+    V = X @ Wv
+
+    d = Q.shape[-1]
+    scores = Q @ K.T / np.sqrt(d)
+    weights = softmax(scores, axis=-1)
+    output = weights @ V
+
+    return output, weights
+
+# Example: 5 tokens, embedding dim 8, attention dim 4.
+np.random.seed(42)
+n_tokens = 5
+embed_dim = 8
+head_dim = 4
+
+X = np.random.randn(n_tokens, embed_dim)
+Wq = np.random.randn(embed_dim, head_dim) * 0.5
+Wk = np.random.randn(embed_dim, head_dim) * 0.5
+Wv = np.random.randn(embed_dim, head_dim) * 0.5
+
+output, weights = self_attention(X, Wq, Wk, Wv)
+
+print("Attention weights (rows: from, columns: to):")
+print(weights.round(3))
+print("\nOutput shape:", output.shape)
+```
+
+The attention weights matrix is (n_tokens × n_tokens). Each row sums to 1 (it's the distribution of attention from that token).
+
+```python
+# Visualize attention.
+import matplotlib.pyplot as plt
+plt.imshow(weights, cmap='viridis')
+plt.colorbar()
+plt.xlabel('Attending to')
+plt.ylabel('Token')
+plt.title('Attention weights')
+plt.show()
+```
+
+A 5×5 grid where each cell brightness shows how much one token attends to another. *"That's an attention map. In a real transformer, the entries are learned during training to focus on relevant words. We just used random weights to show the shape."*
+
+## Three stages of modern training
+
+Modern language models are trained in three stages:
+
+**1. Pre-training (self-supervised).** The model is trained on a huge amount of internet text to predict the next token. No labels (the "label" is the actual next token, available for free in the text). The model learns grammar, facts, reasoning patterns. Most expensive stage by far: months of compute on tens of thousands of GPUs.
+
+**2. Supervised fine-tuning.** Humans write thousands of examples of "this is what a good response to this kind of prompt looks like." The model fine-tunes on these. Shapes the raw next-token predictor into something that follows instructions.
+
+**3. Reinforcement learning from human feedback (RLHF).** Humans rank pairs of model outputs ("response A is better than response B"). The model is trained to produce responses humans prefer. Makes the model "helpful, harmless, and honest" instead of just "very good at predicting next tokens."
+
+So when students ask "is ChatGPT supervised, unsupervised, or reinforcement?", the answer is: yes, all three, in sequence. Pre-training is self-supervised. Fine-tuning is supervised. RLHF is reinforcement learning. This finally answers the question raised in Session 2.
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Token">Basic unit of text. Roughly a word or word-piece.</Term>
+  <Term name="Transformer">The neural network architecture behind modern AI.</Term>
+  <Term name="Attention">The mechanism by which each token looks at every other token.</Term>
+  <Term name="Query, key, value (Q, K, V)">The three projections of token embeddings used in attention.</Term>
+  <Term name="Self-attention">Attention where queries, keys, and values all come from the same sequence.</Term>
+  <Term name="Language model">A model that predicts the probability of token sequences.</Term>
+  <Term name="Pre-training, fine-tuning, RLHF">The three stages of modern language model training.</Term>
+</Vocab>
+
+<Activity title="Attention visualizer" duration="30 min">
+
+Students type a sentence. Lines fan from each word to every other word, with thickness proportional to attention weight. They click a word to see what it's "looking at."
+
+**Suggested explorations:**
+
+1. *"The trophy didn't fit in the brown suitcase because it was too big."* Click "it." Watch attention concentrate on "trophy."
+2. Change "big" to "small." Click "it" again. Attention shifts to "suitcase."
+3. Try a deliberately ambiguous sentence. See what the model attends to.
+4. Look at attention in different layers. Early layers attend to syntax (nearby words, punctuation). Later layers attend to semantics (long-range references).
+
+</Activity>
+
+## Optional discussion — capabilities and limits
+
+The natural session for the year's big ethics conversation:
+
+- *"What can these models do well? Struggle with?"* Good at: language tasks, coding, summarization, brainstorming. Struggle with: precise math without tools, novel reasoning, knowing when they don't know.
+- *"How should we use them in school? Where's the line?"* Models are great as tutors and explainers. Using them to do an assignment that's supposed to teach you something is self-defeating, even when it's "allowed."
+- *"What does it mean that these systems sometimes confidently make things up?"* This is **hallucination**. Models predict what looks plausible, not what's true. Always verify factual claims, especially specific numbers, dates, or quotes.
+- *"What do you think AI will look like when you're 25?"* Listen to predictions.
+
+## Likely student questions
+
+<FAQ>
+  <Q q="Does ChatGPT 'know' things?">
+Sort of. It learned patterns from text, including factual info repeated often. So it "knows" the capital of France in the sense it'll output "Paris." But there's no separate "fact database." Sometimes confidently wrong, especially on obscure or recent things.
+  </Q>
+  <Q q="How does it know when to stop generating?">
+Trained to predict an end-of-text token when responses are complete. Learns this from examples.
+  </Q>
+  <Q q="Can it learn from our conversations?">
+Generally no. Weights fixed after training. Each conversation starts with the same model. Some products store memory across conversations as additional context, but the base model isn't changing in real time.
+  </Q>
+  <Q q="How big is GPT-4?">
+Hundreds of billions of parameters, trained on trillions of tokens. Numbers hard to verify (proprietary). Each generation is roughly 10× the previous.
+  </Q>
+  <Q q="Difference between Claude and ChatGPT and Gemini?">
+All transformers. All trained on huge text. Different companies, different data, different fine-tuning, different safety, different default personalities. Capability-wise close on most tasks. As of April 2026, Claude is regarded as best at coding and long-form writing, ChatGPT is the most polished consumer experience and best at multimodal, and Gemini has the longest context window and best Google integration.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 16 — Final showcase">
+You've seen the architecture behind everything in modern AI. Next session is the finale. You'll present your own ML project.
+</Bridge>

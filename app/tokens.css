@@ -214,3 +214,287 @@
 .mc-root *::-webkit-scrollbar { width: 6px; height: 6px; }
 .mc-root *::-webkit-scrollbar-thumb { background: var(--neutral-300); border-radius: 3px; }
 .mc-root *::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Math (KaTeX wrappers) ── */
+.math-inline {
+  font-size: 1em;
+  color: var(--neutral-900);
+}
+.math-block {
+  display: block;
+  margin: 24px 0;
+  padding: 18px 20px;
+  background: var(--neutral-50);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  font-size: 1.08em;
+  color: var(--neutral-900);
+  overflow-x: auto;
+}
+.math-block .katex-display { margin: 0; }
+
+/* ── Lesson: Big idea ── */
+.lesson-big-idea {
+  margin: 0 0 28px;
+  padding: 20px 22px;
+  background: var(--accent-subtle);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lesson-big-idea-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.lesson-big-idea-body {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--neutral-900);
+  font-weight: 500;
+}
+.lesson-big-idea-body strong { font-weight: 600; }
+
+/* ── Lesson: Objectives ── */
+.lesson-objectives {
+  margin: 0 0 36px;
+  padding: 18px 22px;
+  background: var(--neutral-50);
+  border: 1px solid var(--neutral-200);
+  border-radius: 10px;
+}
+.lesson-objectives-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--neutral-500);
+  display: block;
+  margin-bottom: 12px;
+}
+.lesson-objectives-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lesson-objectives-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--neutral-700);
+}
+.lesson-objectives-check {
+  flex: none;
+  margin-top: 3px;
+  color: var(--accent);
+}
+
+/* ── Lesson: Vocab ── */
+.lesson-vocab {
+  margin: 8px 0 24px;
+  padding: 18px 22px;
+  background: var(--neutral-50);
+  border-radius: 10px;
+}
+.lesson-vocab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lesson-vocab-item {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--neutral-700);
+}
+.lesson-vocab-term {
+  font-weight: 600;
+  color: var(--neutral-900);
+  margin-right: 6px;
+}
+.lesson-vocab-sep {
+  color: var(--neutral-400);
+  margin-right: 6px;
+}
+
+/* ── Lesson: Activity ── */
+.lesson-activity {
+  margin: 28px 0;
+  padding: 20px 24px;
+  background: #FFF;
+  border: 1px solid var(--neutral-200);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+}
+.lesson-activity-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.lesson-activity-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.lesson-activity-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+.lesson-activity-duration {
+  font-size: 13px;
+  color: var(--neutral-500);
+}
+.lesson-activity-body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--neutral-700);
+}
+.lesson-activity-body p { margin: 0 0 12px; }
+.lesson-activity-body p:last-child { margin-bottom: 0; }
+
+/* ── Lesson: FAQ ── */
+.lesson-faq {
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lesson-faq-item {
+  border-bottom: 1px solid var(--neutral-200);
+}
+.lesson-faq-item:first-child { border-top: 1px solid var(--neutral-200); }
+.lesson-faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  padding: 14px 4px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--neutral-900);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--t-micro);
+}
+.lesson-faq-q:hover { color: var(--accent); }
+.lesson-faq-chevron {
+  flex: none;
+  display: inline-flex;
+  color: var(--neutral-400);
+  transition: transform 200ms var(--ease), color var(--t-micro);
+}
+.lesson-faq-item.is-open .lesson-faq-chevron {
+  transform: rotate(90deg);
+  color: var(--accent);
+}
+.lesson-faq-a {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--neutral-700);
+  padding: 0 4px 16px 28px;
+}
+.lesson-faq-a p { margin: 0 0 8px; }
+.lesson-faq-a p:last-child { margin-bottom: 0; }
+
+/* ── Lesson: Bridge ── */
+.lesson-bridge {
+  margin: 48px 0 24px;
+  padding: 22px 24px;
+  background: var(--accent-subtle);
+  border-radius: 12px;
+}
+.lesson-bridge-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+.lesson-bridge-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lesson-bridge-target {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+.lesson-bridge-arrow { margin-left: auto; }
+.lesson-bridge-body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--neutral-900);
+  font-style: italic;
+}
+
+/* ── Lesson: Output ── */
+.lesson-output {
+  margin: 8px 0 24px;
+  position: relative;
+}
+.lesson-output-label {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--neutral-400);
+  pointer-events: none;
+}
+.lesson-output-body {
+  background: #1F2937;
+  color: #E5E7EB;
+  border-radius: 8px;
+  padding: 18px 22px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+}
+
+/* ── Lesson tables (worked examples) ── */
+.lesson-table-wrap {
+  margin: 16px 0 24px;
+  overflow-x: auto;
+}
+.lesson-table {
+  border-collapse: collapse;
+  font-size: 14px;
+  font-family: var(--font-mono);
+  min-width: 100%;
+}
+.lesson-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--neutral-900);
+  background: var(--neutral-50);
+  border-bottom: 2px solid var(--neutral-200);
+  padding: 10px 16px;
+}
+.lesson-table td {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--neutral-100);
+  color: var(--neutral-700);
+}
+.lesson-table tr:last-child td { border-bottom: none; }

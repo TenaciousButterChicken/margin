@@ -1,0 +1,287 @@
+<BigIdea>
+A model that fits training data perfectly might be useless on new data. The "pattern" it learned was specific to training quirks, not the real world. This is overfitting. We'll see it visually with a polynomial regression demo, code train/test splits, and derive L2 regularization.
+</BigIdea>
+
+<Objectives>
+  <Objective>Explain overfitting using the "memorize vs understand" analogy</Objective>
+  <Objective>Code a train/test split correctly</Objective>
+  <Objective>Plot train and test error vs model complexity, and identify the sweet spot</Objective>
+  <Objective>Write the L2-regularized cost function and explain what λ does</Objective>
+</Objectives>
+
+## Opening hook — two students
+
+Two students prepare for an exam.
+
+**Alex** memorized the textbook. Page numbers, examples, even typos. They have 100% accuracy on every example in the book.
+
+**Sam** read the textbook once. They didn't memorize anything. But they understood the concepts.
+
+The exam has new problems not in the book. Who does better?
+
+Sam, almost always. Alex's "knowledge" was specific to the book; the moment a slightly different question shows up, they're stuck. The memorization didn't transfer to understanding.
+
+Alex is an overfitted model. Sam is a well-generalized one.
+
+## Memorization vs. generalization
+
+Our real goal in training is **generalization**: doing well on new examples we haven't seen. We don't actually care if the model gets the training examples right. We care about future examples.
+
+But training only optimizes for training examples. So a sufficiently powerful model can simply *memorize* the training set, achieving zero training error and zero useful learning.
+
+This is **overfitting**: the model learned the noise and quirks of training data instead of the underlying pattern.
+
+The opposite is **underfitting**: the model is too simple to capture the actual pattern. It does poorly on both training and new data.
+
+The sweet spot: a model complex enough to capture the real pattern, simple enough to not memorize noise.
+
+## Train / test split
+
+How do we *detect* overfitting? Reserve some data the model has never seen.
+
+The recipe:
+
+1. Take your dataset. Randomly shuffle.
+2. Split: 80% train, 20% test (or 70/30, or 90/10; doesn't matter much).
+3. Train *only* on the training set.
+4. Evaluate *only* on the test set. Test accuracy is your honest estimate of new-data performance.
+
+This is non-negotiable. Reporting only training accuracy is the cardinal sin of beginner ML.
+
+The test set must be **held out from the start**. Don't peek at it during training. Don't tune your model based on it. (If you do, the test set effectively becomes part of your training data.)
+
+## Code companion — train/test split
+
+```python
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X, y = load_iris(return_X_y=True)
+
+# Split: 80% train, 20% test. random_state for reproducibility.
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+print(f"Train: {len(X_train)} examples")
+print(f"Test:  {len(X_test)} examples")
+
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+train_acc = model.score(X_train, y_train)
+test_acc = model.score(X_test, y_test)
+
+print(f"Train accuracy: {train_acc:.3f}")
+print(f"Test accuracy:  {test_acc:.3f}")
+```
+
+For iris (a relatively easy dataset), train and test accuracy should be similar (around 95+%). When they're far apart, that's overfitting.
+
+## The overfitting curve
+
+Plot training and test error as a function of model complexity.
+
+```text
+error
+  │
+  │\
+  │ \                            ●●●●● test error
+  │  \                       ●●●●
+  │   \                  ●●●●
+  │    \             ●●●
+  │     \●●●●●●●●●●●●●
+  │      ●●●●●●●●●
+  │              ●●●●●●●●●●●●●●● train error
+  │
+  └─────────────────────────────── complexity
+   simple                  complex
+```
+
+As complexity grows, training error monotonically drops (more capacity to fit). Test error drops, then *rises*. The valley of the test curve is the sweet spot.
+
+Past the sweet spot, the model uses extra capacity to memorize training noise, and test error climbs. This U-shape is universal in ML.
+
+## The overfitting demo
+
+Polynomial regression on noisy data. Watch overfitting happen live.
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import mean_squared_error
+
+# True relationship: y = sin(x), with noise.
+np.random.seed(0)
+n_samples = 30
+X = np.sort(np.random.uniform(0, 2*np.pi, n_samples))
+y_true = np.sin(X)
+y = y_true + np.random.normal(0, 0.3, n_samples)
+
+# Split: 70% train, 30% test.
+indices = np.arange(n_samples)
+np.random.shuffle(indices)
+train_idx, test_idx = indices[:21], indices[21:]
+X_train, X_test = X[train_idx], X[test_idx]
+y_train, y_test = y[train_idx], y[test_idx]
+
+# Try polynomial degrees 1 to 15. Fit each, record train and test MSE.
+degrees = list(range(1, 16))
+train_errors, test_errors = [], []
+
+for d in degrees:
+    model = make_pipeline(PolynomialFeatures(degree=d), LinearRegression())
+    model.fit(X_train.reshape(-1, 1), y_train)
+    train_errors.append(mean_squared_error(y_train, model.predict(X_train.reshape(-1, 1))))
+    test_errors.append(mean_squared_error(y_test, model.predict(X_test.reshape(-1, 1))))
+
+# Plot.
+plt.plot(degrees, train_errors, label='Train MSE', marker='o')
+plt.plot(degrees, test_errors, label='Test MSE', marker='s')
+plt.xlabel('Polynomial degree')
+plt.ylabel('MSE')
+plt.yscale('log')
+plt.legend()
+plt.title('Train vs Test error: classic overfitting curve')
+plt.show()
+```
+
+The plot shows train MSE dropping monotonically, test MSE dipping and then climbing. Sweet spot is around degree 3 or 4.
+
+Visualize the actual fitted curves:
+
+```python
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+for ax, d in zip(axes, [1, 4, 15]):
+    model = make_pipeline(PolynomialFeatures(degree=d), LinearRegression())
+    model.fit(X_train.reshape(-1, 1), y_train)
+    x_plot = np.linspace(0, 2*np.pi, 200)
+    y_plot = model.predict(x_plot.reshape(-1, 1))
+    ax.scatter(X_train, y_train, label='train', color='blue')
+    ax.scatter(X_test, y_test, label='test', color='red')
+    ax.plot(x_plot, y_plot, color='green', label=f'degree {d}')
+    ax.plot(x_plot, np.sin(x_plot), color='gray', linestyle='--', label='true')
+    ax.set_title(f'Degree {d}')
+    ax.legend()
+    ax.set_ylim(-2, 2)
+plt.tight_layout()
+plt.show()
+```
+
+Three subplots: degree 1 underfits (a straight line, missing the curvature); degree 4 fits well (close to sin curve); degree 15 wildly overfits (snake-like curve threading through training points but missing the test points and the true sin).
+
+## Regularization
+
+How do we fight overfitting? Several tools. The most universal is **regularization**: add a penalty to the cost function for big weights.
+
+**The intuition.** A model with large weights is "leaning hard" on its features. Tiny input changes produce big output changes. The function it represents wiggles a lot. Wiggle = memorization of training noise.
+
+A model with small weights is smoother. Tiny input changes produce tiny output changes. Smooth functions tend to generalize better.
+
+So: penalize big weights.
+
+**L2 regularization (also called Ridge regression).** Add the sum of squared weights to the cost:
+
+<Math tex="J_{\text{reg}}(\mathbf{w}, b) = J_{\text{orig}}(\mathbf{w}, b) + \lambda \sum_j w_j^2" display />
+
+(The bias b is usually not penalized, by convention. Only the weights.)
+
+λ (lambda) is a knob:
+
+- λ = 0: no regularization. Original cost. Maximum overfitting potential.
+- λ very large: the model is forced to use tiny weights. Maximum smoothness, possibly underfit.
+- λ in between: the sweet spot.
+
+**The new gradient.** The gradient of the regularization term is just <Math tex="2\lambda \cdot w_j" /> (one extra term per weight). So the update rule becomes:
+
+<Math tex="w_j^{\text{new}} = w_j^{\text{old}} - \alpha \cdot \left(\frac{\partial J_{\text{orig}}}{\partial w_j} + 2\lambda w_j^{\text{old}}\right)" display />
+
+Each step now pulls the weights *toward zero* by a small amount. Big weights get tugged down harder; small weights barely change. This is sometimes called "weight decay."
+
+**L1 regularization (Lasso).** Same idea, but uses absolute value instead of squared:
+
+<Math tex="J_{L1} = J_{\text{orig}} + \lambda \sum_j |w_j|" display />
+
+L1 has the property of driving some weights to *exactly* zero, doing automatic feature selection. L2 keeps all weights but small. Both are useful; L2 is more common in deep learning.
+
+## Regularization in action
+
+```python
+from sklearn.linear_model import Ridge
+
+degrees_to_try = [4, 15]
+lambdas = [0, 0.001, 0.1, 10]
+
+fig, axes = plt.subplots(2, len(lambdas), figsize=(16, 8))
+x_plot = np.linspace(0, 2*np.pi, 200)
+
+for row, d in enumerate(degrees_to_try):
+    for col, lam in enumerate(lambdas):
+        # Ridge in sklearn uses alpha for what we called lambda.
+        model = make_pipeline(PolynomialFeatures(degree=d), Ridge(alpha=lam))
+        model.fit(X_train.reshape(-1, 1), y_train)
+        y_plot = model.predict(x_plot.reshape(-1, 1))
+        ax = axes[row][col]
+        ax.scatter(X_train, y_train, color='blue', s=20)
+        ax.plot(x_plot, y_plot, color='green')
+        ax.plot(x_plot, np.sin(x_plot), color='gray', linestyle='--')
+        ax.set_title(f'degree={d}, λ={lam}')
+        ax.set_ylim(-2, 2)
+plt.tight_layout()
+plt.show()
+```
+
+A 2x4 grid. Top row: degree-4 polynomial. Bottom: degree-15 polynomial. Each column: a different λ.
+
+In the bottom row, the wild degree-15 curve calms down dramatically as λ increases, eventually looking nearly identical to the well-behaved degree-4 curve. Regularization rescues the model from overfitting *without changing the model's structure*. That's the magic.
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Overfitting">Model fits training data well but fails on new data.</Term>
+  <Term name="Underfitting">Model too simple to capture the real pattern.</Term>
+  <Term name="Generalization">Performance on data the model hasn't seen.</Term>
+  <Term name="Train/test split">Holding out data to evaluate honestly.</Term>
+  <Term name="Regularization">Penalty in the cost function that discourages complex models.</Term>
+  <Term name="L2 regularization (Ridge)">Penalizes the sum of squared weights.</Term>
+  <Term name="L1 regularization (Lasso)">Penalizes the sum of absolute weights.</Term>
+  <Term name="λ (lambda)">The regularization strength. Big λ = simpler model.</Term>
+</Vocab>
+
+<Activity title="The complexity dial" duration="20 min">
+
+Lab interactive. A noisy dataset with a clear nonlinear pattern. A slider for polynomial degree. Another for λ. Live updating: the curve, the train MSE, the test MSE, with a held-out test set always visible.
+
+**Challenges:**
+
+1. Find the degree with lowest test MSE without regularization. That's the sweet spot.
+2. Crank degree to 15. Watch test MSE explode. Now slowly increase λ. Watch test MSE drop back to near the sweet spot.
+3. Is high-degree-with-regularization better, worse, or about the same as low-degree-with-no-regularization?
+
+</Activity>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="How do I know which complexity is best?">
+Pick the one with the lowest test error. In practice, you split into train/validation/test: train candidates on train, pick best on validation, report final on test. Or use *cross-validation*.
+  </Q>
+  <Q q="Can a simple model overfit?">
+Yes, especially with small datasets. Even a straight line through 2 points "overfits" in the sense it'll pass through both perfectly but probably misrepresent the underlying truth.
+  </Q>
+  <Q q="What if my training data IS the real world?">
+Then you don't need to worry about overfitting in the classical sense. But this is almost never the case. Real-world data drifts; the world today isn't the world the model was trained on. *Distribution shift* is a real practical concern.
+  </Q>
+  <Q q="Why is it called 'lambda'?">
+Convention. Greek letters in math; nothing deeper.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 10 — Mini-project: Titanic">
+You have everything you need to build a real ML project. Next session, no lecture. We do a mini-project: predicting who survived the Titanic, using logistic regression and everything we've learned. It's a famous Kaggle starter problem.
+</Bridge>

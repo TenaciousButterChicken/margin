@@ -1,0 +1,300 @@
+<BigIdea>
+Until now, every model had labels. Most data in the world has no labels. Unsupervised learning finds patterns in unlabeled data. We'll derive the k-means clustering algorithm, code it from scratch, and meet word embeddings — the bridge to language models in Session 15.
+</BigIdea>
+
+<Objectives>
+  <Objective>Distinguish supervised from unsupervised at a glance</Objective>
+  <Objective>Derive and implement k-means clustering from scratch</Objective>
+  <Objective>Explain what word embeddings are and why they have arithmetic structure</Objective>
+  <Objective>Make sense of "king − man + woman ≈ queen"</Objective>
+</Objectives>
+
+## Opening hook
+
+Open Spotify. Show your "Discover Weekly." Pick a song you've never heard. Play 5 seconds. Stop.
+
+*"This song was put on my playlist by Spotify's recommendation system. Spotify has never been told 'I like this song.' I've never rated it. So how did it know? Today: how machines find patterns when nobody tells them what to look for."*
+
+## Unsupervised learning, recapped
+
+Unsupervised learning has only inputs:
+
+<Math tex="D = \{x_1, x_2, \dots, x_n\}" display />
+
+No labels. No correct answers. Find structure: clusters, patterns, weird outliers.
+
+Two main flavors:
+
+- **Clustering.** Group similar examples together.
+- **Dimensionality reduction.** Compress complex data into a simpler representation that preserves what matters.
+
+(Others: anomaly detection, density estimation. Clustering and dim-reduction are the workhorses.)
+
+## K-means clustering, derived
+
+The most famous clustering algorithm. We'll derive it from a clear objective.
+
+**Setup.** A dataset of n points in some feature space. We believe there are K natural groups. We want to find them.
+
+**Define what "good clustering" means.** For each point, it belongs to one cluster. Each cluster has a "center" (centroid) <Math tex="\mu_k" />. We want each point to be close to its cluster's center.
+
+Cost function: total squared distance from each point to its cluster's center.
+
+<Math tex="J = \sum_i \|x_i - \mu_{c(i)}\|^2" display />
+
+where c(i) is the cluster assignment of point i, and ||·|| is Euclidean distance. Minimize J over all assignments and centroids.
+
+**The k-means algorithm.** This is hard to optimize directly (the assignments c(i) are discrete). K-means takes an iterative approach:
+
+1. Randomly pick K points to be initial centroids.
+2. **Assignment step.** For each point, find the nearest centroid. That's its cluster.
+3. **Update step.** For each cluster, set the centroid to the mean of all points in the cluster.
+4. Repeat 2 and 3 until nothing changes.
+
+Why this works: each step decreases J. Step 2 minimizes J over assignments (holding centroids fixed). Step 3 minimizes J over centroids (holding assignments fixed; the mean is provably the point that minimizes total squared distance to a set of points). Both steps decrease J or leave it unchanged. Eventually convergence.
+
+<Callout variant="note">
+**Caveat.** K-means converges to *a* minimum, not always *the* minimum. Different random initializations can give different results. Common practice: run k-means many times with different initializations, pick the run with the lowest final J. Or use the smarter k-means++ initialization, which scikit-learn does by default.
+</Callout>
+
+## The party metaphor
+
+A big party with no name tags. You want to find social groups.
+
+Pick K = 3 people at random. Declare each "the leader" of a group. Everyone else joins the leader they're standing closest to. Now look at where each group is bunched up; the group's center has shifted away from the leader. Move the leader to the new center. Re-check: who's closest now? Some people switch groups. Repeat. Eventually the groups settle.
+
+K-means struggles when groups aren't roughly spherical, when K is wrong, or when features are at weird scales (use feature scaling). For "find the natural groups," it's the first thing to try.
+
+## K-means from scratch
+
+Open Colab.
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate clustered data.
+np.random.seed(42)
+def make_blobs():
+    X = np.vstack([
+        np.random.randn(50, 2) + np.array([0, 0]),
+        np.random.randn(50, 2) + np.array([5, 5]),
+        np.random.randn(50, 2) + np.array([0, 5]),
+    ])
+    return X
+
+X = make_blobs()
+plt.scatter(X[:, 0], X[:, 1])
+plt.title('Unlabeled data, no colors yet')
+plt.show()
+```
+
+Three obvious clusters. Now write k-means:
+
+```python
+def kmeans(X, K, max_iters=100):
+    """Return cluster assignments and final centroids."""
+    n = len(X)
+    # 1. Initialize: pick K random points as initial centroids.
+    indices = np.random.choice(n, K, replace=False)
+    centroids = X[indices].copy()
+
+    for iteration in range(max_iters):
+        # 2. Assign each point to the nearest centroid.
+        # Compute pairwise distances: (n, K).
+        distances = np.sqrt(((X[:, np.newaxis] - centroids) ** 2).sum(axis=2))
+        assignments = distances.argmin(axis=1)
+
+        # 3. Update each centroid to the mean of its cluster.
+        new_centroids = np.array([
+            X[assignments == k].mean(axis=0) if (assignments == k).sum() > 0
+            else centroids[k]
+            for k in range(K)
+        ])
+
+        # 4. Check for convergence.
+        if np.allclose(new_centroids, centroids):
+            print(f"Converged after {iteration + 1} iterations")
+            break
+        centroids = new_centroids
+
+    return assignments, centroids
+
+assignments, centroids = kmeans(X, K=3)
+
+# Plot the result.
+plt.scatter(X[:, 0], X[:, 1], c=assignments, cmap='viridis')
+plt.scatter(centroids[:, 0], centroids[:, 1], color='red', marker='X', s=200,
+            edgecolor='black', label='centroids')
+plt.legend(); plt.title('K-means result, K=3')
+plt.show()
+```
+
+The plot shows the three clusters cleanly identified, with red Xs at the centers.
+
+```python
+# Try with the wrong K.
+for K in [2, 4, 5]:
+    assignments, centroids = kmeans(X, K=K)
+    plt.scatter(X[:, 0], X[:, 1], c=assignments, cmap='viridis')
+    plt.scatter(centroids[:, 0], centroids[:, 1], color='red', marker='X', s=200,
+                edgecolor='black')
+    plt.title(f'K={K}')
+    plt.show()
+```
+
+K=2 merges two of the clusters. K=4 splits one cluster. K=5 splits more. *"K-means doesn't know how many clusters are 'right.' That's a hyperparameter you set. Tools like the elbow method or silhouette score help pick K."*
+
+## Word embeddings — where unsupervised gets cool
+
+Now the bridge to language models. How do you represent a word as numbers in a way that captures meaning?
+
+**Naive way.** Assign each word a unique ID. "Cat" is 47, "dog" is 312, "scrumptious" is 84,251. The IDs have no relationship to meaning. Useless for ML.
+
+**Better way: vectors.** Assign each word a *vector* of numbers (say 300 numbers). The vector is the word's **embedding**. We pick embeddings such that *similar words have similar vectors*. "Cat" and "dog" close. "Cat" and "Tuesday" far.
+
+Who decides similarity? Here's the unsupervised part: we let the model figure it out from context. *"You shall know a word by the company it keeps"* (Firth, 1957). Words used in similar contexts (cat and dog both appear near "pet," "vet," "leash") get similar vectors.
+
+The classic algorithm is **word2vec** (Mikolov et al., 2013). The idea: train a tiny neural network to predict the words around a given word. The "embedding" of each word is the network's internal representation after training.
+
+## Word arithmetic — the famous demo
+
+Once you have embeddings, weird and wonderful things happen.
+
+<Math tex="\text{king} - \text{man} + \text{woman} \approx \text{queen}" display />
+
+Take the embedding vector for "king," subtract the vector for "man," add the vector for "woman." The result is closest to the embedding for "queen."
+
+The model wasn't told this. It learned from how words appear in text. Because "king" relates to "man" the same way "queen" relates to "woman" (both pairs differ by gender), the geometric relationship is consistent in embedding space.
+
+Other classics:
+
+- Paris − France + Italy ≈ Rome
+- Walking − walked + swam ≈ swimming
+
+Some bias examples (reminder of Session 3):
+
+- Doctor − man + woman ≈ nurse (the model learned a stereotype from training data)
+
+## Word embeddings in action
+
+```python
+# Use a small pre-trained word embedding model.
+# This will download a small embedding file the first time you run.
+import gensim.downloader as api
+print("Downloading word embeddings (this takes a moment)...")
+model = api.load("glove-wiki-gigaword-50")  # 50-dim GloVe vectors
+print("Done.")
+
+# Look at a word's vector.
+print("Vector for 'king' (first 10 dims):", model['king'][:10])
+
+# Find similar words.
+print("\nMost similar to 'queen':")
+for word, score in model.most_similar('queen', topn=5):
+    print(f"  {word}: {score:.3f}")
+
+# Word arithmetic.
+print("\nking - man + woman:")
+result = model.most_similar(positive=['king', 'woman'], negative=['man'], topn=3)
+for word, score in result:
+    print(f"  {word}: {score:.3f}")
+
+print("\nParis - France + Italy:")
+result = model.most_similar(positive=['paris', 'italy'], negative=['france'], topn=3)
+for word, score in result:
+    print(f"  {word}: {score:.3f}")
+```
+
+<Output>{`Most similar to 'queen': princess: 0.85, prince: 0.82, ...
+king - man + woman: queen: 0.86, princess: 0.79, ...
+Paris - France + Italy: rome: 0.81, milan: 0.74, ...`}</Output>
+
+*"The model learned the relationship between 'king/man' and 'queen/woman' geometrically. Same with capitals. Pure math, learned from text."*
+
+## Visualize embeddings in 2D
+
+300-dimensional vectors are hard to visualize. We can squish them to 2D using PCA (principal component analysis, a classic dimensionality-reduction algorithm).
+
+```python
+from sklearn.decomposition import PCA
+
+# Pick some words to visualize.
+words = ['king', 'queen', 'prince', 'princess',
+         'man', 'woman', 'boy', 'girl',
+         'cat', 'dog', 'mouse', 'bird',
+         'paris', 'london', 'tokyo', 'berlin',
+         'happy', 'sad', 'angry', 'excited']
+
+vectors = np.array([model[w] for w in words])
+
+# Project to 2D.
+pca = PCA(n_components=2)
+vectors_2d = pca.fit_transform(vectors)
+
+# Plot.
+plt.figure(figsize=(10, 8))
+plt.scatter(vectors_2d[:, 0], vectors_2d[:, 1])
+for i, word in enumerate(words):
+    plt.annotate(word, vectors_2d[i], fontsize=12)
+plt.title("Word embeddings, projected to 2D")
+plt.show()
+```
+
+The plot shows clusters: royalty terms in one region, animals in another, cities in another, emotions in another. The clustering is automatic, learned from text.
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Clustering">Finding natural groups.</Term>
+  <Term name="Centroid">The center of a cluster (in k-means: the average of points in the cluster).</Term>
+  <Term name="K-means">The iterative clustering algorithm we just derived.</Term>
+  <Term name="Embedding">A vector of numbers representing an item (word, image, user, anything) in a way that captures similarity to other items.</Term>
+  <Term name="Word2vec / GloVe">Classic algorithms for learning word embeddings.</Term>
+  <Term name="PCA (Principal Component Analysis)">A classic dimensionality-reduction algorithm for projecting high-dim data to lower dim.</Term>
+</Vocab>
+
+<Activity title="Cluster + embedding explorer" duration="30 min">
+
+Two-part activity.
+
+**Part 1: K-Means Lab.** Drop dots on a 2D plot. Set K. Run k-means. Watch centroids move and points get re-assigned each iteration.
+
+Challenges:
+
+1. Drop 30 dots in 3 visible clumps. Run with K=3.
+2. Run again with K=2. What gets merged?
+3. Run with K=5. What gets split?
+4. Drop dots in two interlocking spirals. Run k-means. It fails. Why? (K-means assumes spherical clusters.)
+
+**Part 2: Word Arithmetic Explorer.** Type three words. The model returns the closest match.
+
+Challenges:
+
+1. king − man + woman → ?
+2. doctor − man + woman → ?  (Note the bias.)
+3. Italy − Rome + Tokyo → ?
+4. happy − good + bad → ?
+
+</Activity>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="How does the model know 'cat' and 'dog' are similar?">
+They appear in similar surroundings in text. The model learns to predict surrounding words; cat and dog predict similar surroundings, so their embeddings end up similar.
+  </Q>
+  <Q q="Are word embeddings still a thing in modern AI?">
+Yes, but now they're learned *inside* large language models, not as a separate step. Modern transformers (Session 15) build context-dependent embeddings on the fly.
+  </Q>
+  <Q q="Could I do this with images?">
+Yes. CLIP (OpenAI) maps images and text into the same embedding space, so you can search images by text. This is how DALL·E and Stable Diffusion work.
+  </Q>
+  <Q q="Why does 'doctor − man + woman = nurse' show bias?">
+The embedding learned that doctor associates more with male contexts, nurse with female, reflecting the corpus. ML models pick up societal stereotypes implicitly. Active research: how to debias embeddings without losing useful info.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 15 — How ChatGPT works">
+Word embeddings are how language models start understanding text. But what happens after the embedding step? How does ChatGPT actually generate sentences? Next time: the architecture that powers all modern AI — the transformer — and we'll derive its central mechanism, attention.
+</Bridge>

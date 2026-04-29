@@ -1,0 +1,205 @@
+<BigIdea>
+Each layer of a deep network learns a more abstract feature than the layer before. Early layers see edges. Middle layers see shapes. Late layers see whole objects. This automatic feature hierarchy is why deep learning works. We'll train a CNN on real images and visualize what it learns.
+</BigIdea>
+
+<Objectives>
+  <Objective>Explain feature hierarchies using the "edges → shapes → objects" example</Objective>
+  <Objective>Describe what a convolutional layer does (slide a small filter, extract local patterns)</Objective>
+  <Objective>Train an image classifier on Fashion-MNIST in Keras</Objective>
+  <Objective>Visualize what the first layer of a trained CNN has learned</Objective>
+</Objectives>
+
+## Opening hook
+
+Show outputs from feature-visualization research (e.g., Distill.pub's "Feature Visualization" article). Early-layer neurons fire for diagonal lines and color blobs. Middle-layer neurons fire for textures (fur, scales, woven fabric). Late-layer neurons fire for whole concepts (dog faces, cars, eyes).
+
+*"Today, we look inside a deep neural network to see what each layer is doing. Each layer learns more abstract features than the one before. That hierarchy is the secret sauce of deep learning."*
+
+## Features, stacked
+
+Take a network trained to classify animal images:
+
+- **Input layer.** Raw pixel values. A 224×224 color image is 150,528 numbers.
+- **First hidden layer.** Each neuron has learned a small pattern detector. Some fire for vertical edges, some for horizontal edges, some for specific colors.
+- **Second hidden layer.** Combines edges into shapes. Corners (two edges meeting), circles, wavy textures.
+- **Third hidden layer.** Combines shapes into parts. Eyes, ears, paws, leaves.
+- **Fourth hidden layer.** Combines parts into whole objects. Dog faces, cat faces, breeds.
+- **Final layer.** Combines object detections into classification ("golden retriever").
+
+This is **feature hierarchy**. Each layer's outputs become the next layer's inputs, and each layer learns a more abstract transformation.
+
+The wild thing: nobody told the network what features to use. We just gave it labeled images and gradient descent. These features emerged because they're what the math needs to do the job.
+
+## Convolutional neural networks (CNNs)
+
+For images specifically, plain feedforward networks (every neuron connected to every input pixel) are wasteful. A 224×224 color image is 150,528 numbers. The first layer with 100 neurons would have 15 million weights. Most of those weights would have to redundantly learn the same patterns at different image positions.
+
+The fix: **convolutional layers**. Instead of each neuron looking at the whole image, each neuron looks at a small patch (typically 3×3 or 5×5 pixels). The same neuron's "filter" slides across the entire image, detecting its pattern wherever it appears.
+
+**The math of convolution.** A small filter is a small weight matrix, say 3×3. To apply it at a position in the image, multiply the filter element-wise with the 3×3 patch at that position, sum the results, add a bias, apply activation. Slide the filter to the next position. Repeat across the whole image. The output is a "feature map" highlighting where the filter's pattern was detected.
+
+A convolutional *layer* has many filters (say 32), each detecting a different pattern. Output: 32 feature maps. Stack convolutional layers, just like in Session 11, and you build feature hierarchies.
+
+Two more pieces:
+
+- **Pooling.** After a convolutional layer, often we *downsample*: take the maximum value in each 2×2 patch. This shrinks the image, reduces computation, and adds robustness (small shifts in input cause small shifts in output).
+- **Flatten + dense.** After several conv+pool layers, the final feature maps are flattened into a vector and fed through a few fully-connected (dense) layers, ending in a classification output.
+
+CNNs dominated computer vision from 2012 (AlexNet's ImageNet win) to roughly 2020, when transformers (Phase 5) started taking over. The principles (layers, gradient descent, feature hierarchies) are exactly the same.
+
+## Train a CNN on Fashion-MNIST
+
+Open Colab. Fashion-MNIST: 60,000 28×28 grayscale images of clothing (shirts, shoes, bags, etc.).
+
+```python
+import tensorflow as tf
+from tensorflow import keras
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Load data.
+(X_train, y_train), (X_test, y_test) = keras.datasets.fashion_mnist.load_data()
+print(f"X_train: {X_train.shape}, y_train: {y_train.shape}")
+
+# Normalize pixel values to [0, 1].
+X_train = X_train.astype('float32') / 255.0
+X_test = X_test.astype('float32') / 255.0
+
+# Reshape to add the channel dimension (CNNs expect height, width, channels).
+X_train = X_train[..., np.newaxis]
+X_test = X_test[..., np.newaxis]
+
+class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
+# Look at a sample.
+fig, axes = plt.subplots(3, 3, figsize=(8, 8))
+for i, ax in enumerate(axes.ravel()):
+    ax.imshow(X_train[i, :, :, 0], cmap='gray')
+    ax.set_title(class_names[y_train[i]])
+    ax.axis('off')
+plt.tight_layout(); plt.show()
+```
+
+```python
+# 2. Build a small CNN.
+model = keras.Sequential([
+    keras.layers.Conv2D(32, kernel_size=3, activation='relu', input_shape=(28, 28, 1)),
+    keras.layers.MaxPooling2D(pool_size=2),
+    keras.layers.Conv2D(64, kernel_size=3, activation='relu'),
+    keras.layers.MaxPooling2D(pool_size=2),
+    keras.layers.Flatten(),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(10, activation='softmax')
+])
+
+model.summary()
+```
+
+Walk through the model summary: each Conv2D adds parameters (filters × kernel size). Total parameters around 100k. Compare to a fully-connected version, which would have millions.
+
+```python
+# 3. Compile and train.
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+history = model.fit(X_train, y_train, epochs=5, batch_size=64,
+                    validation_split=0.1, verbose=1)
+```
+
+Output: training and validation accuracy climb toward ~90%.
+
+```python
+# 4. Evaluate.
+test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)
+print(f"Test accuracy: {test_acc:.3f}")
+```
+
+Around 0.91. *"You just trained a real image classifier on real images. 91% accuracy across 10 categories of clothing."*
+
+## Visualize what the first layer learned
+
+```python
+# Get the first conv layer's weights (32 filters, each 3x3x1).
+first_conv = model.layers[0]
+filters = first_conv.get_weights()[0]   # shape (3, 3, 1, 32)
+
+# Plot the 32 filters.
+fig, axes = plt.subplots(4, 8, figsize=(12, 6))
+for i, ax in enumerate(axes.ravel()):
+    ax.imshow(filters[:, :, 0, i], cmap='gray')
+    ax.axis('off')
+plt.suptitle("32 filters learned by the first conv layer")
+plt.show()
+```
+
+Output: 32 small 3×3 patterns. Some look like edge detectors (high-low-high horizontally, etc.). Some look like blob detectors. Each one is a small pattern the network learned to recognize.
+
+```python
+# Visualize what the first layer outputs for a sample image.
+sample = X_test[0:1]
+plt.imshow(sample[0, :, :, 0], cmap='gray')
+plt.title(f'Input: {class_names[y_test[0]]}')
+plt.axis('off'); plt.show()
+
+# Build a model that outputs the first conv layer's activations.
+activation_model = keras.Model(inputs=model.input, outputs=model.layers[0].output)
+activations = activation_model.predict(sample)
+print(f"Activations shape: {activations.shape}")    # (1, 26, 26, 32)
+
+# Plot the 32 feature maps.
+fig, axes = plt.subplots(4, 8, figsize=(12, 6))
+for i, ax in enumerate(axes.ravel()):
+    ax.imshow(activations[0, :, :, i], cmap='viridis')
+    ax.axis('off')
+plt.suptitle("First conv layer's response to one input image")
+plt.show()
+```
+
+The 32 feature maps show what each filter "saw" in the image. Some highlight edges, some highlight textures. *"Each map is what one filter responded to. The network has decomposed the image into 32 different features, automatically."*
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Deep learning">ML with deep neural networks.</Term>
+  <Term name="Feature hierarchy">Each layer learns more abstract features than the previous.</Term>
+  <Term name="Convolutional layer (Conv2D)">A layer where each neuron looks at a small patch and the same filter slides across the input.</Term>
+  <Term name="Filter / kernel">The weight matrix that detects a pattern in a conv layer.</Term>
+  <Term name="Pooling">Downsampling to reduce size and add robustness.</Term>
+  <Term name="CNN">Convolutional neural network.</Term>
+  <Term name="Pre-trained model">A network trained on huge data that you can reuse.</Term>
+</Vocab>
+
+<Activity title="Image classifier lab" duration="30 min">
+
+The full Colab notebook from above. Students:
+
+1. Run the loading and visualization cells.
+2. Train the model.
+3. Evaluate test accuracy.
+4. Visualize learned filters.
+5. **Stretch:** add more layers; try without pooling; train longer. What changes test accuracy?
+
+Optional teacher demo: have a student upload a photo of their own handwritten digit (or shoe). Preprocess it. Run through the model. Watch it correctly identify it.
+
+</Activity>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="How long would training take for ChatGPT?">
+GPT-4 is rumored to have taken several months on tens of thousands of GPUs, costing hundreds of millions of dollars. The basic algorithm is the same as your tiny model. The scale is incomprehensibly larger.
+  </Q>
+  <Q q="Why does this work so well?">
+Two reasons. Fashion-MNIST is a relatively easy dataset. And clothing genuinely has hierarchical structure (edges → textures → garment types) that aligns with the network's bias.
+  </Q>
+  <Q q="Can I see what each individual neuron is looking at?">
+Yes. Look up "feature visualization" or "activation atlases." Distill.pub's "Building Blocks of Interpretability" is gorgeous.
+  </Q>
+  <Q q="What if the network gets a digit wrong? How do I find out why?">
+Active research area: *interpretability*. Tools include LIME, SHAP, integrated gradients, saliency maps. Anthropic has a whole research team on this. Real career path.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 13 — How it actually learns">
+You've trained a deep network. But we haven't talked about HOW it actually learns. Gradient descent we know. But how do we compute gradients for a 5-layer network with millions of parameters? Next session: backpropagation, the chain rule applied with bookkeeping.
+</Bridge>

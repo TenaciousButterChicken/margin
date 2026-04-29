@@ -1,0 +1,130 @@
+<BigIdea>
+Three fundamentally different ways a computer can learn from data: supervised (flashcards), unsupervised (exploration), and reinforcement (trial and error with rewards).
+</BigIdea>
+
+<Objectives>
+  <Objective>Distinguish supervised from unsupervised learning by example</Objective>
+  <Objective>Train your own image classifier in Teachable Machine</Objective>
+  <Objective>Predict which "flavor" of ML powers a system you've used</Objective>
+</Objectives>
+
+## Opening hook
+
+Show a 60-second clip of OpenAI's robot hand solving a Rubik's cube one-handed (the 2019 demo still lands), or a more recent humanoid robot demo (Figure, 1X, or Boston Dynamics from the past 6 months). *"That hand learned to solve a cube. Today, we'll see the three ways ML systems learn. The hand uses one of them. Spotify uses another. ChatGPT uses a mix."*
+
+## Supervised learning — learning from flashcards
+
+**The metaphor.** Studying for a vocab quiz with flashcards. You see the front, guess, then flip to check. Adjust. Repeat. After enough cards, you don't need them anymore.
+
+That's supervised learning. Each example has a known correct answer (a "label"). The model predicts, compares to the correct answer, and adjusts.
+
+**The math behind the metaphor.** A supervised dataset is a set of pairs:
+
+<Math tex="D = \{(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n)\}" display />
+
+where each <Math tex="x_i" /> is an input (a feature vector) and each <Math tex="y_i" /> is the corresponding correct output (the label). Training is: find a function f such that <Math tex="f(x_i) \approx y_i" /> for as many i as possible.
+
+What "≈" means precisely is the cost function (Session 5). What "find a function f" means precisely is gradient descent (Session 6). But the *shape* of the problem is right there: pairs of inputs and labels, find the function that maps one to the other.
+
+**Two sub-types:**
+
+- **Classification.** y is a category (spam / not spam). Output is a label.
+- **Regression.** y is a number (house price). Output is a value on a continuous scale.
+
+We'll spend Phase 2 on regression and Phase 3 on classification.
+
+**Real examples.** Email spam classifiers (millions of emails labeled spam/not-spam). Medical image diagnosis (X-rays labeled by radiologists). Self-driving car perception (dashcam frames labeled with what's a pedestrian, car, stop sign). The CAPTCHAs you fill out are *labeling training data for Google's self-driving cars*. Free labor. Billions of labels.
+
+## Unsupervised learning — learning by exploring
+
+**The metaphor.** You walk into a party with no name tags. After 20 minutes you've noticed clusters: engineers by the snacks, artists on the porch, sports kids in the kitchen. Nobody told you the categories existed. You found them.
+
+**The math behind the metaphor.** An unsupervised dataset is just inputs:
+
+<Math tex="D = \{x_1, x_2, \dots, x_n\}" display />
+
+No labels. The job is to find structure: clusters, patterns, weird outliers. We'll formalize one approach (k-means clustering) in Session 14.
+
+**Real examples.** Spotify's "Discover Weekly" (groups songs by sonic similarity nobody hand-coded). Customer segmentation (marketing teams find natural groups of shoppers). Fraud detection (flag transactions that don't look like the rest). Topic discovery in news articles.
+
+## Reinforcement learning — trial and error
+
+**The metaphor.** Teaching a dog to sit. No flashcards, no explanation. The dog tries things; when it sits, it gets a treat. Over time it figures out: *the thing I was doing right before the treat, do that more.*
+
+**The math behind the metaphor.** RL has a different shape from supervised/unsupervised. There's an *agent* (the model) interacting with an *environment*. The agent observes a state s, takes an action a, gets a reward r, and the environment transitions to a new state s'. The agent's goal: pick actions that maximize total reward over time.
+
+We don't have labeled examples of "right actions." The agent has to discover them by trying. RL is its own field; we don't go deep on it in this club.
+
+**Real examples.** AlphaGo, AlphaStar, AlphaZero (DeepMind game-playing agents). The Rubik's cube robot hand. ChatGPT's final training stage (RLHF, reinforcement learning from human feedback), where humans rank pairs of model outputs and the model learns to produce ones humans prefer.
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Label">The correct answer attached to a training example.</Term>
+  <Term name="Dataset">The collection of all your training examples. Notation: D.</Term>
+  <Term name="Feature">A single piece of input information. For predicting house price: square footage, bedrooms, neighborhood. The full input x for one example is a *feature vector*.</Term>
+</Vocab>
+
+<Activity title="Train your own model in Teachable Machine" duration="25 min">
+
+**Setup.** Open `teachablemachine.withgoogle.com` on every laptop. Pick "Image Project, Standard image model."
+
+**Instructions:**
+
+1. Create two classes. "Thumbs up vs thumbs down." "Pen vs pencil." Anything.
+2. Click record on Class 1, hold the pose, capture about 50 examples (10 seconds of webcam).
+3. Same for Class 2.
+4. Hit "Train Model." Wait about 20 seconds.
+5. Hold up your pose. Watch the bar fill up for the predicted class.
+
+**Stretch challenge.** 5 classes. Try to fool the model. What confuses it?
+
+**The teaching moment.** *"What kind of learning was that, supervised or unsupervised?"* (Supervised. You labeled every example.) *"What would unsupervised look like here?"* (You'd dump all the webcam frames in without telling it which were which, and the model would have to figure out on its own that there were two distinct groups.)
+
+</Activity>
+
+## Code companion — a tiny supervised pipeline
+
+After Teachable Machine, ground the experience by showing what the same supervised pipeline looks like in code. They won't write this themselves yet, just see it:
+
+```python
+# A complete supervised learning pipeline, in 6 lines.
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+# 1. Get a labeled dataset.
+X, y = load_iris(return_X_y=True)
+
+# 2. Split it: 80% to train on, 20% to test on.
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# 3. Pick a model.
+model = LogisticRegression(max_iter=1000)
+
+# 4. Train it.
+model.fit(X_train, y_train)
+
+# 5. Score it.
+print("Test accuracy:", model.score(X_test, y_test))
+```
+
+Run it live. Output: something like `Test accuracy: 0.967`. *"Six lines. The whole shape of supervised ML. Every model we build this year follows that pattern: get data, split it, pick a model, fit, evaluate. We'll spend Phase 2 understanding what `fit` is actually doing."*
+
+## Likely student questions
+
+<FAQ>
+  <Q q="How did Teachable Machine learn so fast?">
+It's not training from scratch. It's using a pre-trained model that already knows how to "see" general image features, and fine-tuning on your examples. Concept: **transfer learning**. We'll meet this idea informally later.
+  </Q>
+  <Q q="Why does it sometimes get confused if I move the camera?">
+Your "background" was part of the training data. If you trained "thumbs up" in front of a window and "thumbs down" in front of a wall, the model might secretly be classifying the *background*, not your hand. Models can learn the wrong thing if your data is sloppy.
+  </Q>
+  <Q q="Is ChatGPT supervised or unsupervised?">
+Trick question. Both, plus reinforcement. We'll unpack this in Session 15.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 3 — Data is everything">
+Today we showed how computers learn from data. But the data is everything. A model trained on bad data is bad, no matter how clever the algorithm. Next time, we look at how ML systems can fail when their data is wrong. We'll write code to inspect a real dataset for problems.
+</Bridge>

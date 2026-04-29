@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { TopNav } from "@/components/public/TopNav";
 import { PHASE_HEADERS } from "@/components/illustrations/phase-headers";
 import { getSession, SESSIONS, PHASES } from "@/lib/sessions";
@@ -52,7 +53,11 @@ export default async function LessonPage({ params }: { params: { slug: string } 
       </h1>
 
       {notes ? (
-        <MDXRemote source={notes} components={lessonMdxComponents} />
+        <MDXRemote
+          source={notes}
+          components={lessonMdxComponents}
+          options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+        />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <p style={{ fontSize: 17, lineHeight: 1.65, color: "var(--neutral-700)", margin: 0 }}>

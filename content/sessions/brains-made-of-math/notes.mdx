@@ -1,37 +1,277 @@
-By Session 11 we have fit lines through points (Session 4), found the best line by descending a cost surface (Session 6), and drawn boundaries through clouds of dots (Sessions 8 and 9). Today we stack those ideas on top of each other and end up with something that does not look like the sum of its parts.
+<BigIdea>
+A neuron is a tiny decision-maker: weighted sum, bias, activation, output. One neuron is logistic regression. A neural network is many neurons wired into layers. We'll write the matrix math for a layer, build a 2-layer network from scratch in numpy, and see why depth lets networks solve problems linear models can't.
+</BigIdea>
 
-## A neuron is one regression
+<Objectives>
+  <Objective>Sketch a single neuron and label its parts</Objective>
+  <Objective>Write the matrix equation for a layer's forward pass</Objective>
+  <Objective>Implement a forward pass for a 2-layer network in numpy</Objective>
+  <Objective>Use TensorFlow Playground to build a network that solves a problem logistic regression can't</Objective>
+</Objectives>
 
-The basic computation inside a neural network is shockingly familiar. A neuron takes some inputs, multiplies each by a weight, adds them up, and runs the sum through a small nonlinear function. That is it. Algebraically:
+## Opening hook
 
-```python
-def neuron(inputs, weights, bias, activation):
-    z = sum(w * x for w, x in zip(weights, inputs)) + bias
-    return activation(z)
+Open `playground.tensorflow.org`. Pick the "spiral" dataset (two interlocking spirals). Point out: *"This is classification. Logistic regression would draw a straight line through these. It would be terrible. Watch."*
+
+Click play. A 2-hidden-layer neural network trains live. Within 30 seconds, the decision boundary curves through the spirals.
+
+*"Same data. Same algorithm under the hood (gradient descent). The only difference: many neurons stacked. Today, you derive what just happened."*
+
+## One neuron is logistic regression
+
+Recall logistic regression from Session 8:
+
+<Math tex="z = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b" display />
+<Math tex="\text{output} = \sigma(z)" display />
+
+Weighted sum, bias, squish through sigmoid. That structure *is* a neuron.
+
+```text
+   x₁ ──w₁──┐
+   x₂ ──w₂──┤
+   x₃ ──w₃──┼──[sum + b]──[activation]──> output
+   x₄ ──w₄──┘
 ```
 
-The activation function is the only thing that distinguishes a neuron from the linear regression you built three weeks ago. Drop the activation, and a neuron *is* a linear model.
+Each input × its weight, all summed, plus a bias, through an activation function.
 
-<Callout variant="note">
-Common activation choices: **ReLU** (`max(0, z)`) is the workhorse — fast, well-behaved gradients. **Sigmoid** squishes its input into (0,1) and shows up in classification. **Tanh** is the older sibling of sigmoid.
-</Callout>
+**Generalization 1: any activation function.** The sigmoid was chosen for logistic regression because we wanted the output to be a probability. In a neural network's *hidden* layers, we don't need a probability; we just need some non-linearity. The most common modern choice is **ReLU** ("rectified linear unit"):
 
-## Stacking neurons makes layers
+<Math tex="\text{ReLU}(z) = \max(0, z)" display />
 
-A *layer* is just a column of neurons that all see the same inputs. A *network* is a stack of layers, where each layer's outputs become the next layer's inputs. The first layer sees the raw data; the last layer outputs the prediction. Everything in between is the network's internal vocabulary, learned from the gradients.
+If z is positive, output z. If z is negative, output 0. Dead simple.
 
-The depth — how many layers — is what makes networks expressive. A single layer of neurons can carve up the input space with hyperplanes. Two layers can compose those hyperplanes into shapes. Three layers compose the shapes into more complicated shapes. By layer ten, the network is doing things you could not write down by hand.
+Why ReLU instead of sigmoid? Sigmoid's gradient vanishes for big |z| (we saw this in Session 8). ReLU's gradient is 1 for positive z (no vanishing) and 0 for negative z. Faster training, better convergence. Modern deep networks use ReLU almost everywhere except the final layer (where you might still use sigmoid for binary classification, or softmax for multi-class).
 
-## Today's activity
+Other activations exist (tanh, LeakyReLU, GELU, Swish), but ReLU and sigmoid cover most of what you need to know.
 
-The Lab gives you a drag-and-drop network builder. You pick a dataset (XOR, two moons, spirals), drop in some hidden layers, and hit Train. The network trains live in your browser. You can watch the loss go down. You can watch the decision boundary morph, frame by frame, into the shape that fits the data. You can pause, add a layer, and resume.
+**Generalization 2: a neuron's output isn't always a probability.** With ReLU, intermediate neurons' outputs can be any non-negative number. That's fine. They're just internal computations, not final predictions.
 
-Three things to try, in order:
+So a neuron is:
 
-1. Build a network that *cannot* solve the spiral dataset (one hidden layer, two neurons). Watch it fail.
-2. Add capacity until it succeeds. Note what changed.
-3. Inspect a single neuron in a successful network. What pattern does it light up for?
+<Math tex="\text{output} = \text{activation}(\mathbf{w} \cdot \mathbf{x} + b)" display />
 
-<Callout variant="boss">
-**Boss Mode.** Derive what a single neuron computes (Wx + b → activation), then what two stacked layers compute. The math is easy; the implication — that depth is what gives the model expressivity — is not.
-</Callout>
+Where activation is whatever function you pick (ReLU, sigmoid, tanh, etc.).
+
+## A layer is a set of parallel neurons
+
+A **layer** is a group of neurons that all take the same inputs but compute different outputs (because they have different weights and biases).
+
+Suppose your input has 3 features and you want a layer of 4 neurons. Each of the 4 neurons takes all 3 inputs, has its own 3 weights and 1 bias, applies activation, outputs one number. The layer outputs 4 numbers total.
+
+Writing this neuron by neuron is tedious. Matrix notation packs it up.
+
+**The math.** Let:
+
+- **x** be the input vector (length n_in)
+- **W** be a weight matrix of shape (n_out, n_in), where row j is the j-th neuron's weight vector
+- **b** be a bias vector of length n_out
+
+Then the layer's pre-activation values are:
+
+<Math tex="\mathbf{z} = \mathbf{W} \cdot \mathbf{x} + \mathbf{b}" display />
+
+And the layer's output is:
+
+<Math tex="\mathbf{a} = \text{activation}(\mathbf{z})" display />
+
+If we have many input examples stacked into a matrix **X** of shape (N, n_in), the whole batch goes through at once:
+
+<Math tex="\mathbf{Z} = \mathbf{X} \cdot \mathbf{W}^T + \mathbf{b}" display />
+<Math tex="\mathbf{A} = \text{activation}(\mathbf{Z})" display />
+
+(Notation note: ᵀ is "transpose," flipping rows and columns. Some textbooks orient W differently to avoid the transpose. Don't worry about which convention; what matters is "the matrix multiplication that combines inputs with weights.")
+
+## Stacking layers
+
+Take the output of one layer and feed it as the input to the next:
+
+```text
+input  →  layer 1  →  layer 2  →  ...  →  layer L  →  output
+(features) (n₁ neurons) (n₂ neurons)        (final layer)
+```
+
+Each layer has its own weight matrix and bias vector. The math:
+
+<Math tex="\mathbf{a}_0 = \mathbf{x}" display />
+<Math tex="\mathbf{a}_1 = \text{activation}(\mathbf{W}_1 \cdot \mathbf{a}_0 + \mathbf{b}_1)" display />
+<Math tex="\mathbf{a}_2 = \text{activation}(\mathbf{W}_2 \cdot \mathbf{a}_1 + \mathbf{b}_2)" display />
+<Math tex="\hat{y} = \mathbf{a}_L" display />
+
+Layers between input and output are **hidden layers**. They're not directly visible from outside. The whole stack is a **neural network** (or **multi-layer perceptron**, MLP).
+
+## Why depth helps — the Universal Approximation Theorem
+
+Here's the magical fact. *A network with even one hidden layer can approximate any reasonable function*, given enough neurons. This is the Universal Approximation Theorem. It says that no matter how complex the relationship between inputs and outputs, there's a neural network that represents it.
+
+The intuition: each neuron can split the input space into two halves with a line. Combine many neurons in a layer, and you can carve the space into many regions. Stack layers, and each layer can build more complex shapes from the previous layer's regions. With enough layers and neurons, you can represent any pattern.
+
+But: the theorem says *possible*, not *easy*. Training a network to actually find the right weights for a complex function is hard. We use gradient descent (with backpropagation, Session 13). The math is the same as before; just more parameters.
+
+**Empirical observation: deep is often better than wide.** A network with 5 layers of 100 neurons typically outperforms a network with 1 layer of 500 neurons on hard problems, even though both have the same total parameter count. Reason: deep networks compose features. Each layer builds on the previous one's abstractions. We'll see this in Session 12.
+
+## Build a forward pass from scratch
+
+Open Colab. We'll build a 2-layer network: input → hidden layer (ReLU) → output (sigmoid).
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Activation functions.
+def relu(z):
+    return np.maximum(0, z)
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# Forward pass for a 2-layer network.
+def forward(X, W1, b1, W2, b2):
+    """
+    X:  input matrix, shape (N, n_features)
+    W1: hidden layer weights, shape (n_features, n_hidden)
+    b1: hidden layer biases, shape (n_hidden,)
+    W2: output layer weights, shape (n_hidden, 1)
+    b2: output layer bias, shape (1,)
+    Returns: predicted probabilities, shape (N, 1)
+    """
+    z1 = X @ W1 + b1          # pre-activations of hidden layer
+    a1 = relu(z1)             # hidden layer outputs
+    z2 = a1 @ W2 + b2         # pre-activations of output
+    a2 = sigmoid(z2)          # output probabilities
+    return a2
+
+# Try it with random weights on the spiral data.
+np.random.seed(42)
+n_per_class = 100
+
+# Generate two interlocking spirals.
+def make_spiral(n, classes=2, noise=0.2):
+    X = np.zeros((n*classes, 2))
+    y = np.zeros(n*classes, dtype=int)
+    for c in range(classes):
+        ix = range(n*c, n*(c+1))
+        r = np.linspace(0.0, 1, n)
+        t = np.linspace(c*4, (c+1)*4, n) + np.random.randn(n)*noise
+        X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
+        y[ix] = c
+    return X, y
+
+X, y = make_spiral(100, 2)
+
+plt.scatter(X[y==0, 0], X[y==0, 1], color='orange', label='class 0')
+plt.scatter(X[y==1, 0], X[y==1, 1], color='blue', label='class 1')
+plt.title('Two-spiral dataset')
+plt.legend(); plt.show()
+```
+
+The plot shows two interlocking spirals. No straight line can separate them.
+
+```python
+# Random weights for a 2-layer network: 2 inputs → 16 hidden → 1 output.
+n_hidden = 16
+W1 = np.random.randn(2, n_hidden) * 0.5
+b1 = np.zeros(n_hidden)
+W2 = np.random.randn(n_hidden, 1) * 0.5
+b2 = np.zeros(1)
+
+predictions = forward(X, W1, b1, W2, b2)
+print("Predictions shape:", predictions.shape)
+print("First 5 predictions:", predictions[:5].flatten())
+```
+
+Random weights, so the predictions are garbage (around 0.5 for everything). But the *structure* works: data flows in, predictions come out. Now we just need to train it.
+
+Training a neural network requires computing gradients, which requires backpropagation (Session 13). For now, we'll use TensorFlow / Keras to handle backprop automatically, and revisit doing it from scratch later.
+
+## Train a 2-layer network with Keras
+
+```python
+import tensorflow as tf
+from tensorflow import keras
+
+model = keras.Sequential([
+    keras.layers.Dense(16, activation='relu', input_shape=(2,)),
+    keras.layers.Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train.
+history = model.fit(X, y, epochs=200, verbose=0)
+
+# Final accuracy.
+loss, acc = model.evaluate(X, y, verbose=0)
+print(f"Training accuracy: {acc:.3f}")
+
+# Plot the loss.
+plt.plot(history.history['loss'])
+plt.xlabel('Epoch'); plt.ylabel('Loss')
+plt.title('Training loss')
+plt.show()
+```
+
+Output: training accuracy in the high 90s. Loss curve smoothly drops.
+
+```python
+# Plot the decision boundary.
+xx, yy = np.meshgrid(np.linspace(-1.5, 1.5, 200), np.linspace(-1.5, 1.5, 200))
+grid = np.c_[xx.ravel(), yy.ravel()]
+preds = model.predict(grid, verbose=0).reshape(xx.shape)
+
+plt.contourf(xx, yy, preds, levels=20, cmap='RdBu_r', alpha=0.6)
+plt.scatter(X[y==0, 0], X[y==0, 1], color='orange', label='class 0', edgecolor='k')
+plt.scatter(X[y==1, 0], X[y==1, 1], color='blue', label='class 1', edgecolor='k')
+plt.legend(); plt.title('Decision boundary: a 2-layer network on spirals'); plt.show()
+```
+
+A beautiful spiral-shaped decision boundary. *"That's a neural network solving a problem logistic regression cannot. Same gradient descent, just two layers instead of one."*
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Neuron / unit / node">One small computing unit: weighted sum + bias + activation.</Term>
+  <Term name="Activation function">The non-linearity at the end of each neuron. Sigmoid, ReLU, tanh.</Term>
+  <Term name="Layer">A group of neurons taking the same inputs. Mathematically a matrix multiplication plus an activation.</Term>
+  <Term name="Hidden layer">A layer between input and output.</Term>
+  <Term name="Neural network">Stacked layers.</Term>
+  <Term name="ReLU">max(0, z). The standard hidden-layer activation.</Term>
+  <Term name="Multi-layer perceptron (MLP)">A standard feedforward neural network. Synonym for "the kind of network we just built."</Term>
+</Vocab>
+
+<Activity title="TensorFlow Playground deep-dive" duration="35 min">
+
+The whole hour after the lecture is hands-on Playground.
+
+**Guided exploration:**
+
+1. Start with the "two clusters" dataset. 0 hidden layers. The network is logistic regression. Solves instantly with a straight boundary.
+2. Switch to the "circle" dataset. 0 hidden layers. The network can't separate. Loss stays high.
+3. Add 1 hidden layer of 4 neurons. Click play. Boundary curves. Hover over hidden neurons to see what each one is "looking at."
+4. Switch to spiral. 1 hidden layer of 4. Struggles. Add another hidden layer. Better. Add more neurons. Better still.
+5. Compete: solve spiral with the fewest total neurons. (Possible with 2 layers of 6-8 neurons.)
+
+**Aha moment.** Watching the hidden neurons activate. Each first-layer neuron is its own little classifier, drawing a line through the input space. The next layer combines lines into curves. The next combines curves into more complex shapes. The network is *building features hierarchically*, automatically, from gradient descent. Nobody told it what features to use.
+
+</Activity>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="Why is this called a neural network if it's not really how the brain works?">
+Loose 1940s biological inspiration. Modern researchers think of these as "differentiable computation graphs," not brain models. Name stuck.
+  </Q>
+  <Q q="How many layers and neurons should I use?">
+No formula. People try things. Modern image-recognition networks: dozens of layers. GPT-class language models: ~100. Toy problems: 2-3 layers of 16-64 neurons.
+  </Q>
+  <Q q="Why does ReLU work better than sigmoid?">
+No vanishing gradients (gradient is 1 for positive z), and computationally cheaper (no exp).
+  </Q>
+  <Q q="Are neural networks always better than logistic regression?">
+No. For small datasets or when interpretability matters, simpler tools win. For tabular business data, gradient-boosted trees often beat neural networks. Always start simple.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 12 — Going deep">
+Today you saw that adding layers helps. Tomorrow we ask why. Each layer learns more abstract features built from the previous layer's features. Edges become shapes. Shapes become objects. We'll train an image classifier and visualize what each layer "sees."
+</Bridge>

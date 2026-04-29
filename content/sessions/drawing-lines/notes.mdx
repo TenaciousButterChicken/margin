@@ -1,0 +1,223 @@
+<BigIdea>
+The simplest "learning" task: given dots on a graph, find the line that fits them best. Linear regression — derived as a direct extension of <Math tex="y = mx + b" /> from algebra class.
+</BigIdea>
+
+<Objectives>
+  <Objective>Read a scatter plot and sketch a reasonable best-fit line</Objective>
+  <Objective>Translate y = mx + b into ML notation (ŷ = wx + b)</Objective>
+  <Objective>Compute predictions by hand for a small dataset</Objective>
+  <Objective>Use numpy and scikit-learn to fit a line in code</Objective>
+</Objectives>
+
+## Opening hook
+
+Pull up a Google Sheet with 15 data points. Column A: hours studied per week. Column B: exam score. Plot it as a scatter chart. There's an obvious upward trend, but it's noisy.
+
+Ask: *"If a friend studies 8 hours a week, what's your best guess for their exam score?"* Take three guesses. Then add a trendline (Sheets does it in two clicks). Read off the prediction.
+
+*"That trendline is a machine learning model. Today, you're going to derive what it's actually doing, then write the code from scratch. By the end of the hour you will know more about the inside of a 'trendline' than 99% of the people who use them."*
+
+## A line is a function with two knobs
+
+This is the bridge from algebra class to ML. Take it slow.
+
+Recall <Math tex="y = mx + b" /> from algebra. It's the equation of a line:
+
+- **m** is the **slope**: how steep the line is. If you increase x by 1, y goes up by m.
+- **b** is the **intercept**: where the line crosses the y-axis. The value of y when x = 0.
+
+In ML, we use this exact same equation, but we re-cast its meaning. We're going to use a line to make *predictions*. So:
+
+- **x** is the **input** (the thing we know about an example, like hours studied)
+- **y** is the **true output** for that example (the actual exam score)
+- **ŷ** ("y-hat") is the model's **predicted output** (what the line says for this x)
+- The line is our model:
+
+<Math tex="\hat{y} = mx + b" display />
+
+The line predicts ŷ for any input x. The slope m tells us how much ŷ changes per unit increase in x. The intercept b is the prediction when x = 0.
+
+### Notation switch (gentle)
+
+ML papers and textbooks use **w** instead of m (for "weight") and keep **b** (for "bias," same as intercept). Same equation, different letters:
+
+<Math tex="\hat{y} = wx + b" display />
+
+Why the rename? Because when we have multiple input features, we'll have multiple slopes. Calling them all "m" gets confusing. Calling them <Math tex="w_1, w_2, w_3" /> scales naturally. We'll see this in Session 7. From now on, we say w for the slope and b for the intercept.
+
+<Callout variant="note">
+**Why "weight" and "bias"?** "Weight" because it tells you how much *weight* this feature should get when computing the prediction. A big weight means this feature matters a lot. A small weight means it doesn't. "Bias" is older terminology from neural networks, and it just means "the constant that shifts the prediction up or down." Don't confuse it with bias-the-fairness-concept from Session 3. Same word, different meaning.
+</Callout>
+
+## Parameters are what we learn
+
+Lock this in: **the model is the equation <Math tex="\hat{y} = wx + b" />. The *parameters* are the specific numbers w and b that make this line *this particular line*.**
+
+When we say "we trained a model," we mean: *we found good values of w and b for our data.* That's literally it for linear regression. Every concept that comes after (gradient descent, neural networks, transformers) is sophisticated machinery for finding good parameters.
+
+For linear regression in 1D, there are only 2 parameters: w and b. For a neural network, there might be billions. The principle is identical.
+
+## Computing a prediction by hand
+
+Given specific values of w and b, computing ŷ for any x is just arithmetic.
+
+Example: suppose w = 5 and b = 50, and x = 8 (a student studies 8 hours).
+
+<Math tex="\hat{y} = wx + b = 5 \times 8 + 50 = 90" display />
+
+The model predicts a score of 90.
+
+Have students do a few of these by hand on paper. Vary w and b. *Note that different (w, b) pairs give different predictions for the same x.* The whole point of training is to pick the (w, b) that gives good predictions for *all* the points in our dataset, not just one.
+
+Quick worksheet: 5 (w, b, x) triples, compute ŷ for each. Two minutes, then move on.
+
+## Linear regression in three ways
+
+We're going to compute predictions three ways, in increasing levels of abstraction.
+
+### Way 1 — pure Python
+
+Write the formula directly.
+
+```python
+# A single prediction by hand.
+w = 5      # slope
+b = 50     # intercept
+x = 8      # input: hours studied
+
+y_hat = w * x + b
+print("Prediction:", y_hat)   # 90
+```
+
+### Way 2 — multiple predictions with numpy
+
+Real datasets have many inputs. We use arrays.
+
+```python
+import numpy as np
+
+w = 5
+b = 50
+# A whole array of inputs.
+x_array = np.array([1, 2, 4, 6, 8, 10, 12])
+
+# Numpy applies the operation to every element. This is called "vectorization."
+y_hat_array = w * x_array + b
+print(y_hat_array)
+```
+
+<Output>{`[55 60 70 80 90 100 110]`}</Output>
+
+Walk through what just happened: numpy's array multiplication is element-wise. Adding 50 adds 50 to each element. We computed 7 predictions in one line.
+
+### Way 3 — plot the line
+
+```python
+import matplotlib.pyplot as plt
+
+# Some made-up data.
+x_data = np.array([1, 2, 4, 6, 8, 10, 12])
+y_data = np.array([55, 65, 70, 75, 90, 95, 115])  # actual exam scores
+
+# Our guessed line.
+w, b = 5, 50
+x_line = np.linspace(0, 13, 100)         # 100 points from 0 to 13
+y_line = w * x_line + b
+
+plt.scatter(x_data, y_data, label='actual data')
+plt.plot(x_line, y_line, color='red', label=f'line: y = {w}x + {b}')
+plt.xlabel('Hours studied')
+plt.ylabel('Exam score')
+plt.legend()
+plt.show()
+```
+
+The plot shows the dots and our guessed line. Some dots are above the line, some below. Our line is approximately right, but not perfect.
+
+*"Take a moment. Look at the line. Could you do better? Drag the line in your imagination, slope up a bit, intercept down a bit. The question for next session is: how do we measure how good a line is? Without that measurement, 'better' has no meaning."*
+
+## When linear regression makes sense
+
+Linear regression assumes the relationship between x and y is roughly a straight line. That sounds restrictive but covers a lot of real data:
+
+- Hours studied vs. exam score
+- Square footage vs. house price
+- Years of experience vs. salary
+- Outdoor temperature vs. ice cream sales
+
+It does **not** make sense when:
+
+- The relationship is wildly non-linear (a thrown ball's trajectory, a parabola)
+- The output is a category (spam vs not spam — a classification problem; Phase 3)
+
+## Fit a line with scikit-learn
+
+Now skip to the punchline of the session. We've been computing predictions for *guessed* w and b. What if we let sklearn find the best w and b for us?
+
+```python
+from sklearn.linear_model import LinearRegression
+
+# Our data, reshaped into the form sklearn expects.
+# X must be 2D: (n_examples, n_features). Even with one feature, we need 2D.
+X = np.array([[1], [2], [4], [6], [8], [10], [12]])
+y = np.array([55, 65, 70, 75, 90, 95, 115])
+
+# Create the model. Train it. Print the learned w and b.
+model = LinearRegression()
+model.fit(X, y)
+
+print("Learned w:", model.coef_[0])      # the slope
+print("Learned b:", model.intercept_)     # the intercept
+
+# Predict for a new student.
+x_new = np.array([[7]])   # 7 hours studied
+y_pred = model.predict(x_new)
+print(f"Predicted score for 7 hours: {y_pred[0]:.1f}")
+```
+
+Two-line training. The slope and intercept print out something like w = 5.3, b = 50.2.
+
+*"sklearn just found 'the best' line. We don't yet know how it defined 'best.' We don't yet know how it found it. That's Sessions 5 and 6. But you can already use this in real projects."*
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Parameter / weight (w)">The "knob" that tells the model how much each feature matters. In y = wx + b, w is the slope.</Term>
+  <Term name="Bias (b)">The intercept. The model's prediction when all features are zero.</Term>
+  <Term name="Prediction (ŷ)">What the model outputs, written y-hat.</Term>
+  <Term name="Linear regression">The algorithm "fit a straight line through data, use it to predict numbers."</Term>
+</Vocab>
+
+<Activity title="Predict your class's grades" duration="20 min">
+
+The Lab activity: a Colab notebook with a CSV of fake student records (`hours_studied`, `exam_score`). Students:
+
+1. Load the data with pandas.
+2. Plot it.
+3. Fit a `LinearRegression` from sklearn.
+4. Print the learned w and b.
+5. Predict scores for hypothetical study times: 0 hours, 5 hours, 20 hours.
+6. **Stretch:** add a row of bizarre data (e.g., 5 hours studied, score 5; or 15 hours, score 40). Refit the model. How much did w and b change? Why?
+
+</Activity>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="What if my data isn't a straight line?">
+Then linear regression is the wrong tool. Polynomial regression (Session 9), or transformations of the data (e.g., taking the log of one variable to make a curved relationship look linear).
+  </Q>
+  <Q q="What if I have more than one input?">
+Session 7. The line becomes a *plane* (3D) or a *hyperplane* (higher dimensions). The math generalizes; the geometry gets weird.
+  </Q>
+  <Q q="How did sklearn find w and b?">
+Two ways. Sklearn's `LinearRegression` uses a closed-form formula called the **normal equation**, which gives the exact best (w, b) in one calculation. For more complex models (neural networks), no closed-form exists, and we use gradient descent (Session 6).
+  </Q>
+  <Q q="This seems too simple to be useful.">
+Linear regression is one of the most widely used ML algorithms in industry. Forecasting, pricing, any time you need a transparent model a human can interpret. "How much will this product sell?" "How long will this project take?" Linear regression is often the first answer.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 5 — How wrong are we?">
+Today we drew a line through dots. Next time, we make "best fit" precise. We will *define* what it means for one line to be better than another, and we will derive the most important formula in introductory ML: Mean Squared Error. We're going to write it, by hand, in code, in math, and use it to compare lines.
+</Bridge>

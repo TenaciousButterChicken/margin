@@ -1,0 +1,204 @@
+<BigIdea>
+Apply everything from Phases 1 to 3 to a real dataset. Titanic survival prediction is the famous Kaggle starter problem. It's small enough to fit in a notebook, complex enough to require thinking, and has been done by hundreds of thousands of people.
+</BigIdea>
+
+<Callout variant="note">
+This session is mostly hands-on. No new concepts. The teacher's job: walk the room, unstick people, run a friendly showcase at the end.
+</Callout>
+
+<Objectives>
+  <Objective>Load a real CSV, clean it, and split it</Objective>
+  <Objective>Train and compare two or more classification models</Objective>
+  <Objective>Evaluate accuracy on a held-out test set</Objective>
+  <Objective>Engineer one or two features that help</Objective>
+</Objectives>
+
+## Opening hook
+
+Pull up the Wikipedia page on the Titanic. The famous photo. Quick stats: 2,224 passengers and crew, 706 survived. Survival was not random. Women survived more than men. First-class passengers survived more than third-class. Children survived more than adults.
+
+*"Today, you train an ML model to predict, given basic information about a passenger, whether they survived. This is called the Titanic problem and it's the single most famous starter project in machine learning."*
+
+## The dataset
+
+Standard Kaggle Titanic dataset (or pre-loaded in Lab). About 900 rows. Columns:
+
+- `Pclass`: ticket class (1, 2, or 3)
+- `Sex`: male / female
+- `Age`: in years (some missing)
+- `SibSp`: number of siblings / spouses aboard
+- `Parch`: number of parents / children aboard
+- `Fare`: ticket price
+- `Embarked`: where they boarded (C, Q, S)
+- `Survived`: the label (0 or 1)
+
+## Full code walkthrough
+
+Open Colab. Walk through this end-to-end with the room.
+
+```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
+
+# 1. Load the data. Several public mirrors; pick whichever loads.
+url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+df = pd.read_csv(url)
+print(df.shape)
+df.head()
+```
+
+Walk through the columns. Show students what real-world data looks like (it's messy).
+
+```python
+# 2. Look at survival rates by group.
+print("Overall survival rate:", df['Survived'].mean())
+print()
+print("Survival rate by sex:")
+print(df.groupby('Sex')['Survived'].mean())
+print()
+print("Survival rate by class:")
+print(df.groupby('Pclass')['Survived'].mean())
+```
+
+Output shows clearly: women survived at ~74%, men at ~19%. First class ~63%, third class ~24%. *"The model has obvious patterns to find. Let's see if it does."*
+
+```python
+# 3. Visualize age distribution.
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+df[df['Survived']==1]['Age'].hist(ax=axes[0], bins=20, color='green', alpha=0.7)
+axes[0].set_title('Age distribution: Survived')
+df[df['Survived']==0]['Age'].hist(ax=axes[1], bins=20, color='red', alpha=0.7)
+axes[1].set_title('Age distribution: Did not survive')
+plt.show()
+```
+
+Children disproportionately survived. The "women and children first" policy is visible in the data.
+
+```python
+# 4. Clean the data.
+# - Age has missing values. Fill with median.
+df['Age'] = df['Age'].fillna(df['Age'].median())
+
+# - Embarked has 2 missing. Fill with most common.
+df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
+
+# - Drop columns we won't use (Name, Ticket, Cabin are messy).
+df = df.drop(['Name', 'Ticket', 'Cabin', 'PassengerId'], axis=1)
+
+# - Convert categorical to numeric.
+df['Sex'] = (df['Sex'] == 'female').astype(int)         # 1 if female, 0 if male
+df = pd.get_dummies(df, columns=['Embarked'], drop_first=True)  # one-hot encode
+
+print("Cleaned:")
+df.head()
+```
+
+```python
+# 5. Train/test split.
+X = df.drop('Survived', axis=1).values.astype(float)
+y = df['Survived'].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 6. Scale features.
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 7. Train logistic regression.
+log_reg = LogisticRegression(max_iter=1000)
+log_reg.fit(X_train_scaled, y_train)
+print(f"Logistic Regression train acc: {log_reg.score(X_train_scaled, y_train):.3f}")
+print(f"Logistic Regression test acc:  {log_reg.score(X_test_scaled, y_test):.3f}")
+
+# 8. Try random forest.
+rf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
+rf.fit(X_train, y_train)   # random forest doesn't need scaled features
+print(f"Random Forest train acc: {rf.score(X_train, y_train):.3f}")
+print(f"Random Forest test acc:  {rf.score(X_test, y_test):.3f}")
+```
+
+<Output>{`Logistic Regression train acc: 0.799
+Logistic Regression test acc:  0.804
+Random Forest train acc: 0.886
+Random Forest test acc:  0.821`}</Output>
+
+```python
+# 9. Inspect what logistic regression learned.
+feature_names = df.drop('Survived', axis=1).columns.tolist()
+for name, w in zip(feature_names, log_reg.coef_[0]):
+    print(f"  {name:15s}: weight = {w:+.3f}")
+```
+
+Walk through the weights:
+
+- `Sex`: large positive (being female strongly helps survival)
+- `Pclass`: large negative (higher class number = worse class = worse survival)
+- `Age`: small negative (older slightly worse)
+- `Fare`: small positive (paying more = often higher class = slight advantage even after controlling for class)
+
+The model is interpretable. Each weight tells a story.
+
+## Stretch — feature engineering
+
+```python
+# Engineer new features.
+df['FamilySize'] = df['SibSp'] + df['Parch'] + 1
+df['IsAlone'] = (df['FamilySize'] == 1).astype(int)
+
+# Re-do the train/test/scale/fit cycle.
+X = df.drop('Survived', axis=1).values.astype(float)
+y = df['Survived'].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+log_reg2 = LogisticRegression(max_iter=1000)
+log_reg2.fit(X_train_scaled, y_train)
+print(f"With new features, test acc: {log_reg2.score(X_test_scaled, y_test):.3f}")
+```
+
+Often this nudges accuracy up by 1-2 points. Students will love watching their score climb.
+
+## Workflow walkthrough
+
+The workflow students should follow:
+
+1. **Explore (10 min).** Load. Print shapes and columns. Group-by for survival rates by sex, class, age. Plot at least one histogram.
+2. **Clean (10 min).** Handle missing values. Convert categoricals (one-hot encode `Sex`, `Embarked`). Drop messy columns.
+3. **Split (2 min).** 80/20 train/test, with `random_state=42`.
+4. **Train (5 min).** Logistic regression first. Print train and test accuracy.
+5. **Iterate (15 min).** Try random forest. Engineer features. Tune `max_depth` for the random forest.
+6. **Submit and reflect (3 min).** Submit predictions. Print final accuracy. One-sentence summary of what you tried.
+
+## Closing showcase
+
+The last 10 minutes: 4 to 5 students share their best result and what they tried. *"I added family size, accuracy went from 80 to 82." "I tried random forest with max_depth=5 and got 84."* No "winner." Just rapid-fire show and tell.
+
+## Likely student questions
+
+<FAQ>
+  <Q q="Should I use the most complex model?">
+No. Always start simple (logistic regression). Add complexity only if the data justifies it. Most of the time, feature engineering beats a fancier model.
+  </Q>
+  <Q q="My accuracy is stuck at 80%. Is that bad?">
+That's roughly the standard result on Titanic with basic feature engineering. The Kaggle leaderboard for Titanic ranges from ~75% to ~84% for serious entries. (Anything claiming 99%+ is leaking the test data. Ignore.)
+  </Q>
+  <Q q="Why doesn't more feature engineering always help?">
+Adding noise dilutes signal. Adding redundant features confuses the model.
+  </Q>
+  <Q q="This dataset is from 1912. Is this... ethical?">
+Titanic dataset is a teaching tool, not a deployed model. The deeper point: every dataset reflects its time. A model trained on it would happily predict women and children should be saved first, which is great for 1912 and weird for any modern application. Always know where your data came from.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 11 — Brains made of math">
+You've now built a real ML project end-to-end. Phase 4 starts next time, and that's where things get cool. We'll meet neural networks, the technology behind every modern AI breakthrough. Linear regression is one neuron. The brain of ChatGPT is hundreds of billions of them. Same machinery, more layers.
+</Bridge>

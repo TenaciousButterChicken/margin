@@ -1,0 +1,253 @@
+<BigIdea>
+Real datasets have many features, not one. House prices depend on size, bedrooms, location, age — dozens of variables. Linear regression generalizes gracefully to multiple features. The math becomes vector math. The code becomes a few extra lines. Two new traps appear: features at different scales, and features that don't actually help.
+</BigIdea>
+
+<Objectives>
+  <Objective>Write a multivariate linear regression model in vector notation</Objective>
+  <Objective>Explain why feature scaling matters for gradient descent</Objective>
+  <Objective>Train a real multivariate model on a real dataset using sklearn</Objective>
+  <Objective>Inspect a model's learned weights and interpret them</Objective>
+</Objectives>
+
+## Opening hook
+
+Pull up Zillow on the projector. Search a house in your city. Show the price estimate ("Zestimate"). Click to see what features Zillow used.
+
+*"Zillow's price estimate is a real-world ML model. It uses dozens of features about a house: size, bedrooms, lot size, school district, recent neighborhood sales, year built. Today, you build a baby Zestimate."*
+
+## From one feature to many
+
+Last sessions, we predicted from one feature:
+
+<Math tex="\hat{y} = wx + b" display />
+
+Now imagine three features:
+
+- <Math tex="x_1" />: square footage
+- <Math tex="x_2" />: number of bedrooms
+- <Math tex="x_3" />: distance to downtown (km)
+
+The model:
+
+<Math tex="\hat{y} = w_1 x_1 + w_2 x_2 + w_3 x_3 + b" display />
+
+Each feature gets its own weight. Each weight tells you how much that feature contributes. If <Math tex="w_1 = 200" />, every additional square foot adds $200 to the predicted price. If <Math tex="w_3 = -50000" />, every additional kilometer from downtown subtracts $50,000.
+
+For n features, in general:
+
+<Math tex="\hat{y} = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b" display />
+
+## Vector notation
+
+Writing all those weights is annoying. Vector notation packs it up:
+
+Let **x** be a vector of features (an n-dimensional vector), **w** a vector of weights. Then:
+
+<Math tex="\hat{y} = \mathbf{w} \cdot \mathbf{x} + b" display />
+
+The dot is a **dot product**: multiply corresponding components and sum.
+
+<Math tex="\mathbf{w} \cdot \mathbf{x} = w_1 x_1 + w_2 x_2 + \dots + w_n x_n" display />
+
+So **w** · **x** + b is *exactly* what we wrote above, just shorter. You'll see this notation everywhere in ML papers. It scales the same way to 10 features, 100, 10,000.
+
+The cost function generalizes too. With multiple features, MSE is still:
+
+<Math tex="J(\mathbf{w}, b) = \tfrac{1}{2N} \sum_i (\hat{y}_i - y_i)^2" display />
+
+The only thing that changed: <Math tex="\hat{y}_i" /> is now <Math tex="\mathbf{w} \cdot \mathbf{x}_i + b" />, where <Math tex="\mathbf{x}_i" /> is the feature vector for example i.
+
+## Gradient descent with vectors
+
+The update rule generalizes too. Now we have a gradient component for each weight:
+
+<Math tex="\frac{\partial J}{\partial w_j} = \tfrac{1}{N} \sum_i (\hat{y}_i - y_i) \cdot x_{ij} \quad \text{for each } j" display />
+<Math tex="\frac{\partial J}{\partial b} = \tfrac{1}{N} \sum_i (\hat{y}_i - y_i)" display />
+
+Where <Math tex="x_{ij}" /> is "the j-th feature of the i-th example." Update each weight:
+
+<Math tex="w_j^{\text{new}} = w_j^{\text{old}} - \alpha \cdot \frac{\partial J}{\partial w_j}" display />
+
+Same logic, more components. In code, this is just a numpy vector operation; no extra loop.
+
+## The scaling problem
+
+Here's a subtle issue that bites every beginner.
+
+In the housing example:
+
+- Square footage ranges from about 500 to 5000
+- Bedrooms range from 1 to 5
+- Distance ranges from 0 to 30
+
+These are wildly different ranges. Gradient descent's "step" affects every parameter by the same learning rate. If the learning rate is right for the bedroom weight, it's wrong for the square-footage weight. The cost surface becomes a long, narrow valley instead of a round bowl, and gradient descent zigzags painfully.
+
+**The fix: feature scaling.** Standardize each feature before training.
+
+Two common methods:
+
+**Min-max scaling.** Squash to [0, 1].
+
+<Math tex="x' = \frac{x - \min}{\max - \min}" display />
+
+**Standardization (z-score).** Mean 0, standard deviation 1.
+
+<Math tex="x' = \frac{x - \mu}{\sigma}" display />
+
+where μ is the feature's mean and σ is its standard deviation.
+
+Standardization is the more common choice in ML. After scaling, all features have similar ranges, the cost surface is a nice round bowl, and gradient descent rolls smoothly.
+
+## Multivariate linear regression on California housing
+
+The full pipeline. Open Colab.
+
+```python
+import numpy as np
+import pandas as pd
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+
+# 1. Load the data.
+data = fetch_california_housing(as_frame=True)
+df = data.frame
+print("Shape:", df.shape)        # (20640, 9)
+print("Columns:", df.columns.tolist())
+
+# Separate features (X) from target (y).
+X = df.drop('MedHouseVal', axis=1).values
+y = df['MedHouseVal'].values
+
+# 2. Train/test split. 80/20.
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 3. Scale features. Fit scaler on train ONLY, then transform both.
+# This avoids "leaking" test data information into training.
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 4. Train.
+model = LinearRegression()
+model.fit(X_train_scaled, y_train)
+
+# 5. Evaluate.
+y_pred_train = model.predict(X_train_scaled)
+y_pred_test = model.predict(X_test_scaled)
+print(f"Train MSE: {mean_squared_error(y_train, y_pred_train):.3f}")
+print(f"Test MSE:  {mean_squared_error(y_test, y_pred_test):.3f}")
+
+# 6. Inspect what the model learned.
+feature_names = df.columns.tolist()[:-1]   # all except 'MedHouseVal'
+for name, weight in zip(feature_names, model.coef_):
+    print(f"  {name:12s}: weight = {weight:+.3f}")
+print(f"  {'intercept':12s}: {model.intercept_:+.3f}")
+```
+
+<Output>{`Train MSE: 0.524
+Test MSE:  0.556
+  MedInc      : weight = +0.829
+  HouseAge    : weight = +0.119
+  AveRooms    : weight = -0.265
+  AveBedrms   : weight = +0.305
+  Population  : weight = -0.005
+  AveOccup    : weight = -0.038
+  Latitude    : weight = -0.890
+  Longitude   : weight = -0.870
+  intercept   : +2.072`}</Output>
+
+Walk through what these mean. The MSE on test is 0.556, which (since the target is in units of $100k, squared) means the typical prediction is off by about √0.556 × $100k ≈ $75k. Not amazing, but reasonable for such a simple model.
+
+The largest absolute weights tell us what the model relies on most:
+
+- `MedInc` (median income): big positive. Higher income areas → higher prices. Makes sense.
+- `Latitude` and `Longitude`: big negative. The north and east have lower prices in California. The model has learned California geography.
+- `AveRooms`: small negative. Surprising! More rooms per household, lower prices? Could be because more rooms per household correlates with rural/lower-density areas, where prices are lower despite the size. This is the kind of weird thing a real model surfaces.
+
+## The scaling demo
+
+To dramatize feature scaling, run the same model *without* scaling, using gradient descent.
+
+```python
+# Without scaling: gradient descent struggles or diverges.
+from sklearn.linear_model import SGDRegressor
+
+# SGDRegressor uses gradient descent (with mini-batches).
+# Without scaling, it'll struggle with this data.
+print("Without scaling:")
+model_unscaled = SGDRegressor(max_iter=1000, learning_rate='constant', eta0=0.001)
+try:
+    model_unscaled.fit(X_train, y_train)
+    print(f"  Test MSE: {mean_squared_error(y_test, model_unscaled.predict(X_test)):.3f}")
+except Exception as e:
+    print(f"  Failed: {e}")
+
+print("\nWith scaling:")
+model_scaled = SGDRegressor(max_iter=1000, learning_rate='constant', eta0=0.001)
+model_scaled.fit(X_train_scaled, y_train)
+print(f"  Test MSE: {mean_squared_error(y_test, model_scaled.predict(X_test_scaled)):.3f}")
+```
+
+The unscaled version often produces astronomical MSE or NaN values. The scaled version converges to a reasonable result. *"Same algorithm, same data. The only difference is whether we standardized first. This is why feature scaling is the first thing every ML practitioner does on a new dataset."*
+
+## More features aren't always better
+
+Three things to watch for:
+
+**1. Useless features dilute signal.** Adding "average outdoor temperature on the day the house was listed" gives the model another variable to figure out is unhelpful, occupying training capacity that could have gone to better features.
+
+**2. Highly correlated features confuse the model.** Including "square feet" and "square meters" is the same information twice. The model becomes unstable: which weight should be big? Either one. Both at once becomes ambiguous. (Term: **multicollinearity**.)
+
+**3. Some features actively mislead.** "Year built" trained on 1990 data: model thinks old houses are cheap. Apply to 2026 data, badly mispriced historic properties.
+
+This is where feature engineering matters. Picking, transforming, and combining features is its own craft.
+
+## Vocabulary
+
+<Vocab>
+  <Term name="Multivariate (or multiple) linear regression">Linear regression with more than one input feature.</Term>
+  <Term name="Vector notation">Using **w** and **x** to package multiple weights/features.</Term>
+  <Term name="Dot product">Multiply corresponding components and sum: w · x = Σⱼ wⱼxⱼ.</Term>
+  <Term name="Feature scaling / standardization">Transforming features to similar numerical ranges before training.</Term>
+  <Term name="Feature engineering">The art of crafting features for a model.</Term>
+</Vocab>
+
+<Activity title="Housing price predictor" duration="30 min">
+
+The Lab notebook. Walk through:
+
+1. Load data, plot histograms of features.
+2. Train linear regression with one feature (`MedInc`). Print MSE.
+3. Add features one at a time. Watch MSE drop.
+4. Add a deliberately useless feature (random numbers). Watch what happens (MSE barely changes; the weight on the useless feature is near zero).
+5. Compare scaled vs unscaled training.
+6. Identify the most-important features by absolute weight.
+
+**Stretch challenge.** Engineer a new feature: `rooms_per_person = AveRooms / AveOccup`. Does it help? It often does, because it captures something neither feature does individually.
+
+</Activity>
+
+## Likely student questions
+
+<FAQ>
+  <Q q="Can the model handle words as features, like 'neighborhood name'?">
+Not directly. Linear regression needs numerical inputs. We turn categories into numbers via **one-hot encoding** (a separate 0/1 column per category) or, for many categories, embeddings (Phase 5).
+  </Q>
+  <Q q="What if I don't know which features will help?">
+That's the normal case. Real ML practice is half "throw features at the wall and see what sticks" and half "carefully engineer based on domain knowledge." Tools like feature-importance scores tell you which features the model leans on most.
+  </Q>
+  <Q q="Why does the model give negative weights to some features?">
+Because more of that feature predicts a *lower* output. Negative weights are not bugs.
+  </Q>
+  <Q q="Did Zillow really train a linear regression?">
+Probably not just one. Modern Zestimates use ensembles of more sophisticated models (gradient-boosted trees, neural nets). But the input shape is the same: a vector of features about a house. Linear regression is often the first thing people try because it's transparent and fast.
+  </Q>
+</FAQ>
+
+<Bridge to="Session 8 — Cats or dogs?">
+Phase 2 is done. You've built a real model that predicts house prices from data. But what if the thing you're predicting isn't a number? What if it's a category, like "is this email spam"? That's classification. We meet a new model (logistic regression), a new cost function (log loss), and a new squish function (sigmoid). Same machinery, new toolkit.
+</Bridge>
