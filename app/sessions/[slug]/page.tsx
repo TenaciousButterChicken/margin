@@ -29,7 +29,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
   const hasLab = session.slug === "rolling-downhill";
 
   const notesNode = (
-    <article style={{ maxWidth: 680, margin: "0 auto", paddingBottom: 96, paddingTop: 0 }}>
+    <article style={{ maxWidth: 1080, margin: "0 auto", paddingBottom: 96, paddingTop: 0 }}>
       <div style={{ marginBottom: 40, marginTop: 24 }}>
         <PhaseHeader width={260} />
       </div>
