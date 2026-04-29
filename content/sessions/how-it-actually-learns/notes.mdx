@@ -1,5 +1,5 @@
 <BigIdea>
-Backpropagation is how neural networks compute gradients. It's the chain rule from calculus, applied with careful bookkeeping. We'll derive it for a 2-layer network, code it from scratch, and verify it matches the framework.
+Backpropagation is how neural networks compute gradients. It's the chain rule from calculus, applied with careful bookkeeping. You'll derive it for a 2-layer network, code it from scratch, and verify it matches the framework.
 </BigIdea>
 
 <Objectives>
@@ -9,11 +9,11 @@ Backpropagation is how neural networks compute gradients. It's the chain rule fr
   <Objective>Use PyTorch's autograd to compute gradients automatically</Objective>
 </Objectives>
 
-## Opening hook
+## The basketball coach
 
-A basketball coach reviewing tape: *"Your release was rushed. Why? Because you got off-balance. Why? Because your pivot foot was wrong. Why? Because you didn't see the defender."* Each step in the chain gets adjusted, and the player's whole shooting form improves.
+A basketball coach reviews tape: *"Your release was rushed. Why? Because you got off-balance. Why? Because your pivot foot was wrong. Why? Because you didn't see the defender."* Each step in the chain gets adjusted, and the player's whole shooting form improves.
 
-*"Today's algorithm does the same thing for a neural network. When it makes a wrong prediction, we trace backward through the layers, figuring out which weights contributed how much to the mistake, and we nudge each one in proportion. It's called backpropagation."*
+Backpropagation does the same thing for a neural network. When the model makes a wrong prediction, you trace backward through the layers, figuring out which weights contributed how much to the mistake, and you nudge each one in proportion.
 
 ## The forward pass and the mistake
 
@@ -21,9 +21,9 @@ The network pushes input forward, layer by layer, ending with a prediction and a
 
 > input → layer 1 → layer 2 → … → output → compare to label → cost J
 
-Now we want to update the weights to reduce J. We need ∂J/∂w for every weight w in the network.
+Now you want to update the weights to reduce J. You need ∂J/∂w for every weight w in the network.
 
-For a single-layer model (linear or logistic regression), this was easy. We had a closed-form formula. In a deep network, weights in early layers affect the cost *indirectly*, through every layer that comes after. Untangling their contribution is the job of backprop.
+For a single-layer model (linear or logistic regression), this was easy. You had a closed-form formula. In a deep network, weights in early layers affect the cost *indirectly*, through every layer that comes after. Untangling their contribution is the job of backprop.
 
 ## The chain rule
 
@@ -41,11 +41,11 @@ The derivative through a chain is the product of derivatives along the chain.
 
 Check by expanding: <Math tex="f(x) = 9x^2 + 12x + 4" />. So <Math tex="df/dx = 18x + 12 = 6(3x+2)" />. ✓
 
-**For neural networks.** The cost J depends on the output, which depends on the last layer's weights, which depend on the previous layer's outputs, which depend on its weights, all the way back. The chain rule lets us compute ∂J/∂w for any w by multiplying derivatives along the chain.
+**For neural networks.** The cost J depends on the output, which depends on the last layer's weights, which depend on the previous layer's outputs, which depend on its weights, all the way back. The chain rule lets you compute ∂J/∂w for any w by multiplying derivatives along the chain.
 
 ## Deriving backprop for a 2-layer network
 
-This is the most rigorous derivation in the year. Take it slow.
+This is the most rigorous derivation in the book. Take it slow.
 
 Setup: a 2-layer network for binary classification.
 
@@ -55,13 +55,11 @@ Setup: a 2-layer network for binary classification.
 <Math tex="\hat{y} = \sigma(z_2)" display />
 <Math tex="J = \text{log loss}" display />
 
-Goal: compute ∂J/∂W₁, ∂J/∂b₁, ∂J/∂W₂, ∂J/∂b₂.
-
-We'll work backward from the output.
+Goal: compute ∂J/∂W₁, ∂J/∂b₁, ∂J/∂W₂, ∂J/∂b₂. You'll work backward from the output.
 
 ### Step 1 — ∂J/∂z₂
 
-The combination "log loss + sigmoid" has the beautiful property (we mentioned in Session 8):
+The combination "log loss + sigmoid" has the beautiful property mentioned in Chapter 8:
 
 <Math tex="\frac{\partial J}{\partial z_2} = \hat{y} - y" display />
 
@@ -78,11 +76,11 @@ This single line is doing the heavy lifting. The derivative of log loss with res
 <Math tex="\frac{\partial J}{\partial W_2} = a_1^T \cdot \delta_2 / N" display />
 <Math tex="\frac{\partial J}{\partial b_2} = \text{mean}(\delta_2)" display />
 
-(Dividing by N because we average over the dataset.)
+(Dividing by N because you average over the dataset.)
 
 ### Step 3 — propagate the error back to layer 1
 
-We want <Math tex="\delta_1 = \partial J / \partial z_1" />. Using chain rule, going through z₂ and a₁:
+You want <Math tex="\delta_1 = \partial J / \partial z_1" />. Using chain rule, going through z₂ and a₁:
 
 <Math tex="\delta_1 = (\delta_2 \cdot W_2^T) \odot \text{ReLU}'(z_1)" display />
 
@@ -90,8 +88,8 @@ Where ⊙ is element-wise multiplication. ReLU'(z) is 1 if z > 0, else 0.
 
 Read this slowly:
 
-- <Math tex="\delta_2 \cdot W_2^T" /> is the error at layer 2, "pulled back" through W₂. It tells us how much each hidden activation a₁ affected J.
-- We multiply by ReLU'(z₁) to account for the activation function. If a hidden neuron was inactive (z < 0, ReLU output 0), it didn't contribute to anything, so its error signal is 0.
+- <Math tex="\delta_2 \cdot W_2^T" /> is the error at layer 2, "pulled back" through W₂. It tells you how much each hidden activation a₁ affected J.
+- You multiply by ReLU'(z₁) to account for the activation function. If a hidden neuron was inactive (z < 0, ReLU output 0), it didn't contribute to anything, so its error signal is 0.
 
 ### Step 4 — ∂J/∂W₁ and ∂J/∂b₁
 
@@ -100,7 +98,7 @@ Read this slowly:
 <Math tex="\frac{\partial J}{\partial W_1} = X^T \cdot \delta_1 / N" display />
 <Math tex="\frac{\partial J}{\partial b_1} = \text{mean}(\delta_1)" display />
 
-**Done.** Five lines of math give us all four gradients. The pattern is universal:
+**Done.** Five lines of math give you all four gradients. The pattern is universal:
 
 1. Compute the output error δ.
 2. Use it to compute ∂J/∂W and ∂J/∂b for the *output* layer.
@@ -110,7 +108,7 @@ Read this slowly:
 
 ## The "chain of blame" metaphor
 
-Make this less abstract. A relay team failed. Coach has to assign blame.
+Make this less abstract. A relay team failed. The coach has to assign blame.
 
 The last runner crossed the finish late. Most of the blame goes to them, *if* they ran their leg badly. But maybe they got the baton late. Then they're less to blame, and the previous runner is more.
 
@@ -161,6 +159,7 @@ W1 = np.random.randn(2, n_hidden) * 0.5
 b1 = np.zeros((1, n_hidden))
 W2 = np.random.randn(n_hidden, 1) * 0.5
 b2 = np.zeros((1, 1))
+
 learning_rate = 0.5
 n_iterations = 5000
 loss_history = []
@@ -210,7 +209,7 @@ Iter  1000: loss=0.2641, acc=0.910
 Iter  2000: loss=0.0823, acc=0.985
 Iter  4500: loss=0.0231, acc=1.000`}</Output>
 
-The network learns to perfectly classify the spirals. With backprop coded by hand. Forty lines of numpy. *"You wrote the algorithm that trains every modern AI system, on a problem logistic regression cannot solve. You should feel something."*
+The network learns to perfectly classify the spirals. With backprop coded by hand. Forty lines of numpy. *You wrote the algorithm that trains every modern AI system, on a problem logistic regression cannot solve. You should feel something.*
 
 ```python
 # Plot loss curve and decision boundary.
@@ -237,7 +236,7 @@ plt.show()
 
 ## The easy way — autograd
 
-Now show students why frameworks exist. PyTorch with autograd handles backprop automatically.
+Frameworks like PyTorch handle backprop automatically.
 
 ```python
 import torch
@@ -247,7 +246,7 @@ import torch.nn as nn
 X_t = torch.tensor(X, dtype=torch.float32)
 y_t = torch.tensor(y, dtype=torch.float32)
 
-# Define the model: same architecture as our manual one.
+# Define the model: same architecture as your manual one.
 model = nn.Sequential(
     nn.Linear(2, 16),
     nn.ReLU(),
@@ -273,7 +272,7 @@ for i in range(5000):
         print(f"Iter {i:5d}: loss={loss.item():.4f}, acc={acc:.3f}")
 ```
 
-Same result, far less code. *"`loss.backward()` ran the backprop we just wrote by hand. PyTorch built a 'computation graph' as we did the forward pass and walked it backward to compute every gradient. This is called automatic differentiation, or autograd. You will probably never write backprop by hand again. But now you know what's happening when you call `.backward()`."*
+Same result, far less code. *`loss.backward()` ran the backprop you just wrote by hand. PyTorch built a "computation graph" as you did the forward pass and walked it backward to compute every gradient. This is called automatic differentiation, or autograd. You will probably never write backprop by hand again. But now you know what's happening when you call `.backward()`.*
 
 ## Why this is a big deal
 
@@ -315,7 +314,7 @@ W1_minus = W1.copy(); W1_minus[i, j] -= h
 numerical_grad = (compute_loss(W1_plus, b1, W2, b2) - compute_loss(W1_minus, b1, W2, b2)) / (2 * h)
 print(f"Numerical gradient: {numerical_grad:.6f}")
 
-# Run our backprop and read off dW1[i, j].
+# Run your backprop and read off dW1[i, j].
 z1 = X @ W1 + b1
 a1 = relu(z1)
 z2 = a1 @ W2 + b2
@@ -327,11 +326,11 @@ dW1 = X.T @ delta1 / N
 print(f"Backprop gradient:  {dW1[i, j]:.6f}")
 ```
 
-The two numbers should match to ~6 decimal places. *"That's how you know backprop is right. Compute the gradient two ways. If they agree, the math is right."*
+The two numbers should match to ~6 decimal places. *That's how you know backprop is right.* Compute the gradient two ways. If they agree, the math is right.
 
 </Activity>
 
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Do I need calculus to use neural networks?">
@@ -348,6 +347,6 @@ Almost certainly not. Real neurons don't run anything like backprop. Neural netw
   </Q>
 </FAQ>
 
-<Bridge to="Session 14 — Learning without a teacher">
-You now understand how a neural network learns: forward pass, compute cost, backprop the gradient, gradient descent update. That's the engine of all modern AI. Next time, we leave supervised learning. What can a model learn when there are no labels at all?
+<Bridge to="Chapter 14 — Learning without a teacher">
+You now understand how a neural network learns: forward pass, compute cost, backprop the gradient, gradient descent update. That's the engine of all modern AI. Next: leave supervised learning behind. What can a model learn when there are no labels at all?
 </Bridge>

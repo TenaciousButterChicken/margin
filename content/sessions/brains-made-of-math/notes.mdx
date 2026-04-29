@@ -1,5 +1,5 @@
 <BigIdea>
-A neuron is a tiny decision-maker: weighted sum, bias, activation, output. One neuron is logistic regression. A neural network is many neurons wired into layers. We'll write the matrix math for a layer, build a 2-layer network from scratch in numpy, and see why depth lets networks solve problems linear models can't.
+A neuron is a tiny decision-maker: weighted sum, bias, activation, output. One neuron is logistic regression. A neural network is many neurons wired into layers. You'll write the matrix math for a layer, build a 2-layer network from scratch in numpy, and see why depth lets networks solve problems linear models can't.
 </BigIdea>
 
 <Objectives>
@@ -9,17 +9,9 @@ A neuron is a tiny decision-maker: weighted sum, bias, activation, output. One n
   <Objective>Use TensorFlow Playground to build a network that solves a problem logistic regression can't</Objective>
 </Objectives>
 
-## Opening hook
-
-Open `playground.tensorflow.org`. Pick the "spiral" dataset (two interlocking spirals). Point out: *"This is classification. Logistic regression would draw a straight line through these. It would be terrible. Watch."*
-
-Click play. A 2-hidden-layer neural network trains live. Within 30 seconds, the decision boundary curves through the spirals.
-
-*"Same data. Same algorithm under the hood (gradient descent). The only difference: many neurons stacked. Today, you derive what just happened."*
-
 ## One neuron is logistic regression
 
-Recall logistic regression from Session 8:
+Recall logistic regression from Chapter 8:
 
 <Math tex="z = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b" display />
 <Math tex="\text{output} = \sigma(z)" display />
@@ -35,17 +27,17 @@ Weighted sum, bias, squish through sigmoid. That structure *is* a neuron.
 
 Each input × its weight, all summed, plus a bias, through an activation function.
 
-**Generalization 1: any activation function.** The sigmoid was chosen for logistic regression because we wanted the output to be a probability. In a neural network's *hidden* layers, we don't need a probability; we just need some non-linearity. The most common modern choice is **ReLU** ("rectified linear unit"):
+**Generalization 1 — any activation function.** The sigmoid was chosen for logistic regression because we wanted the output to be a probability. In a neural network's *hidden* layers, you don't need a probability; you just need some non-linearity. The most common modern choice is **ReLU** ("rectified linear unit"):
 
 <Math tex="\text{ReLU}(z) = \max(0, z)" display />
 
 If z is positive, output z. If z is negative, output 0. Dead simple.
 
-Why ReLU instead of sigmoid? Sigmoid's gradient vanishes for big |z| (we saw this in Session 8). ReLU's gradient is 1 for positive z (no vanishing) and 0 for negative z. Faster training, better convergence. Modern deep networks use ReLU almost everywhere except the final layer (where you might still use sigmoid for binary classification, or softmax for multi-class).
+Why ReLU instead of sigmoid? Sigmoid's gradient vanishes for big |z| (you saw this in Chapter 8). ReLU's gradient is 1 for positive z (no vanishing) and 0 for negative z. Faster training, better convergence. Modern deep networks use ReLU almost everywhere except the final layer (where you might still use sigmoid for binary classification, or softmax for multi-class).
 
 Other activations exist (tanh, LeakyReLU, GELU, Swish), but ReLU and sigmoid cover most of what you need to know.
 
-**Generalization 2: a neuron's output isn't always a probability.** With ReLU, intermediate neurons' outputs can be any non-negative number. That's fine. They're just internal computations, not final predictions.
+**Generalization 2 — a neuron's output isn't always a probability.** With ReLU, intermediate neurons' outputs can be any non-negative number. That's fine. They're just internal computations, not final predictions.
 
 So a neuron is:
 
@@ -75,7 +67,7 @@ And the layer's output is:
 
 <Math tex="\mathbf{a} = \text{activation}(\mathbf{z})" display />
 
-If we have many input examples stacked into a matrix **X** of shape (N, n_in), the whole batch goes through at once:
+If you have many input examples stacked into a matrix **X** of shape (N, n_in), the whole batch goes through at once:
 
 <Math tex="\mathbf{Z} = \mathbf{X} \cdot \mathbf{W}^T + \mathbf{b}" display />
 <Math tex="\mathbf{A} = \text{activation}(\mathbf{Z})" display />
@@ -106,13 +98,13 @@ Here's the magical fact. *A network with even one hidden layer can approximate a
 
 The intuition: each neuron can split the input space into two halves with a line. Combine many neurons in a layer, and you can carve the space into many regions. Stack layers, and each layer can build more complex shapes from the previous layer's regions. With enough layers and neurons, you can represent any pattern.
 
-But: the theorem says *possible*, not *easy*. Training a network to actually find the right weights for a complex function is hard. We use gradient descent (with backpropagation, Session 13). The math is the same as before; just more parameters.
+But: the theorem says *possible*, not *easy*. Training a network to actually find the right weights for a complex function is hard. You use gradient descent (with backpropagation, Chapter 13). The math is the same as before; just more parameters.
 
-**Empirical observation: deep is often better than wide.** A network with 5 layers of 100 neurons typically outperforms a network with 1 layer of 500 neurons on hard problems, even though both have the same total parameter count. Reason: deep networks compose features. Each layer builds on the previous one's abstractions. We'll see this in Session 12.
+**Empirical observation: deep is often better than wide.** A network with 5 layers of 100 neurons typically outperforms a network with 1 layer of 500 neurons on hard problems, even though both have the same total parameter count. Reason: deep networks compose features. Each layer builds on the previous one's abstractions. You'll see this in Chapter 12.
 
 ## Build a forward pass from scratch
 
-Open Colab. We'll build a 2-layer network: input → hidden layer (ReLU) → output (sigmoid).
+Open Colab. Build a 2-layer network: input → hidden layer (ReLU) → output (sigmoid).
 
 ```python
 import numpy as np
@@ -180,9 +172,9 @@ print("Predictions shape:", predictions.shape)
 print("First 5 predictions:", predictions[:5].flatten())
 ```
 
-Random weights, so the predictions are garbage (around 0.5 for everything). But the *structure* works: data flows in, predictions come out. Now we just need to train it.
+Random weights, so the predictions are garbage (around 0.5 for everything). But the *structure* works: data flows in, predictions come out. Now you just need to train it.
 
-Training a neural network requires computing gradients, which requires backpropagation (Session 13). For now, we'll use TensorFlow / Keras to handle backprop automatically, and revisit doing it from scratch later.
+Training a neural network requires computing gradients, which requires backpropagation (Chapter 13). For now, use TensorFlow / Keras to handle backprop automatically, and revisit doing it from scratch later.
 
 ## Train a 2-layer network with Keras
 
@@ -225,7 +217,7 @@ plt.scatter(X[y==1, 0], X[y==1, 1], color='blue', label='class 1', edgecolor='k'
 plt.legend(); plt.title('Decision boundary: a 2-layer network on spirals'); plt.show()
 ```
 
-A beautiful spiral-shaped decision boundary. *"That's a neural network solving a problem logistic regression cannot. Same gradient descent, just two layers instead of one."*
+A beautiful spiral-shaped decision boundary. *That's a neural network solving a problem logistic regression cannot. Same gradient descent, just two layers instead of one.*
 
 ## Vocabulary
 
@@ -236,30 +228,28 @@ A beautiful spiral-shaped decision boundary. *"That's a neural network solving a
   <Term name="Hidden layer">A layer between input and output.</Term>
   <Term name="Neural network">Stacked layers.</Term>
   <Term name="ReLU">max(0, z). The standard hidden-layer activation.</Term>
-  <Term name="Multi-layer perceptron (MLP)">A standard feedforward neural network. Synonym for "the kind of network we just built."</Term>
+  <Term name="Multi-layer perceptron (MLP)">A standard feedforward neural network.</Term>
 </Vocab>
 
-<Activity title="TensorFlow Playground deep-dive" duration="35 min">
+<Activity title="TensorFlow Playground" duration="30 min">
 
-The whole hour after the lecture is hands-on Playground.
-
-**Guided exploration:**
+Open `playground.tensorflow.org`. This tool runs real neural networks in your browser, with live visualization of every neuron.
 
 1. Start with the "two clusters" dataset. 0 hidden layers. The network is logistic regression. Solves instantly with a straight boundary.
 2. Switch to the "circle" dataset. 0 hidden layers. The network can't separate. Loss stays high.
 3. Add 1 hidden layer of 4 neurons. Click play. Boundary curves. Hover over hidden neurons to see what each one is "looking at."
 4. Switch to spiral. 1 hidden layer of 4. Struggles. Add another hidden layer. Better. Add more neurons. Better still.
-5. Compete: solve spiral with the fewest total neurons. (Possible with 2 layers of 6-8 neurons.)
+5. Compete with yourself: solve spiral with the fewest total neurons. (Possible with 2 layers of 6-8 neurons.)
 
-**Aha moment.** Watching the hidden neurons activate. Each first-layer neuron is its own little classifier, drawing a line through the input space. The next layer combines lines into curves. The next combines curves into more complex shapes. The network is *building features hierarchically*, automatically, from gradient descent. Nobody told it what features to use.
+**The aha moment.** Watching the hidden neurons activate. Each first-layer neuron is its own little classifier, drawing a line through the input space. The next layer combines lines into curves. The next combines curves into more complex shapes. The network is *building features hierarchically*, automatically, from gradient descent. Nobody told it what features to use.
 
 </Activity>
 
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Why is this called a neural network if it's not really how the brain works?">
-Loose 1940s biological inspiration. Modern researchers think of these as "differentiable computation graphs," not brain models. Name stuck.
+Loose 1940s biological inspiration. Modern researchers think of these as "differentiable computation graphs," not brain models. The name stuck.
   </Q>
   <Q q="How many layers and neurons should I use?">
 No formula. People try things. Modern image-recognition networks: dozens of layers. GPT-class language models: ~100. Toy problems: 2-3 layers of 16-64 neurons.
@@ -272,6 +262,6 @@ No. For small datasets or when interpretability matters, simpler tools win. For 
   </Q>
 </FAQ>
 
-<Bridge to="Session 12 — Going deep">
+<Bridge to="Chapter 12 — Going deep">
 Today you saw that adding layers helps. Tomorrow we ask why. Each layer learns more abstract features built from the previous layer's features. Edges become shapes. Shapes become objects. We'll train an image classifier and visualize what each layer "sees."
 </Bridge>

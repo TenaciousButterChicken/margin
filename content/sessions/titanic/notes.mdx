@@ -3,7 +3,7 @@ Apply everything from Phases 1 to 3 to a real dataset. Titanic survival predicti
 </BigIdea>
 
 <Callout variant="note">
-This session is mostly hands-on. No new concepts. The teacher's job: walk the room, unstick people, run a friendly showcase at the end.
+This chapter is mostly code. No new concepts.
 </Callout>
 
 <Objectives>
@@ -13,15 +13,15 @@ This session is mostly hands-on. No new concepts. The teacher's job: walk the ro
   <Objective>Engineer one or two features that help</Objective>
 </Objectives>
 
-## Opening hook
+## The Titanic
 
-Pull up the Wikipedia page on the Titanic. The famous photo. Quick stats: 2,224 passengers and crew, 706 survived. Survival was not random. Women survived more than men. First-class passengers survived more than third-class. Children survived more than adults.
+In 1912, the RMS Titanic struck an iceberg and sank. Of the 2,224 passengers and crew, only 706 survived. Survival was not random. Women survived more than men. First-class passengers survived more than third-class. Children survived more than adults.
 
-*"Today, you train an ML model to predict, given basic information about a passenger, whether they survived. This is called the Titanic problem and it's the single most famous starter project in machine learning."*
+You'll train an ML model to predict, given basic information about a passenger, whether they survived. This is called the Titanic problem and it's the single most famous starter project in machine learning.
 
 ## The dataset
 
-Standard Kaggle Titanic dataset (or pre-loaded in Lab). About 900 rows. Columns:
+The standard Kaggle Titanic dataset. About 900 rows. Columns:
 
 - `Pclass`: ticket class (1, 2, or 3)
 - `Sex`: male / female
@@ -34,7 +34,7 @@ Standard Kaggle Titanic dataset (or pre-loaded in Lab). About 900 rows. Columns:
 
 ## Full code walkthrough
 
-Open Colab. Walk through this end-to-end with the room.
+Open Colab. Work through this end-to-end.
 
 ```python
 import numpy as np
@@ -45,14 +45,14 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
-# 1. Load the data. Several public mirrors; pick whichever loads.
+# 1. Load the data.
 url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
 df = pd.read_csv(url)
 print(df.shape)
 df.head()
 ```
 
-Walk through the columns. Show students what real-world data looks like (it's messy).
+Look at the columns. Real-world data is messy.
 
 ```python
 # 2. Look at survival rates by group.
@@ -65,7 +65,7 @@ print("Survival rate by class:")
 print(df.groupby('Pclass')['Survived'].mean())
 ```
 
-Output shows clearly: women survived at ~74%, men at ~19%. First class ~63%, third class ~24%. *"The model has obvious patterns to find. Let's see if it does."*
+Output shows clearly: women survived at ~74%, men at ~19%. First class ~63%, third class ~24%. The model has obvious patterns to find.
 
 ```python
 # 3. Visualize age distribution.
@@ -137,7 +137,7 @@ for name, w in zip(feature_names, log_reg.coef_[0]):
     print(f"  {name:15s}: weight = {w:+.3f}")
 ```
 
-Walk through the weights:
+What the weights mean:
 
 - `Sex`: large positive (being female strongly helps survival)
 - `Pclass`: large negative (higher class number = worse class = worse survival)
@@ -165,24 +165,20 @@ log_reg2.fit(X_train_scaled, y_train)
 print(f"With new features, test acc: {log_reg2.score(X_test_scaled, y_test):.3f}")
 ```
 
-Often this nudges accuracy up by 1-2 points. Students will love watching their score climb.
+Often this nudges accuracy up by 1-2 points.
 
-## Workflow walkthrough
+## Workflow summary
 
-The workflow students should follow:
+The general workflow:
 
-1. **Explore (10 min).** Load. Print shapes and columns. Group-by for survival rates by sex, class, age. Plot at least one histogram.
-2. **Clean (10 min).** Handle missing values. Convert categoricals (one-hot encode `Sex`, `Embarked`). Drop messy columns.
-3. **Split (2 min).** 80/20 train/test, with `random_state=42`.
-4. **Train (5 min).** Logistic regression first. Print train and test accuracy.
-5. **Iterate (15 min).** Try random forest. Engineer features. Tune `max_depth` for the random forest.
-6. **Submit and reflect (3 min).** Submit predictions. Print final accuracy. One-sentence summary of what you tried.
+1. **Explore.** Load. Print shapes and columns. Group-by for survival rates by sex, class, age. Plot at least one histogram.
+2. **Clean.** Handle missing values. Convert categoricals (one-hot encode). Drop messy columns.
+3. **Split.** 80/20 train/test, with `random_state=42`.
+4. **Train.** Logistic regression first. Print train and test accuracy.
+5. **Iterate.** Try random forest. Engineer features. Tune `max_depth` for the random forest.
+6. **Reflect.** What worked? What didn't? Why?
 
-## Closing showcase
-
-The last 10 minutes: 4 to 5 students share their best result and what they tried. *"I added family size, accuracy went from 80 to 82." "I tried random forest with max_depth=5 and got 84."* No "winner." Just rapid-fire show and tell.
-
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Should I use the most complex model?">
@@ -195,10 +191,10 @@ That's roughly the standard result on Titanic with basic feature engineering. Th
 Adding noise dilutes signal. Adding redundant features confuses the model.
   </Q>
   <Q q="This dataset is from 1912. Is this... ethical?">
-Titanic dataset is a teaching tool, not a deployed model. The deeper point: every dataset reflects its time. A model trained on it would happily predict women and children should be saved first, which is great for 1912 and weird for any modern application. Always know where your data came from.
+The Titanic dataset is a teaching tool, not a deployed model. The deeper point: every dataset reflects its time. A model trained on it would happily predict women and children should be saved first, which is great for 1912 and weird for any modern application. Always know where your data came from.
   </Q>
 </FAQ>
 
-<Bridge to="Session 11 — Brains made of math">
-You've now built a real ML project end-to-end. Phase 4 starts next time, and that's where things get cool. We'll meet neural networks, the technology behind every modern AI breakthrough. Linear regression is one neuron. The brain of ChatGPT is hundreds of billions of them. Same machinery, more layers.
+<Bridge to="Chapter 11 — Brains made of math">
+You've now built a real ML project end-to-end. Phase 4 starts next, and that's where things get cool. Neural networks — the technology behind every modern AI breakthrough. Linear regression is one neuron. The brain of ChatGPT is hundreds of billions of them. Same machinery, more layers.
 </Bridge>

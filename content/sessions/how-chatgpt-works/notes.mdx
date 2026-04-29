@@ -1,5 +1,5 @@
 <BigIdea>
-Transformers are the architecture behind every flagship AI in 2026: GPT, Claude, Gemini, Llama, image generators, code completers. The key idea (attention) sounds simple: every token in a sequence looks at every other token and decides what to pay attention to. We'll derive the math of self-attention and code a baby attention block.
+Transformers are the architecture behind every flagship AI in 2026: GPT, Claude, Gemini, Llama, image generators, code completers. The key idea (attention) sounds simple: every token in a sequence looks at every other token and decides what to pay attention to. You'll derive the math of self-attention and code a baby attention block.
 </BigIdea>
 
 <Objectives>
@@ -9,15 +9,11 @@ Transformers are the architecture behind every flagship AI in 2026: GPT, Claude,
   <Objective>Recognize how transformer layers stack and what makes them powerful</Objective>
 </Objectives>
 
-## Opening hook
+## What's actually happening when you prompt Claude
 
-Pull up Claude or ChatGPT. Type: "Write a haiku about machine learning." Read it.
+Pull up Claude or ChatGPT. Type: "Write a haiku about machine learning." Read it. Now: "Now write it as a 3-year-old who just learned what a computer is." Read. Now: "Now write it as Yoda." Read.
 
-Now: "Now write it as a 3-year-old who just learned what a computer is." Read.
-
-Now: "Now write it as Yoda." Read.
-
-*"What's actually happening? The model isn't pulling pre-written haikus from a database. It's computing, one word at a time, what word should come next given everything that's come before. Today, you'll know the architecture that makes that possible."*
+What's going on? The model isn't pulling pre-written haikus from a database. It's computing, one word at a time, what word should come next given everything that's come before. By the end of this chapter, you'll know the architecture that makes this possible.
 
 ## Language models are next-token predictors
 
@@ -114,7 +110,7 @@ A typical transformer layer:
 
 Stack many layers (GPT-3 had 96; modern frontier models have around 100). Each layer's output is the next layer's input. After many layers, every token's representation is incredibly rich, informed by every other token at multiple levels of abstraction. The final layer outputs a probability distribution over the next token.
 
-The whole thing is trained with gradient descent on the next-token-prediction objective, on enormous amounts of text. Backprop computes the gradients (Session 13's algorithm, scaled up). With enough data and compute: GPT-4, Claude, Gemini.
+The whole thing is trained with gradient descent on the next-token-prediction objective, on enormous amounts of text. Backprop computes the gradients (Chapter 13's algorithm, scaled up). With enough data and compute: GPT-4, Claude, Gemini.
 
 The architecture is from "Attention Is All You Need" (Vaswani et al., 2017). That paper kicked off the modern AI era.
 
@@ -176,7 +172,7 @@ plt.title('Attention weights')
 plt.show()
 ```
 
-A 5×5 grid where each cell brightness shows how much one token attends to another. *"That's an attention map. In a real transformer, the entries are learned during training to focus on relevant words. We just used random weights to show the shape."*
+A 5×5 grid where each cell brightness shows how much one token attends to another. That's an attention map. In a real transformer, the entries are learned during training to focus on relevant words. The example above used random weights to show the shape.
 
 ## Three stages of modern training
 
@@ -188,7 +184,7 @@ Modern language models are trained in three stages:
 
 **3. Reinforcement learning from human feedback (RLHF).** Humans rank pairs of model outputs ("response A is better than response B"). The model is trained to produce responses humans prefer. Makes the model "helpful, harmless, and honest" instead of just "very good at predicting next tokens."
 
-So when students ask "is ChatGPT supervised, unsupervised, or reinforcement?", the answer is: yes, all three, in sequence. Pre-training is self-supervised. Fine-tuning is supervised. RLHF is reinforcement learning. This finally answers the question raised in Session 2.
+So when you ask "is ChatGPT supervised, unsupervised, or reinforcement?", the answer is: yes, all three, in sequence. Pre-training is self-supervised. Fine-tuning is supervised. RLHF is reinforcement learning. This finally answers the question raised in Chapter 2.
 
 ## Vocabulary
 
@@ -202,29 +198,30 @@ So when students ask "is ChatGPT supervised, unsupervised, or reinforcement?", t
   <Term name="Pre-training, fine-tuning, RLHF">The three stages of modern language model training.</Term>
 </Vocab>
 
-<Activity title="Attention visualizer" duration="30 min">
+<Activity title="Attention visualizer" duration="25 min">
 
-Students type a sentence. Lines fan from each word to every other word, with thickness proportional to attention weight. They click a word to see what it's "looking at."
+Take the self-attention code above and feed it real text. Tokenize a sentence (split into words for simplicity), look up each word's embedding from the GloVe model in Chapter 14, and compute attention weights using random Q, K, V matrices.
 
 **Suggested explorations:**
 
-1. *"The trophy didn't fit in the brown suitcase because it was too big."* Click "it." Watch attention concentrate on "trophy."
-2. Change "big" to "small." Click "it" again. Attention shifts to "suitcase."
-3. Try a deliberately ambiguous sentence. See what the model attends to.
-4. Look at attention in different layers. Early layers attend to syntax (nearby words, punctuation). Later layers attend to semantics (long-range references).
+1. Use the sentence *"The trophy didn't fit in the brown suitcase because it was too big."* In a real (trained) transformer, the attention from "it" would concentrate on "trophy."
+2. Change "big" to "small." In a trained transformer, attention from "it" would shift to "suitcase."
+3. Try a deliberately ambiguous sentence. See what the (untrained) model attends to.
+
+For a much more polished version, search for "BertViz" or "Attention visualization for transformers". There are interactive web tools that show attention patterns from real trained models.
 
 </Activity>
 
-## Optional discussion — capabilities and limits
+## Capabilities and limits
 
-The natural session for the year's big ethics conversation:
+A few things worth thinking about with these models:
 
-- *"What can these models do well? Struggle with?"* Good at: language tasks, coding, summarization, brainstorming. Struggle with: precise math without tools, novel reasoning, knowing when they don't know.
-- *"How should we use them in school? Where's the line?"* Models are great as tutors and explainers. Using them to do an assignment that's supposed to teach you something is self-defeating, even when it's "allowed."
-- *"What does it mean that these systems sometimes confidently make things up?"* This is **hallucination**. Models predict what looks plausible, not what's true. Always verify factual claims, especially specific numbers, dates, or quotes.
-- *"What do you think AI will look like when you're 25?"* Listen to predictions.
+- **What they do well.** Language tasks, coding, summarization, brainstorming, explaining concepts.
+- **What they struggle with.** Precise math without tools, novel reasoning, knowing when they don't know.
+- **Hallucination.** Models predict what looks plausible, not what's true. Always verify factual claims, especially specific numbers, dates, or quotes. A confidently-stated answer is not necessarily correct.
+- **Use in school.** Models are great as tutors and explainers. Using them to do an assignment that's supposed to teach you something is self-defeating, even when it's "allowed." Use them to learn faster, not to skip learning.
 
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Does ChatGPT 'know' things?">
@@ -244,6 +241,6 @@ All transformers. All trained on huge text. Different companies, different data,
   </Q>
 </FAQ>
 
-<Bridge to="Session 16 — Final showcase">
-You've seen the architecture behind everything in modern AI. Next session is the finale. You'll present your own ML project.
+<Bridge to="Chapter 16 — Final showcase">
+You've seen the architecture behind everything in modern AI. Next is the finale — you'll present your own ML project.
 </Bridge>

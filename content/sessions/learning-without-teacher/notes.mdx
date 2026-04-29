@@ -1,5 +1,5 @@
 <BigIdea>
-Until now, every model had labels. Most data in the world has no labels. Unsupervised learning finds patterns in unlabeled data. We'll derive the k-means clustering algorithm, code it from scratch, and meet word embeddings — the bridge to language models in Session 15.
+Until now, every model had labels. Most data in the world has no labels. Unsupervised learning finds patterns in unlabeled data. You'll derive the k-means clustering algorithm, code it from scratch, and meet word embeddings — the bridge to language models in Chapter 15.
 </BigIdea>
 
 <Objectives>
@@ -9,11 +9,11 @@ Until now, every model had labels. Most data in the world has no labels. Unsuper
   <Objective>Make sense of "king − man + woman ≈ queen"</Objective>
 </Objectives>
 
-## Opening hook
+## Spotify already does this
 
-Open Spotify. Show your "Discover Weekly." Pick a song you've never heard. Play 5 seconds. Stop.
+Open Spotify. Look at your "Discover Weekly." Pick a song you've never heard.
 
-*"This song was put on my playlist by Spotify's recommendation system. Spotify has never been told 'I like this song.' I've never rated it. So how did it know? Today: how machines find patterns when nobody tells them what to look for."*
+That song was put on your playlist by Spotify's recommendation system. Spotify has never been told "this user likes that song." You've never rated it. So how did it know? This chapter is about how machines find patterns when nobody tells them what to look for.
 
 ## Unsupervised learning, recapped
 
@@ -32,11 +32,11 @@ Two main flavors:
 
 ## K-means clustering, derived
 
-The most famous clustering algorithm. We'll derive it from a clear objective.
+The most famous clustering algorithm. You'll derive it from a clear objective.
 
-**Setup.** A dataset of n points in some feature space. We believe there are K natural groups. We want to find them.
+**Setup.** A dataset of n points in some feature space. You believe there are K natural groups. You want to find them.
 
-**Define what "good clustering" means.** For each point, it belongs to one cluster. Each cluster has a "center" (centroid) <Math tex="\mu_k" />. We want each point to be close to its cluster's center.
+**Define what "good clustering" means.** For each point, it belongs to one cluster. Each cluster has a "center" (centroid) <Math tex="\mu_k" />. You want each point to be close to its cluster's center.
 
 Cost function: total squared distance from each point to its cluster's center.
 
@@ -143,7 +143,7 @@ for K in [2, 4, 5]:
     plt.show()
 ```
 
-K=2 merges two of the clusters. K=4 splits one cluster. K=5 splits more. *"K-means doesn't know how many clusters are 'right.' That's a hyperparameter you set. Tools like the elbow method or silhouette score help pick K."*
+K=2 merges two of the clusters. K=4 splits one cluster. K=5 splits more. K-means doesn't know how many clusters are "right." That's a hyperparameter you set. Tools like the elbow method or silhouette score help pick K.
 
 ## Word embeddings — where unsupervised gets cool
 
@@ -151,9 +151,9 @@ Now the bridge to language models. How do you represent a word as numbers in a w
 
 **Naive way.** Assign each word a unique ID. "Cat" is 47, "dog" is 312, "scrumptious" is 84,251. The IDs have no relationship to meaning. Useless for ML.
 
-**Better way: vectors.** Assign each word a *vector* of numbers (say 300 numbers). The vector is the word's **embedding**. We pick embeddings such that *similar words have similar vectors*. "Cat" and "dog" close. "Cat" and "Tuesday" far.
+**Better way: vectors.** Assign each word a *vector* of numbers (say 300 numbers). The vector is the word's **embedding**. You pick embeddings such that *similar words have similar vectors*. "Cat" and "dog" close. "Cat" and "Tuesday" far.
 
-Who decides similarity? Here's the unsupervised part: we let the model figure it out from context. *"You shall know a word by the company it keeps"* (Firth, 1957). Words used in similar contexts (cat and dog both appear near "pet," "vet," "leash") get similar vectors.
+Who decides similarity? Here's the unsupervised part: you let the model figure it out from context. *"You shall know a word by the company it keeps"* (Firth, 1957). Words used in similar contexts (cat and dog both appear near "pet," "vet," "leash") get similar vectors.
 
 The classic algorithm is **word2vec** (Mikolov et al., 2013). The idea: train a tiny neural network to predict the words around a given word. The "embedding" of each word is the network's internal representation after training.
 
@@ -172,7 +172,7 @@ Other classics:
 - Paris − France + Italy ≈ Rome
 - Walking − walked + swam ≈ swimming
 
-Some bias examples (reminder of Session 3):
+A bias example (reminder of Chapter 3):
 
 - Doctor − man + woman ≈ nurse (the model learned a stereotype from training data)
 
@@ -210,11 +210,11 @@ for word, score in result:
 king - man + woman: queen: 0.86, princess: 0.79, ...
 Paris - France + Italy: rome: 0.81, milan: 0.74, ...`}</Output>
 
-*"The model learned the relationship between 'king/man' and 'queen/woman' geometrically. Same with capitals. Pure math, learned from text."*
+The model learned the relationship between "king/man" and "queen/woman" geometrically. Same with capitals. Pure math, learned from text.
 
 ## Visualize embeddings in 2D
 
-300-dimensional vectors are hard to visualize. We can squish them to 2D using PCA (principal component analysis, a classic dimensionality-reduction algorithm).
+300-dimensional vectors are hard to visualize. You can squish them to 2D using PCA (principal component analysis, a classic dimensionality-reduction algorithm).
 
 ```python
 from sklearn.decomposition import PCA
@@ -248,7 +248,7 @@ The plot shows clusters: royalty terms in one region, animals in another, cities
 <Vocab>
   <Term name="Clustering">Finding natural groups.</Term>
   <Term name="Centroid">The center of a cluster (in k-means: the average of points in the cluster).</Term>
-  <Term name="K-means">The iterative clustering algorithm we just derived.</Term>
+  <Term name="K-means">The iterative clustering algorithm derived above.</Term>
   <Term name="Embedding">A vector of numbers representing an item (word, image, user, anything) in a way that captures similarity to other items.</Term>
   <Term name="Word2vec / GloVe">Classic algorithms for learning word embeddings.</Term>
   <Term name="PCA (Principal Component Analysis)">A classic dimensionality-reduction algorithm for projecting high-dim data to lower dim.</Term>
@@ -256,9 +256,9 @@ The plot shows clusters: royalty terms in one region, animals in another, cities
 
 <Activity title="Cluster + embedding explorer" duration="30 min">
 
-Two-part activity.
+Two parts.
 
-**Part 1: K-Means Lab.** Drop dots on a 2D plot. Set K. Run k-means. Watch centroids move and points get re-assigned each iteration.
+**Part 1: K-means lab.** In Colab, drop dots on a 2D plot. Set K. Run k-means. Watch centroids move and points get re-assigned each iteration.
 
 Challenges:
 
@@ -267,7 +267,7 @@ Challenges:
 3. Run with K=5. What gets split?
 4. Drop dots in two interlocking spirals. Run k-means. It fails. Why? (K-means assumes spherical clusters.)
 
-**Part 2: Word Arithmetic Explorer.** Type three words. The model returns the closest match.
+**Part 2: word arithmetic explorer.** Using the gensim model loaded above, type three words and find the closest match.
 
 Challenges:
 
@@ -278,14 +278,14 @@ Challenges:
 
 </Activity>
 
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="How does the model know 'cat' and 'dog' are similar?">
 They appear in similar surroundings in text. The model learns to predict surrounding words; cat and dog predict similar surroundings, so their embeddings end up similar.
   </Q>
   <Q q="Are word embeddings still a thing in modern AI?">
-Yes, but now they're learned *inside* large language models, not as a separate step. Modern transformers (Session 15) build context-dependent embeddings on the fly.
+Yes, but now they're learned *inside* large language models, not as a separate step. Modern transformers (Chapter 15) build context-dependent embeddings on the fly.
   </Q>
   <Q q="Could I do this with images?">
 Yes. CLIP (OpenAI) maps images and text into the same embedding space, so you can search images by text. This is how DALL·E and Stable Diffusion work.
@@ -295,6 +295,6 @@ The embedding learned that doctor associates more with male contexts, nurse with
   </Q>
 </FAQ>
 
-<Bridge to="Session 15 — How ChatGPT works">
-Word embeddings are how language models start understanding text. But what happens after the embedding step? How does ChatGPT actually generate sentences? Next time: the architecture that powers all modern AI — the transformer — and we'll derive its central mechanism, attention.
+<Bridge to="Chapter 15 — How ChatGPT works">
+Word embeddings are how language models start understanding text. But what happens after the embedding step? How does ChatGPT actually generate sentences? Next: the architecture that powers all modern AI — the transformer — and we'll derive its central mechanism, attention.
 </Bridge>

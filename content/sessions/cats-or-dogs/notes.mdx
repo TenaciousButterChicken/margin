@@ -1,5 +1,5 @@
 <BigIdea>
-Linear regression predicts numbers. To predict a category, wrap the linear model in a "squish function" called the sigmoid that maps any number to (0, 1). That's a probability. We'll derive the sigmoid, derive *why* MSE fails for classification, derive log loss, and code logistic regression from scratch.
+Linear regression predicts numbers. To predict a category, wrap the linear model in a "squish function" called the sigmoid that maps any number to (0, 1). That's a probability. You'll derive the sigmoid, derive *why* MSE fails for classification, derive log loss, and code logistic regression from scratch.
 </BigIdea>
 
 <Objectives>
@@ -10,21 +10,15 @@ Linear regression predicts numbers. To predict a category, wrap the linear model
   <Objective>Identify a decision boundary on a scatter plot</Objective>
 </Objectives>
 
-## Opening hook
-
-Open Gmail. Show the spam folder. Pick a clearly junk email and ask: *"How does Gmail know this is spam?"*
-
-Some students will say "it has the word Viagra" or "it's from a weird address." Push back: *"Sure, but those rules don't catch everything. Modern spam filters use ML. They look at hundreds of features and output a single number: the probability this email is spam. Above some cutoff, it goes to spam. Today we derive the math for the simplest version of that classifier."*
-
 ## The problem with plain linear regression for classification
 
-Suppose we encode "cat" as 0 and "dog" as 1, then train a linear regression on the (image_features, 0_or_1) pairs. Two problems immediately appear.
+Suppose you encode "cat" as 0 and "dog" as 1, then train a linear regression on the (image_features, 0_or_1) pairs. Two problems immediately appear.
 
-**Problem 1: the output isn't bounded.** Linear regression can output anything: 0.5, 1.7, −3, 100. None of those are useful when we want a 0 or 1.
+**Problem 1: the output isn't bounded.** Linear regression can output anything: 0.5, 1.7, −3, 100. None of those are useful when you want a 0 or 1.
 
-**Problem 2: there's no notion of confidence.** If the model outputs 1.4, what do we say? "More than dog"? Models that output unbounded numbers can't communicate "I'm 80% sure it's a dog."
+**Problem 2: there's no notion of confidence.** If the model outputs 1.4, what do you say? "More than dog"? Models that output unbounded numbers can't communicate "I'm 80% sure it's a dog."
 
-We need a function that takes the linear model's raw output (any real number) and maps it to (0, 1), so we can interpret it as a probability.
+You need a function that takes the linear model's raw output (any real number) and maps it to (0, 1), so you can interpret it as a probability.
 
 ## The sigmoid function
 
@@ -34,7 +28,7 @@ Enter the sigmoid:
 
 Where e ≈ 2.718, the base of natural logarithms. The lowercase Greek letter σ is "sigma" (different from the summation Σ; same letter, different fonts).
 
-Let's analyze its behavior. Plug in some values:
+Analyze its behavior. Plug in some values:
 
 - z = 0: σ(0) = 1 / (1 + 1) = **0.5**
 - z = +∞: <Math tex="e^{-z} \to 0" />, so σ → 1 / (1 + 0) = **1**
@@ -44,12 +38,12 @@ Let's analyze its behavior. Plug in some values:
 
 So σ smoothly maps the entire real line onto (0, 1). Big positive z → close to 1. Big negative z → close to 0. Zero z → exactly 0.5. The shape is an S-curve.
 
-**Our classification model.** Take the linear model from Phase 2 and wrap it in σ:
+**Your classification model.** Take the linear model from Phase 2 and wrap it in σ:
 
 <Math tex="z = w_1 x_1 + w_2 x_2 + \dots + b" display />
 <Math tex="\hat{y} = \sigma(z)" display />
 
-That's logistic regression. The linear part is identical to Session 7's model. We just added one more step.
+That's logistic regression. The linear part is identical to Chapter 7's model. You just added one more step.
 
 The output ŷ is the model's predicted probability that this example is class 1. ŷ = 0.92 means "92% confident class 1." ŷ = 0.03 means "97% confident class 0."
 
@@ -62,12 +56,12 @@ To make a final yes/no decision, pick a threshold (default 0.5):
 
 <Math tex="\sigma'(z) = \sigma(z) \cdot (1 - \sigma(z))" display />
 
-We won't derive it now (it's a clean exercise in the chain rule). It'll matter for backprop in Session 13.
+You won't derive it now (it's a clean exercise in the chain rule). It'll matter for backprop in Chapter 13.
 </Callout>
 
 ## Why MSE fails for classification
 
-If we used MSE for classification, we'd write:
+If you used MSE for classification, you'd write:
 
 <Math tex="J(w, b) = \tfrac{1}{N} \sum_i (\sigma(z_i) - y_i)^2" display />
 
@@ -75,29 +69,29 @@ where <Math tex="z_i = \mathbf{w} \cdot \mathbf{x}_i + b" />.
 
 This *technically* works. But it has two ugly problems:
 
-**Problem 1: the cost surface is not convex.** With a sigmoid in the middle, MSE has multiple local minima. Gradient descent can get stuck. For our nice convex linear regression, gradient descent always finds the global best. With sigmoid + MSE, it might not.
+**Problem 1: the cost surface is not convex.** With a sigmoid in the middle, MSE has multiple local minima. Gradient descent can get stuck. For nice convex linear regression, gradient descent always finds the global best. With sigmoid + MSE, it might not.
 
 **Problem 2: gradients vanish.** When σ(z) is very close to 0 or 1 (the model is very confident), σ'(z) ≈ 0. And σ' shows up in the gradient via the chain rule. So when the model is *confidently wrong* (σ(z) ≈ 0 but the answer was y = 1), the gradient is tiny, and gradient descent can barely make progress. Training stalls.
 
-We need a different cost function that:
+You need a different cost function that:
 
-- Punishes confident wrong answers very harshly (so the gradient is big when we're wrong).
+- Punishes confident wrong answers very harshly (so the gradient is big when you're wrong).
 - Has a convex shape with sigmoid (so gradient descent converges nicely).
 
 Enter log loss.
 
 ## Deriving log loss
 
-We want a cost function that:
+You want a cost function that:
 
-- Is small when ŷ ≈ y (we predicted correctly)
-- Grows large as ŷ moves away from y (we predicted wrong)
-- Grows *very* large when we are confidently wrong
+- Is small when ŷ ≈ y (you predicted correctly)
+- Grows large as ŷ moves away from y (you predicted wrong)
+- Grows *very* large when you are confidently wrong
 
-Consider one example with the true label y = 1. The model predicted ŷ. We want a "loss for one example" that:
+Consider one example with the true label y = 1. The model predicted ŷ. You want a "loss for one example" that:
 
-- Is near 0 when ŷ ≈ 1 (we got it right)
-- Goes to ∞ when ŷ ≈ 0 (we predicted "definitely class 0" but the answer was class 1)
+- Is near 0 when ŷ ≈ 1 (you got it right)
+- Goes to ∞ when ŷ ≈ 0 (you predicted "definitely class 0" but the answer was class 1)
 
 The function <Math tex="-\log(\hat{y})" /> does exactly this:
 
@@ -110,10 +104,10 @@ So for y = 1, the per-example loss is <Math tex="-\log(\hat{y})" />.
 
 Symmetrically, for y = 0:
 
-- We want loss small when ŷ ≈ 0 and huge when ŷ ≈ 1.
+- You want loss small when ŷ ≈ 0 and huge when ŷ ≈ 1.
 - The function <Math tex="-\log(1 - \hat{y})" /> does this.
 
-We can combine these two cases into one formula using a clever trick. When y = 1, we want the y=1 piece. When y = 0, we want the y=0 piece. Multiply each piece by a factor that's 1 in its case and 0 in the other:
+You can combine these two cases into one formula using a clever trick. When y = 1, you want the y=1 piece. When y = 0, you want the y=0 piece. Multiply each piece by a factor that's 1 in its case and 0 in the other:
 
 <Math tex="\text{Loss}_i = -[\, y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \,]" display />
 
@@ -154,9 +148,11 @@ It's a line with slope <Math tex="-w_1/w_2" /> and intercept <Math tex="-b/w_2" 
 
 For 3 features, the boundary is a plane. For higher dimensions, a hyperplane. Logistic regression separates classes with linear boundaries.
 
-**The limitation this makes obvious:** if the orange dots and blue dots can't be separated by a straight line (e.g., orange dots in a circle inside a ring of blue), no logistic regression will work. We'd need a more flexible model. That's exactly what neural networks solve in Phase 4.
+**The limitation this makes obvious:** if the orange dots and blue dots can't be separated by a straight line (e.g., orange dots in a circle inside a ring of blue), no logistic regression will work. You'd need a more flexible model. That's exactly what neural networks solve in Phase 4.
 
 ## Implement logistic regression from scratch
+
+Open Colab.
 
 ```python
 import numpy as np
@@ -178,7 +174,7 @@ plt.title('Sigmoid: maps any z to (0, 1)')
 plt.show()
 ```
 
-Now the model. Same shape as linear regression code from Session 6, three small changes:
+Now the model. Same shape as linear regression code from Chapter 6, three small changes:
 
 1. Predictions go through σ.
 2. Cost is log loss.
@@ -251,8 +247,6 @@ Final b: 0.034
 Final loss: 0.1352
 Accuracy: 0.990`}</Output>
 
-Plot the loss over iterations:
-
 ```python
 plt.plot(loss_history)
 plt.xlabel('Iteration')
@@ -261,7 +255,7 @@ plt.title('Training a logistic regression from scratch')
 plt.show()
 ```
 
-Smooth, fast convergence. *"That's logistic regression. Six functions, gradient descent, sigmoid wrapper. You just wrote the algorithm Gmail uses for spam, scaled down."*
+Smooth, fast convergence. *That's logistic regression.* Six functions, gradient descent, sigmoid wrapper. You just wrote the algorithm Gmail uses for spam, scaled down.
 
 ## Visualize the decision boundary
 
@@ -279,23 +273,23 @@ plt.xlabel('x1'); plt.ylabel('x2')
 plt.legend(); plt.show()
 ```
 
-The red line cleanly separates the two clusters. *"That line is exactly the equation w₁x₁ + w₂x₂ + b = 0. The model learned where to put it."*
+The red line cleanly separates the two clusters. *That line is exactly the equation w₁x₁ + w₂x₂ + b = 0. The model learned where to put it.*
 
 ## scikit-learn equivalent
 
-After the from-scratch version, show the one-liner:
+After the from-scratch version, see the one-liner:
 
 ```python
 from sklearn.linear_model import LogisticRegression
 
 model = LogisticRegression()
 model.fit(X, y)
-print("sklearn weights:", model.coef_)        # very close to our w
-print("sklearn bias:", model.intercept_)      # very close to our b
+print("sklearn weights:", model.coef_)        # very close to your w
+print("sklearn bias:", model.intercept_)      # very close to your b
 print("sklearn accuracy:", model.score(X, y))
 ```
 
-The numbers match (give or take small differences in regularization defaults). *"Now you understand what sklearn is doing. Always understand a thing before you outsource it."*
+The numbers match (give or take small differences in regularization defaults). *Now you understand what sklearn is doing. Always understand a thing before you outsource it.*
 
 ## Vocabulary
 
@@ -307,29 +301,14 @@ The numbers match (give or take small differences in regularization defaults). *
   <Term name="Log loss / binary cross-entropy">The standard cost function for binary classification.</Term>
 </Vocab>
 
-<Activity title="Live decision boundary" duration="20 min">
-
-The Lab's most engaging activity. A 2D plotting canvas. Students click to drop points; class toggle (orange/blue) sets which class.
-
-After every click, a logistic regression is fit. The decision boundary appears live. Background is shaded by predicted probability.
-
-**Challenges:**
-
-1. Place 4 points so the boundary is a vertical line.
-2. Place 4 points so the boundary is a 45-degree diagonal.
-3. Try to make a configuration the model *can't* separate. (Easiest: orange dots in a circle around blue dots in the center.) Take a screenshot. Why is logistic regression failing?
-4. Toggle on "polynomial features" (which adds x₁², x₂², x₁x₂ to the feature set). Re-train. The boundary curves and now solves the circle problem. Why?
-
-</Activity>
-
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Why is it called 'logistic regression' if it does classification?">
-Historical naming. The sigmoid is also called the "logistic function." So it's "regression that uses the logistic function," and we use it for classification by thresholding. ML names are mostly bad. You get used to it.
+Historical naming. The sigmoid is also called the "logistic function." So it's "regression that uses the logistic function," and you use it for classification by thresholding. ML names are mostly bad. You get used to it.
   </Q>
   <Q q="What if I have more than two classes?">
-**Multinomial logistic regression** (or softmax regression). The sigmoid generalizes to **softmax**, which outputs a probability for each of K classes (summing to 1). We'll use softmax in Session 12.
+**Multinomial logistic regression** (or softmax regression). The sigmoid generalizes to **softmax**, which outputs a probability for each of K classes (summing to 1). You'll use softmax in Chapter 12.
   </Q>
   <Q q="Is the threshold of 0.5 always right?">
 No. For spam, you might use 0.9 (only flag if very confident). For cancer screening, you might use 0.1 (flag any suspicion). Domain decision.
@@ -339,6 +318,6 @@ Yes. It's the negative log-likelihood of the data under the model. Maximizing th
   </Q>
 </FAQ>
 
-<Bridge to="Session 9 — When models lie">
-You can build a model that classifies. But how do you know it's actually good? You could fit your training data perfectly and still be useless on new data. That's overfitting, and detecting it is the most important practical skill in ML. Next session: train/test splits, the overfitting curve, and L2 regularization.
+<Bridge to="Chapter 9 — When models lie">
+You can build a model that classifies. But how do you know it's actually good? You could fit your training data perfectly and still be useless on new data. That's overfitting, and detecting it is the most important practical skill in ML. Next: train/test splits, the overfitting curve, and L2 regularization.
 </Bridge>

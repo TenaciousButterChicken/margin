@@ -1,94 +1,98 @@
 <BigIdea>
-Each student presents one small project. The point isn't to dazzle. It's to see the year in retrospect: what we covered, what each student did, where they might go next.
+You'll present one small project you've built this year. The point isn't to dazzle. It's to see the year in retrospect: what you covered, what you did, where you might go next.
 </BigIdea>
 
 <Callout variant="boss">
-This is the end-of-year celebration. Invite faculty, parents, and friends. Order food.
+This is the end-of-year celebration. Faculty, parents, and friends are invited. There will be food.
 </Callout>
 
-**Format.** Each student gets 4 to 6 minutes: 3 minutes presentation, 1 to 2 minutes Q&A. Bring a soft timer. 16 students at 5 minutes each is 80 minutes; if you have a 60-minute meeting, do this over two sessions or run a longer event.
+**Format.** Each person gets 4 to 6 minutes: 3 minutes presentation, 1 to 2 minutes Q&A.
 
-## Project scope (set this in Session 14)
+## Project scope
 
 Projects should be small. Goal: "I built and understood something," not "recreate AlphaGo."
 
-Suggested formats:
+Pick one of these formats:
 
-- **A trained model.** Predicting club attendance from features. Predicting your next month's Spotify listening. Sentiment classifier for tweets.
-- **A built application.** Web app or notebook demonstrating an ML concept. "Draw a digit, see what the model sees." An attention visualizer.
-- **A presentation about a paper or system.** For students who don't want to code: pick a recent ML paper, present what it does, why it matters, what surprised them. AlphaFold. Anthropic's interpretability research.
-- **An ethical analysis.** Pick an AI deployment in the news (a hiring system, court risk score, content moderation). Explain how it works, what's gone wrong, what they'd change.
+**A trained model.** Predicting club attendance from features. Predicting your next month's Spotify listening from past listening. Sentiment classifier for tweets. Movie rating predictor.
 
-In Session 14, students pitch project ideas. Two weeks before showcase, a 5-minute check-in. Students without a clear project get matched into pairs and given a starter idea.
+**A built application.** Web app or notebook demonstrating an ML concept. "Draw a digit, see what the model sees." An attention visualizer. An interactive overfitting explorer.
 
-## Student presentation template
+**A presentation about a paper or system.** If you don't want to code: pick a recent ML paper or system, present what it does, why it matters, what surprised you. AlphaFold. Anthropic's interpretability research. The latest open-source model release.
 
-Encourage roughly this structure for 3 minutes:
+**An ethical analysis.** Pick an AI deployment in the news (a hiring system, court risk score, content moderation, a generative AI controversy). Explain how it works, what's gone wrong, what you'd change.
+
+## Project planning timeline
+
+You'll pitch your project idea at the end of Chapter 14. Two weeks before showcase, there's a 5-minute check-in. By then you should have:
+
+- A clear question or goal
+- A dataset (if applicable) or chosen paper / system
+- A baseline result (even if weak), if it's a coding project
+- One slide describing what you've done so far
+
+If you don't have a clear project by check-in time, you'll be paired with someone and given a starter idea. Nobody fails this. Everyone presents.
+
+## Presentation structure
+
+Aim for roughly this structure for your 3 minutes:
 
 1. **The question (15 seconds).** "I wanted to know if I could predict X from Y."
 2. **The data (30 seconds).** Where it came from, what it looks like, how big.
 3. **The approach (45 seconds).** What model, what features, how trained.
 4. **The result (45 seconds).** What worked, what didn't. A chart or two.
-5. **What I learned (45 seconds).** One thing they want the room to take away.
+5. **What I learned (45 seconds).** One thing you want the room to take away.
 
-Provide a slide template with these sections. Keep slide counts low (5 to 8 max).
+Slide count: 5 to 8 slides max. Don't bury the audience in text. One idea per slide.
 
-## Teacher's job
+## Questions you'll be asked
 
-Three things:
+A few prompts that might come up during your Q&A:
 
-- **Time-keep ruthlessly.** Soft timer at 3 minutes, hard cutoff at 4. Otherwise the showcase runs long and loses momentum.
-- **Ask one good question per student.** Pre-prep one based on their topic. Gives them confidence; gives audience something to learn.
-- **Bridge between presentations.** A one-line connection. *"Saanvi just used logistic regression on a small dataset. Diego is going to use a neural network on a bigger one. Both came from Phases 2 and 4."*
+- "Why did you pick this project?"
+- "What was the hardest part?"
+- "If you had another month, what would you do next?"
+- "What surprised you most?"
+- "What would you tell a 10th grader thinking about doing this?"
 
-## Year wrap (final 10 minutes)
+Have rough answers in mind. The Q&A is short and friendly, not adversarial.
 
-After the last student, take 10 minutes for year-in-review. Show a slide with the 16 sessions. Walk through:
+## Year in review
 
-- *"Phase 1, we asked 'why care.' Look how far we've come."*
-- *"Phase 2, we built our first model and derived gradient descent from y = mx + b. That algorithm is in every system you use now."*
-- *"Phase 3, you derived sigmoid and log loss, implemented logistic regression from scratch, and built the Titanic project."*
-- *"Phase 4, you derived backprop using the chain rule, implemented it in numpy, and trained a real neural network."*
-- *"Phase 5, you saw transformers and attention. You can read 'Attention Is All You Need' now and follow it."*
+After everyone has presented, the last 10 minutes recap what you've covered. Reading it back here in textbook form:
 
-End with what's next. Three concrete recommendations:
+- **Phase 1 asked "why care."** You saw what ML is, the three flavors of learning, and why data is everything.
+- **Phase 2 was your first real model.** You derived gradient descent from y = mx + b. That algorithm is in every system you use now.
+- **Phase 3 was classification.** You derived sigmoid and log loss, implemented logistic regression from scratch, and built the Titanic project.
+- **Phase 4 was neural networks.** You derived backprop using the chain rule, implemented it in numpy, and trained a real neural network on spirals.
+- **Phase 5 was the modern era.** You saw transformers and attention. You can now read "Attention Is All You Need" and follow it.
 
-- **Andrew Ng's Machine Learning Specialization** on Coursera, for students who want the full math treatment.
-- **Fast.ai's Practical Deep Learning for Coders**, for students who want code-first depth.
-- **Build a project of your own.** Find a dataset that interests you. Try.
+## What's next
 
-End with: *"Six months ago, most of you couldn't have explained 'machine learning.' Now you can derive its core algorithms, implement them in code, and explain what's inside ChatGPT. Whatever you do next, you understand the technology reshaping your world. That's a permanent change. Good luck."*
+Three concrete recommendations for staying with ML after the year:
 
-## Likely student questions during Q&A
+- **Andrew Ng's Machine Learning Specialization** on Coursera, if you want the full math treatment, taught by one of the field's clearest explainers.
+- **Fast.ai's Practical Deep Learning for Coders**, if you want code-first depth. Top-down approach: build big things first, understand them later.
+- **Build a project of your own.** Find a dataset that interests you. Try. The best way to keep learning is to keep doing.
 
-Have a few prompts ready in case the room goes silent:
+Six months ago, most of you couldn't have explained "machine learning." Now you can derive its core algorithms, implement them in code, and explain what's inside ChatGPT. Whatever you do next, you understand the technology reshaping your world. That's a permanent change.
 
-<FAQ>
-  <Q q="Why did you pick this project?">
-Open-ended. Lets the presenter tell their own story.
-  </Q>
-  <Q q="What was the hardest part?">
-Reveals real learning more than the polished result.
-  </Q>
-  <Q q="If you had another month, what would you do next?">
-Lets them dream a little.
-  </Q>
-  <Q q="What surprised you most?">
-Often the best answer of the day.
-  </Q>
-  <Q q="What would you tell a 10th grader thinking about doing this?">
-Recruits next year's club.
-  </Q>
-</FAQ>
+## What you can do now
 
-## After the showcase
+By the end of this book, if you worked through it consistently, you can:
 
-Three concrete artifacts:
+- Derive linear regression's MSE and its gradient from y = mx + b
+- Implement gradient descent in numpy from scratch and watch it converge
+- Derive sigmoid and log loss, and explain why they fit together
+- Implement logistic regression from scratch
+- Detect overfitting and apply L2 regularization
+- Implement backpropagation for a 2-layer network
+- Use scikit-learn and PyTorch for real projects
+- Explain the math of self-attention and outline a transformer
+- Articulate the limits of ML (bias, overfitting, hallucinations) with examples
 
-1. **Class hall-of-fame document.** Each student's project title, one-paragraph summary, screenshot. Share with parents and school. Useful for next year's recruiting.
-2. **Notes for next year.** What worked, what didn't, which sessions ran long, which activities landed. Future-you will thank present-you.
-3. **A graduation message** to each student via email, acknowledging their specific contributions. 30 minutes of work; students remember years later.
+That's a real foundation. It's also a foundation for the rest of your life, whichever way you go. Good luck.
 
 <Bridge to="Whatever comes next">
-By the end of Session 16, students who attended consistently can derive linear regression's MSE and its gradient from y = mx + b, implement gradient descent and backprop in numpy from scratch, and explain the math of self-attention. That's a real outcome for a school-year club. It's also a foundation for the rest of their careers. Good luck building.
+*End of textbook.*
 </Bridge>

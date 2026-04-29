@@ -1,5 +1,5 @@
 <BigIdea>
-Gradient descent: a simple, beautiful algorithm. Stand somewhere on the cost surface. Compute which way is downhill. Take a small step. Repeat. Done enough times, you find the minimum. We'll derive the gradient for MSE, code the algorithm from scratch, and watch our model train in real time.
+Gradient descent is a simple, beautiful algorithm. Stand somewhere on the cost surface. Compute which way is downhill. Take a small step. Repeat. Done enough times, you find the minimum. You'll derive the gradient for MSE, code the algorithm from scratch, and watch your model train in real time.
 </BigIdea>
 
 <Objectives>
@@ -9,15 +9,9 @@ Gradient descent: a simple, beautiful algorithm. Stand somewhere on the cost sur
   <Objective>Predict what happens when the learning rate is too big or too small</Objective>
 </Objectives>
 
-## Opening hook
-
-Show a 2-minute clip of a robot trying to learn to walk in simulation (DeepMind's parkour humanoid, or Boston Dynamics simulator footage). It falls. Gets up. Falls a different way. After thousands of attempts, it walks. After millions, it parkours.
-
-*"That robot didn't have someone telling it 'move your left leg 30 degrees forward.' It had a simple rule: try things, and if your reward goes up, do more of that. The mathematical version of that rule is gradient descent. By the end of the hour, you will have implemented it from scratch in 20 lines of Python and used it to train your first model."*
-
 ## The blindfolded hiker
 
-Recall: the cost function is a surface. For linear regression, it's a 3D bowl. The lowest point is the best (w, b). We want to find it.
+Recall: the cost function is a surface. For linear regression, it's a 3D bowl. The lowest point is the best (w, b). You want to find it.
 
 Imagine you're a hiker, blindfolded, standing somewhere on this hilly landscape. Your goal: get to the lowest point. You can't see anything. You can only feel the ground around your feet.
 
@@ -35,7 +29,7 @@ For linear regression, the cost surface is a perfect bowl (convex), so this stra
 
 ## A 60-second refresher on derivatives
 
-To compute the gradient, we need derivatives. If you've taken calculus, you've seen this. If not, here's the quick version.
+To compute the gradient, you need derivatives. If you've taken calculus, you've seen this. If not, here's the quick version.
 
 **The derivative of a function tells you its slope at a point.**
 
@@ -45,30 +39,30 @@ Consider <Math tex="f(x) = x^2" />. Its graph is a parabola.
 - At x = −1, it's going down. The derivative is negative.
 - At x = 0, it's flat at the bottom. The derivative is zero.
 
-There's a formula for the derivative of <Math tex="x^2" />: it's <Math tex="2x" />. So at x = 1, the derivative is 2. At x = −1, it's −2. At x = 0, it's 0. Matches our intuition.
+There's a formula for the derivative of <Math tex="x^2" />: it's <Math tex="2x" />. So at x = 1, the derivative is 2. At x = −1, it's −2. At x = 0, it's 0. Matches your intuition.
 
-**Three derivative rules we need:**
+**Three derivative rules you need:**
 
 1. **Power rule.** Derivative of <Math tex="x^n" /> is <Math tex="n \cdot x^{n-1}" />. So <Math tex="x^2 \to 2x" />, <Math tex="x^3 \to 3x^2" />.
 2. **Constant rule.** Derivative of a constant is 0.
 3. **Chain rule.** Derivative of <Math tex="f(g(x))" /> is <Math tex="f'(g(x)) \cdot g'(x)" />. The "outer" derivative times the "inner" derivative.
 
-**Partial derivatives** are derivatives when the function has multiple variables. We hold all other variables constant and take the regular derivative with respect to one. Notation: <Math tex="\partial f / \partial x" /> ("partial dee f, partial dee x") means "derivative of f, treating all other variables as constants."
+**Partial derivatives** are derivatives when the function has multiple variables. You hold all other variables constant and take the regular derivative with respect to one. Notation: <Math tex="\partial f / \partial x" /> ("partial dee f, partial dee x") means "derivative of f, treating all other variables as constants."
 
 Example: <Math tex="f(w, b) = w^2 + 3wb + b^3" />.
 
 - <Math tex="\partial f / \partial w" /> (treat b as constant): <Math tex="2w + 3b" />
 - <Math tex="\partial f / \partial b" /> (treat w as constant): <Math tex="3w + 3b^2" />
 
-That's all the calculus we need. If this is brand new, it'll feel weird for one session and become natural by Session 7.
+That's all the calculus you need. If this is brand new, it'll feel weird for one chapter and become natural by Chapter 7.
 
 ## The gradient of MSE
 
-Now apply derivatives to our cost function. Recall:
+Now apply derivatives to the cost function. Recall:
 
 <Math tex="J(w, b) = \tfrac{1}{2N} \sum_i (wx_i + b - y_i)^2" display />
 
-(We use the 1/(2N) version because the 2 will cancel out cleanly. See the aside in Session 5.)
+(Using the 1/(2N) version because the 2 will cancel out cleanly. See the aside in Chapter 5.)
 
 **Take ∂J/∂w.** Treat b as a constant. Use the chain rule on the square.
 
@@ -86,27 +80,27 @@ Sum over i, multiply by 1/(2N), and the 2 cancels with the 1/2:
 
 <Math tex="\frac{\partial J}{\partial b} = \tfrac{1}{N} \sum_i (\hat{y}_i - y_i)" display />
 
-These two formulas are the **gradient** of MSE. They tell us, for the current (w, b), which direction to nudge each parameter to *increase* J. We move the *opposite* way to decrease J.
+These two formulas are the **gradient** of MSE. They tell you, for the current (w, b), which direction to nudge each parameter to *increase* J. You move the *opposite* way to decrease J.
 
 **Pause and look at these formulas.** They have a beautiful structure.
 
-- ∂J/∂b is the average error (predicted minus actual). Big positive average error means b is too high; gradient is positive; we'll subtract from b. Big negative average error means b is too low; gradient is negative; we'll add to b. Self-correcting.
-- ∂J/∂w is the average error weighted by x. The <Math tex="x_i" /> factor says "errors at large-x points should pull on w more than errors at small-x points." Makes sense: w is the *slope*, so high-leverage points should influence the slope more.
+- ∂J/∂b is the average error (predicted minus actual). Big positive average error means b is too high; gradient is positive; you'll subtract from b. Big negative average error means b is too low; gradient is negative; you'll add to b. Self-correcting.
+- ∂J/∂w is the average error weighted by x. The <Math tex="x_i" /> factor says "errors at large-x points should pull on w more than errors at small-x points." Makes sense: w is the *slope*, so high-leverage points (large x) should influence the slope more.
 
 When the model is doing well, the average error is near zero, both gradients are small, and the steps are small. The algorithm naturally slows down as it approaches the answer. *Aesthetically beautiful.*
 
 ## The update rule
 
-Now we have gradients. The gradient descent update rule:
+Now you have gradients. The gradient descent update rule:
 
 <Math tex="w_{\text{new}} = w_{\text{old}} - \alpha \cdot \frac{\partial J}{\partial w}" display />
 <Math tex="b_{\text{new}} = b_{\text{old}} - \alpha \cdot \frac{\partial J}{\partial b}" display />
 
 α (alpha) is the **learning rate**, which controls how big a step to take.
 
-In English: "subtract a small fraction of the gradient from each parameter." The minus sign is because we want to go *opposite* to the gradient (downhill, not uphill).
+In English: "subtract a small fraction of the gradient from each parameter." The minus sign is because you want to go *opposite* to the gradient (downhill, not uphill).
 
-Repeat this update many times. Each iteration, the cost drops a bit. Eventually, we converge.
+Repeat this update many times. Each iteration, the cost drops a bit. Eventually, you converge.
 
 ## The learning rate trade-off
 
@@ -120,7 +114,7 @@ In practice, you tune the learning rate by trying values like 0.1, 0.01, 0.001 a
 
 ## Gradient descent from scratch
 
-This is the most important code block in the entire year. Walk through it slowly.
+This is the most important code block in the book. Read it slowly, line by line.
 
 ```python
 import numpy as np
@@ -187,7 +181,7 @@ Iter  900: w=2.523, b=4.689, cost=4.38
 Final: w=2.522, b=4.696
 True:  w=2.500, b=5.000`}</Output>
 
-**Stop and stare.** We started with w=0, b=0. After 1000 iterations of gradient descent, our model converged to w=2.52, b=4.70, very close to the true w=2.5, b=5.0. We just trained a model. We just ran *the same algorithm that trains GPT-4*, on a tiny dataset.
+Stop and stare. You started with w=0, b=0. After 1000 iterations of gradient descent, your model converged to w=2.52, b=4.70, very close to the true w=2.5, b=5.0. You just trained a model. You just ran *the same algorithm that trains GPT-4*, on a tiny dataset.
 
 ```python
 plt.plot(cost_history)
@@ -197,7 +191,7 @@ plt.title('Cost dropping during gradient descent')
 plt.show()
 ```
 
-The plot shows a steep drop in the first 50 iterations, then a slow flattening as we approach the minimum. *That curve is the universal shape of model training.*
+The plot shows a steep drop in the first 50 iterations, then a slow flattening as you approach the minimum. *That curve is the universal shape of model training.*
 
 ## Play with the learning rate
 
@@ -222,11 +216,11 @@ lr=0.0100: w=2.522, b=4.696, final cost=4.38     (just right)
 lr=0.1000: w=nan,    b=nan,   final cost=nan      (diverged!)
 lr=0.5000: w=nan,    b=nan,   final cost=nan      (diverged worse!)`}</Output>
 
-Live demonstration of the U-shape. Too small wastes time. Too big diverges. The right value is found by experimentation.
+A live demonstration of the U-shape. Too small wastes time. Too big diverges. The right value is found by experimentation.
 
 ## Why this generalizes to everything
 
-The punchline that makes Session 6 the conceptual peak of Phase 2:
+Here's the punchline that makes Chapter 6 the conceptual peak of Phase 2:
 
 > Every modern ML model is trained with gradient descent (or some variant of it).
 
@@ -245,37 +239,17 @@ When you understand gradient descent, you've understood the engine of the entire
 ## Vocabulary
 
 <Vocab>
-  <Term name="Gradient">The vector of partial derivatives of the cost with respect to each parameter. Tells you which way to move parameters to *increase* cost; we move opposite.</Term>
+  <Term name="Gradient">The vector of partial derivatives of the cost with respect to each parameter. Tells you which way to move parameters to *increase* cost; you move opposite.</Term>
   <Term name="Learning rate (α or sometimes η)">Step size for gradient descent.</Term>
   <Term name="Iteration / step">One round of: compute gradient, update parameters.</Term>
   <Term name="Convergence">When the cost has stopped dropping meaningfully.</Term>
 </Vocab>
 
-<Activity title="The gradient descent lab" duration="25 min">
-
-The Lab interactive (this is the marquee activity of Phase 2):
-
-- A 3D rotatable cost surface (the bowl from Session 5)
-- A "ball" starting at random (w, b)
-- Learning rate slider (logarithmic, 0.0001 to 10)
-- Play / Pause / Step / Reset buttons
-- Two side panels: cost over iterations, path traced on the (w, b) plane
-
-**Challenges:**
-
-1. With learning rate 0.1, count steps to convergence. (Roughly 30 to 50.)
-2. Increase learning rate to 1.5. Watch what happens. Why does the ball oscillate?
-3. Increase to 10. The ball flies off; cost goes to infinity. Why?
-4. Set to 0.0001. After 100 steps, has it gotten close? (No.)
-5. Find the learning rate that converges in fewer than 20 steps.
-
-</Activity>
-
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Why subtract instead of add?">
-The gradient points in the direction of *steepest increase*. We want to *decrease* the cost. So we subtract.
+The gradient points in the direction of *steepest increase*. You want to *decrease* the cost. So you subtract.
   </Q>
   <Q q="Does gradient descent always work?">
 It always *runs*. Whether it converges to the actual best parameters depends on the cost surface. For convex problems (like linear regression), yes. For non-convex (neural networks), it might find a local minimum that isn't the global one. In practice, deep learning works well anyway.
@@ -288,6 +262,6 @@ For linear regression, you can — closed-form formula called the normal equatio
   </Q>
 </FAQ>
 
-<Bridge to="Session 7 — Real-world regression">
-You now understand the heart of how machines learn. Every model in this club uses gradient descent. Next session, we make linear regression realistic: predicting house prices from multiple features at once. We'll generalize our equation to vectors, see why models care about the *scale* of features, and meet our first real-world dataset.
+<Bridge to="Chapter 7 — Real-world regression">
+You now understand the heart of how machines learn. Every model in this book uses gradient descent. Next: linear regression on real data. Predicting house prices from multiple features at once. We'll generalize the equation to vectors, see why models care about the *scale* of features, and meet a real-world dataset.
 </Bridge>

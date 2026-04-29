@@ -8,34 +8,25 @@ Computers used to do what we told them, line by line. Now they figure things out
   <Objective>Open Google Colab and run your first line of Python</Objective>
 </Objectives>
 
-## Opening hook — ML in the wild
-
-A 90-second demo reel, no narration:
-
-1. **A ChatGPT or Claude conversation.** Type a goofy prompt live, get a response.
-2. **An image generator.** Midjourney, DALL·E, or any current model. Generate "a raccoon writing a calculus exam in the style of Renaissance oil painting."
-3. **A self-driving car clip.** Waymo or Tesla footage navigating a busy intersection.
-4. **A live Spotify "Made For You" playlist.** Pulled from your own account. Talk through how oddly specific the song picks are.
-
-Then the line: *"Every single one of those things is the same thing under the hood. By the end of this year, you'll know what that thing is and how to build a tiny one yourself."*
-
 ## Rules vs. examples — the central shift
 
-This is the most important idea in the entire year.
+This is the most important idea in the entire book. If you get it, everything else follows. If you don't, nothing else makes sense.
 
-**The metaphor.** Imagine you're trying to teach a friend to recognize a cat.
+Imagine you're trying to teach a friend to recognize a cat.
 
-Old way (rules-based programming): you'd write a list. *"Has fur. Has four legs. Has whiskers. Says 'meow.' Tail under 14 inches. Eyes round and forward-facing…"* But every rule has an exception. Hairless cats. Three-legged cats. Kittens that haven't learned to meow. You'd be writing rules forever and you'd still get it wrong.
+The old way (rules-based programming): you'd write a list. *"Has fur. Has four legs. Has whiskers. Says 'meow.' Tail under 14 inches. Eyes round and forward-facing…"* But every rule has an exception. Hairless cats. Three-legged cats. Kittens that haven't learned to meow. You'd be writing rules forever and you'd still get it wrong.
 
-New way (machine learning): you show your friend ten thousand pictures of cats and ten thousand pictures of dogs, and just say "cat" or "dog" each time. After a while, they can tell new cats from new dogs without you ever having written down a single rule. They've **learned the pattern from examples**.
+The new way (machine learning): you show your friend ten thousand pictures of cats and ten thousand pictures of dogs, and just say "cat" or "dog" each time. After a while, they can tell new cats from new dogs without you ever having written down a single rule. They've **learned the pattern from examples**.
 
 That second way is machine learning. The whole field is just figuring out clever ways to do that "show examples and let it figure out the pattern" trick on harder and harder problems.
 
 <Callout variant="note">
-**Where the math is taking us.** In Phase 2, we'll formalize this. "Show examples and figure out the pattern" will become: *we have data points <Math tex="(x_i, y_i)" />, and we want to find a function f such that <Math tex="f(x_i) \approx y_i" /> for as many i as possible.* That sentence is most of machine learning. We'll spend the year unpacking what "function," "close," and "as possible" mean precisely.
+**Where this is going.** In Phase 2, you'll formalize this idea. "Show examples and figure out the pattern" will become: *we have data points <Math tex="(x_i, y_i)" />, and we want to find a function f such that <Math tex="f(x_i) \approx y_i" /> for as many i as possible.* That sentence is most of machine learning. The rest of the book unpacks what "function," "close," and "as possible" mean precisely.
 </Callout>
 
-## ML is already everywhere
+## Where you've already seen ML
+
+ML isn't some future thing. It's already running your life:
 
 | Where you've seen it | What's being predicted |
 |---|---|
@@ -48,33 +39,29 @@ That second way is machine learning. The whole field is just figuring out clever
 | ChatGPT / Claude / Gemini | What word should come next |
 | Self-driving cars | Where the lane is, what other cars will do |
 
-The point: students have been training ML systems with their behavior for years. Every time you skipped a song, watched a video to the end, or scrolled past a post, that was a labeled example feeding a model.
+You've been training ML systems with your behavior for years. Every time you skipped a song, watched a video to the end, or scrolled past a post, that was a labeled example feeding a model.
 
-## Three flavors of ML — a teaser
+## Three flavors of ML
 
-We'll unpack each flavor in Session 2.
+You'll see these names again and again. For now, just plant the flag — we unpack each one in the next chapter.
 
 - **Supervised learning.** Learning from labeled examples ("this is a cat, this is a dog").
 - **Unsupervised learning.** Finding patterns in unlabeled data.
 - **Reinforcement learning.** Learning by trial and error with rewards.
 
-Don't go deeper here. Plant the flag, move on.
+## Your first code — hello, Colab
 
-## First code — hello, Colab
+Open `colab.research.google.com`. Sign in with a Google account. Click "New notebook."
 
-Take 15 minutes to get every student into Google Colab and running a Python cell. This is the operational backbone of the rest of the year. Don't skip it.
-
-**Step 1.** Open `colab.research.google.com`. Sign in with a Google account. Click "New notebook."
-
-**Step 2.** In the first cell, type:
+In the first cell, type:
 
 ```python
-print("Hello, ML club.")
+print("Hello, ML.")
 ```
 
-Hit Shift+Enter. The output appears below.
+Hit Shift+Enter. The output appears below the cell.
 
-**Step 3.** Add a new cell. We'll do something slightly more ML-shaped: load a real dataset and look at it.
+Add a new cell. Now you'll do something slightly more ML-shaped: load a real dataset and look at it.
 
 ```python
 # Import pandas. Pandas is the standard library for working with
@@ -92,11 +79,11 @@ df = iris.frame
 df.head()
 ```
 
-When students run this, they see a small table: 5 rows, 5 columns. Sepal length, sepal width, petal length, petal width, target (the species).
+Run it. You'll see a small table: 5 rows, 5 columns. Sepal length, sepal width, petal length, petal width, target (the species).
 
-*"That table is a dataset. Every row is one example (one flower). Every column is one feature (one measurement). The 'target' column is the label, which species the flower is. By the end of Phase 3, you will train a model on this exact dataset that can identify a flower's species from its measurements with 95+% accuracy."*
+That table is a dataset. Every row is one example (one flower). Every column is one feature (one measurement). The `target` column is the label — which species the flower is. By the end of Phase 3, you will train a model on this exact dataset that can identify a flower's species from its measurements with 95+% accuracy.
 
-**Step 4.** One more cell, just to plant the visual:
+Run one more cell to see why the dataset is so well-loved:
 
 ```python
 import matplotlib.pyplot as plt
@@ -110,45 +97,36 @@ plt.title('Iris dataset: three species are visibly separable')
 plt.show()
 ```
 
-The output: three colored clusters in a 2D plot. *"Look at that. Three different species form three visible groups, just from two measurements. Your job by the end of the year: turn that visible separation into an algorithm a computer can use."*
+The output shows three colored clusters in a 2D plot. Three different species form three visible groups, just from two measurements. Your job by the end of the year is to turn that visible separation into an algorithm a computer can use.
 
 ## Vocabulary
 
 <Vocab>
   <Term name="Model">The thing that takes an input and produces a prediction.</Term>
   <Term name="Training">The process of showing a model examples so it learns the pattern.</Term>
-  <Term name="Prediction">What the model outputs when you give it a new input.</Term>
+  <Term name="Prediction">What the model outputs when given a new input.</Term>
 </Vocab>
 
-<Activity title="AI or Real?" duration="20 min">
-
-**Setup.** Prepare 10 images. Five are AI-generated (Midjourney, DALL·E, recent diffusion model output), five are real photos. Mix in some easy ones (obvious AI artifacts like extra fingers or melting backgrounds) and some genuinely hard ones.
-
-**Format.** Project each image for 20 seconds. Students mark "AI" or "Real" on a worksheet, plus a 1 to 5 confidence rating and a one-line note ("looked off in the hands").
-
-**The reveal.** Walk through each image. Ask volunteers to share their reasoning before revealing. Tally a class score for the room.
-
-**The point.** Most classes score 5 to 7 out of 10. *"A computer made something that the most visually-trained human eyes in this room couldn't reliably distinguish from reality. That capability didn't exist five years ago. By the end of the year, you'll know how it works."*
-
-</Activity>
-
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Is this just programming?">
-No. In programming, you write the rules. In ML, you show examples and the system learns the rules.
+No. In programming, you write the rules. In ML, you show examples and the system learns the rules. A spam filter from 1995 was programming. The one in your Gmail today is ML.
   </Q>
   <Q q="Is AI going to take my job?">
-Some jobs change a lot, some change a little, almost none are unchanged in 10 years. The students who understand how this stuff works will be the ones shaping that change instead of being shaped by it.
+Honest answer: some jobs will change a lot, some will change a little, almost none will be unchanged in ten years. Students who understand how this stuff works will be the ones shaping that change instead of being shaped by it. That's why this book exists.
   </Q>
   <Q q="Is this going to be math-heavy?">
-Yes, but the math is built up from algebra you already know. Each concept extends the previous one. We're going to derive the equations, not just hand them to you. If you can get to y = mx + b, you can get to ChatGPT, with enough sessions in between.
+Yes, but the math is built from algebra you already know. Each idea extends the previous one. We derive the equations together; you don't just have to memorize them. If you can get to y = mx + b, you can get to ChatGPT, with enough chapters in between.
   </Q>
   <Q q="Is ML the same as AI?">
-Loosely yes for this club. Strictly: AI is the goal, ML is the dominant approach to that goal.
+Loosely yes. Strictly: AI is the goal (making machines do "intelligent" things), ML is the dominant approach to that goal (get there by learning from data).
+  </Q>
+  <Q q="Can a computer really 'learn'?">
+Depends what you mean. It doesn't understand things the way you do. But if "learn" means "improve performance on a task by being exposed to examples," then yes. We'll spend the year making this precise.
   </Q>
 </FAQ>
 
-<Bridge to="Session 2 — Teaching computers like teaching kids">
-Today we said ML learns from examples. Different ways to give a computer examples produce different flavors of ML. Next time, we'll see the three big flavors, and you'll train your own ML model from scratch in your browser.
+<Bridge to="Chapter 2 — Teaching computers like teaching kids">
+You've seen what ML is. Next, the three big flavors of how computers actually learn from data — and you'll train your first real model from scratch in a browser tab.
 </Bridge>

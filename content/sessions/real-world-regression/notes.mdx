@@ -1,5 +1,5 @@
 <BigIdea>
-Real datasets have many features, not one. House prices depend on size, bedrooms, location, age — dozens of variables. Linear regression generalizes gracefully to multiple features. The math becomes vector math. The code becomes a few extra lines. Two new traps appear: features at different scales, and features that don't actually help.
+Real datasets have many features, not one. House prices depend on size, bedrooms, location, age — dozens of variables. Linear regression generalizes gracefully. The math becomes vector math. The code becomes a few extra lines. Two new traps appear: features at different scales, and features that don't actually help.
 </BigIdea>
 
 <Objectives>
@@ -9,15 +9,9 @@ Real datasets have many features, not one. House prices depend on size, bedrooms
   <Objective>Inspect a model's learned weights and interpret them</Objective>
 </Objectives>
 
-## Opening hook
-
-Pull up Zillow on the projector. Search a house in your city. Show the price estimate ("Zestimate"). Click to see what features Zillow used.
-
-*"Zillow's price estimate is a real-world ML model. It uses dozens of features about a house: size, bedrooms, lot size, school district, recent neighborhood sales, year built. Today, you build a baby Zestimate."*
-
 ## From one feature to many
 
-Last sessions, we predicted from one feature:
+In previous chapters, you predicted from one feature:
 
 <Math tex="\hat{y} = wx + b" display />
 
@@ -39,7 +33,7 @@ For n features, in general:
 
 ## Vector notation
 
-Writing all those weights is annoying. Vector notation packs it up:
+Writing all those weights is annoying. Vector notation packs it up.
 
 Let **x** be a vector of features (an n-dimensional vector), **w** a vector of weights. Then:
 
@@ -49,7 +43,7 @@ The dot is a **dot product**: multiply corresponding components and sum.
 
 <Math tex="\mathbf{w} \cdot \mathbf{x} = w_1 x_1 + w_2 x_2 + \dots + w_n x_n" display />
 
-So **w** · **x** + b is *exactly* what we wrote above, just shorter. You'll see this notation everywhere in ML papers. It scales the same way to 10 features, 100, 10,000.
+So **w** · **x** + b is *exactly* what you wrote above, just shorter. You'll see this notation everywhere in ML papers. It scales the same way to 10 features, 100, 10,000.
 
 The cost function generalizes too. With multiple features, MSE is still:
 
@@ -59,7 +53,7 @@ The only thing that changed: <Math tex="\hat{y}_i" /> is now <Math tex="\mathbf{
 
 ## Gradient descent with vectors
 
-The update rule generalizes too. Now we have a gradient component for each weight:
+The update rule generalizes too. Now you have a gradient component for each weight:
 
 <Math tex="\frac{\partial J}{\partial w_j} = \tfrac{1}{N} \sum_i (\hat{y}_i - y_i) \cdot x_{ij} \quad \text{for each } j" display />
 <Math tex="\frac{\partial J}{\partial b} = \tfrac{1}{N} \sum_i (\hat{y}_i - y_i)" display />
@@ -160,13 +154,13 @@ Test MSE:  0.556
   Longitude   : weight = -0.870
   intercept   : +2.072`}</Output>
 
-Walk through what these mean. The MSE on test is 0.556, which (since the target is in units of $100k, squared) means the typical prediction is off by about √0.556 × $100k ≈ $75k. Not amazing, but reasonable for such a simple model.
+What do these mean? The MSE on test is 0.556, which (since the target is in units of $100k, squared) means the typical prediction is off by about √0.556 × $100k ≈ $75k. Not amazing, but reasonable for such a simple model.
 
-The largest absolute weights tell us what the model relies on most:
+The largest absolute weights tell you what the model relies on most:
 
 - `MedInc` (median income): big positive. Higher income areas → higher prices. Makes sense.
 - `Latitude` and `Longitude`: big negative. The north and east have lower prices in California. The model has learned California geography.
-- `AveRooms`: small negative. Surprising! More rooms per household, lower prices? Could be because more rooms per household correlates with rural/lower-density areas, where prices are lower despite the size. This is the kind of weird thing a real model surfaces.
+- `AveRooms`: small negative. Surprising! More rooms per household, lower prices? This is probably because more rooms per household correlates with rural/lower-density areas, where prices are lower despite the size. This is the kind of weird thing a real model surfaces.
 
 ## The scaling demo
 
@@ -192,7 +186,7 @@ model_scaled.fit(X_train_scaled, y_train)
 print(f"  Test MSE: {mean_squared_error(y_test, model_scaled.predict(X_test_scaled)):.3f}")
 ```
 
-The unscaled version often produces astronomical MSE or NaN values. The scaled version converges to a reasonable result. *"Same algorithm, same data. The only difference is whether we standardized first. This is why feature scaling is the first thing every ML practitioner does on a new dataset."*
+The unscaled version often produces astronomical MSE or NaN values. The scaled version converges to a reasonable result. *Same algorithm, same data. The only difference is whether we standardized first.* This is why feature scaling is the first thing every ML practitioner does on a new dataset.
 
 ## More features aren't always better
 
@@ -218,9 +212,9 @@ This is where feature engineering matters. Picking, transforming, and combining 
 
 <Activity title="Housing price predictor" duration="30 min">
 
-The Lab notebook. Walk through:
+Take the Colab notebook above and:
 
-1. Load data, plot histograms of features.
+1. Load the data, plot histograms of features.
 2. Train linear regression with one feature (`MedInc`). Print MSE.
 3. Add features one at a time. Watch MSE drop.
 4. Add a deliberately useless feature (random numbers). Watch what happens (MSE barely changes; the weight on the useless feature is near zero).
@@ -231,11 +225,11 @@ The Lab notebook. Walk through:
 
 </Activity>
 
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="Can the model handle words as features, like 'neighborhood name'?">
-Not directly. Linear regression needs numerical inputs. We turn categories into numbers via **one-hot encoding** (a separate 0/1 column per category) or, for many categories, embeddings (Phase 5).
+Not directly. Linear regression needs numerical inputs. You turn categories into numbers via **one-hot encoding** (a separate 0/1 column per category) or, for many categories, embeddings (Phase 5).
   </Q>
   <Q q="What if I don't know which features will help?">
 That's the normal case. Real ML practice is half "throw features at the wall and see what sticks" and half "carefully engineer based on domain knowledge." Tools like feature-importance scores tell you which features the model leans on most.
@@ -248,6 +242,6 @@ Probably not just one. Modern Zestimates use ensembles of more sophisticated mod
   </Q>
 </FAQ>
 
-<Bridge to="Session 8 — Cats or dogs?">
-Phase 2 is done. You've built a real model that predicts house prices from data. But what if the thing you're predicting isn't a number? What if it's a category, like "is this email spam"? That's classification. We meet a new model (logistic regression), a new cost function (log loss), and a new squish function (sigmoid). Same machinery, new toolkit.
+<Bridge to="Chapter 8 — Cats or dogs?">
+Phase 2 is done. You've built a real model that predicts house prices from data. But what if the thing you're predicting isn't a number? What if it's a category, like "is this email spam"? That's classification. Next: a new model (logistic regression), a new cost function (log loss), and a new squish function (sigmoid). Same machinery, new toolkit.
 </Bridge>

@@ -1,5 +1,5 @@
 <BigIdea>
-Each layer of a deep network learns a more abstract feature than the layer before. Early layers see edges. Middle layers see shapes. Late layers see whole objects. This automatic feature hierarchy is why deep learning works. We'll train a CNN on real images and visualize what it learns.
+Each layer of a deep network learns a more abstract feature than the layer before. Early layers see edges. Middle layers see shapes. Late layers see whole objects. This automatic feature hierarchy is why deep learning works. You'll train a CNN on real images and visualize what it learns.
 </BigIdea>
 
 <Objectives>
@@ -8,12 +8,6 @@ Each layer of a deep network learns a more abstract feature than the layer befor
   <Objective>Train an image classifier on Fashion-MNIST in Keras</Objective>
   <Objective>Visualize what the first layer of a trained CNN has learned</Objective>
 </Objectives>
-
-## Opening hook
-
-Show outputs from feature-visualization research (e.g., Distill.pub's "Feature Visualization" article). Early-layer neurons fire for diagonal lines and color blobs. Middle-layer neurons fire for textures (fur, scales, woven fabric). Late-layer neurons fire for whole concepts (dog faces, cars, eyes).
-
-*"Today, we look inside a deep neural network to see what each layer is doing. Each layer learns more abstract features than the one before. That hierarchy is the secret sauce of deep learning."*
 
 ## Features, stacked
 
@@ -28,9 +22,9 @@ Take a network trained to classify animal images:
 
 This is **feature hierarchy**. Each layer's outputs become the next layer's inputs, and each layer learns a more abstract transformation.
 
-The wild thing: nobody told the network what features to use. We just gave it labeled images and gradient descent. These features emerged because they're what the math needs to do the job.
+The wild thing: nobody told the network what features to use. The network was given labeled images and gradient descent. These features emerged because they're what the math needs to do the job.
 
-## Convolutional neural networks (CNNs)
+## Convolutional Neural Networks (CNNs)
 
 For images specifically, plain feedforward networks (every neuron connected to every input pixel) are wasteful. A 224×224 color image is 150,528 numbers. The first layer with 100 neurons would have 15 million weights. Most of those weights would have to redundantly learn the same patterns at different image positions.
 
@@ -38,11 +32,11 @@ The fix: **convolutional layers**. Instead of each neuron looking at the whole i
 
 **The math of convolution.** A small filter is a small weight matrix, say 3×3. To apply it at a position in the image, multiply the filter element-wise with the 3×3 patch at that position, sum the results, add a bias, apply activation. Slide the filter to the next position. Repeat across the whole image. The output is a "feature map" highlighting where the filter's pattern was detected.
 
-A convolutional *layer* has many filters (say 32), each detecting a different pattern. Output: 32 feature maps. Stack convolutional layers, just like in Session 11, and you build feature hierarchies.
+A convolutional *layer* has many filters (say 32), each detecting a different pattern. Output: 32 feature maps. Stack convolutional layers, just like in Chapter 11, and you build feature hierarchies.
 
 Two more pieces:
 
-- **Pooling.** After a convolutional layer, often we *downsample*: take the maximum value in each 2×2 patch. This shrinks the image, reduces computation, and adds robustness (small shifts in input cause small shifts in output).
+- **Pooling.** After a convolutional layer, often you *downsample*: take the maximum value in each 2×2 patch. This shrinks the image, reduces computation, and adds robustness (small shifts in input cause small shifts in output).
 - **Flatten + dense.** After several conv+pool layers, the final feature maps are flattened into a vector and fed through a few fully-connected (dense) layers, ending in a classification output.
 
 CNNs dominated computer vision from 2012 (AlexNet's ImageNet win) to roughly 2020, when transformers (Phase 5) started taking over. The principles (layers, gradient descent, feature hierarchies) are exactly the same.
@@ -96,7 +90,7 @@ model = keras.Sequential([
 model.summary()
 ```
 
-Walk through the model summary: each Conv2D adds parameters (filters × kernel size). Total parameters around 100k. Compare to a fully-connected version, which would have millions.
+Look at the model summary: each Conv2D adds parameters (filters × kernel size). Total parameters around 100k. Compare to a fully-connected version, which would have millions.
 
 ```python
 # 3. Compile and train.
@@ -114,7 +108,7 @@ test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)
 print(f"Test accuracy: {test_acc:.3f}")
 ```
 
-Around 0.91. *"You just trained a real image classifier on real images. 91% accuracy across 10 categories of clothing."*
+Around 0.91. *You just trained a real image classifier on real images. 91% accuracy across 10 categories of clothing.*
 
 ## Visualize what the first layer learned
 
@@ -155,7 +149,7 @@ plt.suptitle("First conv layer's response to one input image")
 plt.show()
 ```
 
-The 32 feature maps show what each filter "saw" in the image. Some highlight edges, some highlight textures. *"Each map is what one filter responded to. The network has decomposed the image into 32 different features, automatically."*
+The 32 feature maps show what each filter "saw" in the image. Some highlight edges, some highlight textures. *Each map is what one filter responded to. The network has decomposed the image into 32 different features, automatically.*
 
 ## Vocabulary
 
@@ -169,9 +163,9 @@ The 32 feature maps show what each filter "saw" in the image. Some highlight edg
   <Term name="Pre-trained model">A network trained on huge data that you can reuse.</Term>
 </Vocab>
 
-<Activity title="Image classifier lab" duration="30 min">
+<Activity title="Train your own CNN" duration="30 min">
 
-The full Colab notebook from above. Students:
+Take the Fashion-MNIST notebook above and:
 
 1. Run the loading and visualization cells.
 2. Train the model.
@@ -179,11 +173,11 @@ The full Colab notebook from above. Students:
 4. Visualize learned filters.
 5. **Stretch:** add more layers; try without pooling; train longer. What changes test accuracy?
 
-Optional teacher demo: have a student upload a photo of their own handwritten digit (or shoe). Preprocess it. Run through the model. Watch it correctly identify it.
+Optional fun: upload a photo of your own handwritten digit (or a clothing item). Preprocess it (grayscale, resize to 28×28). Run through the model. Watch it correctly identify it.
 
 </Activity>
 
-## Likely student questions
+## Questions you might have
 
 <FAQ>
   <Q q="How long would training take for ChatGPT?">
@@ -200,6 +194,6 @@ Active research area: *interpretability*. Tools include LIME, SHAP, integrated g
   </Q>
 </FAQ>
 
-<Bridge to="Session 13 — How it actually learns">
-You've trained a deep network. But we haven't talked about HOW it actually learns. Gradient descent we know. But how do we compute gradients for a 5-layer network with millions of parameters? Next session: backpropagation, the chain rule applied with bookkeeping.
+<Bridge to="Chapter 13 — How it actually learns">
+You've trained a deep network. But we haven't talked about HOW it actually learns. Gradient descent we know. But how do we compute gradients for a 5-layer network with millions of parameters? Next: backpropagation — the chain rule applied with bookkeeping.
 </Bridge>
