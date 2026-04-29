@@ -252,6 +252,8 @@ export type FaultyTerminalProps = {
   dpr?: number;
   pageLoadAnimation?: boolean;
   brightness?: number;
+  /** Target frames-per-second for the render loop. Default 30. */
+  targetFps?: number;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -276,6 +278,7 @@ export default function FaultyTerminal({
   dpr,
   pageLoadAnimation = true,
   brightness = 1,
+  targetFps = 30,
   className,
   style,
   ...rest
@@ -291,6 +294,25 @@ export default function FaultyTerminal({
   const rafRef = useRef(0);
   const loadAnimationStartRef = useRef(0);
   const timeOffsetRef = useRef(Math.random() * 100);
+
+  // Pause coordination. The render loop reads these refs each tick;
+  // when ANY is true we stop scheduling rAF and the WebGL context goes
+  // completely idle. This is what makes scrolling smooth on weak GPUs.
+  const propPauseRef = useRef(pause);
+  const offscreenPauseRef = useRef(false);
+  const visibilityPauseRef = useRef(false);
+  const updateRef = useRef<((t: number) => void) | null>(null);
+
+  const isEffectivelyPaused = () =>
+    propPauseRef.current ||
+    offscreenPauseRef.current ||
+    visibilityPauseRef.current;
+
+  const restartLoopIfNeeded = () => {
+    if (!isEffectivelyPaused() && rafRef.current === 0 && updateRef.current) {
+      rafRef.current = requestAnimationFrame(updateRef.current);
+    }
+  };
 
   const tintVec = useMemo(() => hexToRgb(tint), [tint]);
   const bgVec = useMemo(() => hexToRgb(background), [background]);
@@ -313,12 +335,11 @@ export default function FaultyTerminal({
     const ctn = containerRef.current;
     if (!ctn) return;
 
-    // SSR-safe DPR resolution: window only exists in the browser.
-    const resolvedDpr =
-      dpr ??
-      (typeof window !== "undefined"
-        ? Math.min(window.devicePixelRatio || 1, 2)
-        : 1);
+    // SSR-safe DPR resolution. We default to 1 (NOT devicePixelRatio)
+    // because the fragment shader is the bottleneck and rendering at 2×
+    // resolution on retina makes GPU cost 4× without visible benefit
+    // for this glitchy effect. Caller can pass higher dpr if they want.
+    const resolvedDpr = dpr ?? 1;
 
     const renderer = new Renderer({ dpr: resolvedDpr });
     rendererRef.current = renderer;
@@ -382,20 +403,31 @@ export default function FaultyTerminal({
     resizeObserver.observe(ctn);
     resize();
 
+    const minFrameMs = 1000 / Math.max(1, targetFps);
+    let lastFrameMs = 0;
+
     const update = (t: number) => {
+      // If anything paused us, drop out completely — don't reschedule
+      // and don't render. The restart helpers below will kick rAF
+      // back on when we become visible again.
+      if (isEffectivelyPaused()) {
+        rafRef.current = 0;
+        return;
+      }
       rafRef.current = requestAnimationFrame(update);
+
+      // Cap at targetFps. The shader is the bottleneck; halving frames
+      // halves GPU work and is invisible for this glitch effect.
+      if (t - lastFrameMs < minFrameMs) return;
+      lastFrameMs = t;
 
       if (pageLoadAnimation && loadAnimationStartRef.current === 0) {
         loadAnimationStartRef.current = t;
       }
 
-      if (!pause) {
-        const elapsed = (t * 0.001 + timeOffsetRef.current) * timeScale;
-        program.uniforms.iTime.value = elapsed;
-        frozenTimeRef.current = elapsed;
-      } else {
-        program.uniforms.iTime.value = frozenTimeRef.current;
-      }
+      const elapsed = (t * 0.001 + timeOffsetRef.current) * timeScale;
+      program.uniforms.iTime.value = elapsed;
+      frozenTimeRef.current = elapsed;
 
       if (pageLoadAnimation && loadAnimationStartRef.current > 0) {
         const animationDuration = 2000;
@@ -418,6 +450,7 @@ export default function FaultyTerminal({
 
       renderer.render({ scene: mesh });
     };
+    updateRef.current = update;
     rafRef.current = requestAnimationFrame(update);
     ctn.appendChild(gl.canvas);
 
@@ -439,9 +472,11 @@ export default function FaultyTerminal({
       loadAnimationStartRef.current = 0;
       timeOffsetRef.current = Math.random() * 100;
     };
+    // NB: `pause` deliberately NOT in deps — it's read via propPauseRef
+    // so toggling pause doesn't tear down and recreate the WebGL context.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dpr,
-    pause,
     timeScale,
     scale,
     gridMul,
@@ -459,8 +494,61 @@ export default function FaultyTerminal({
     mouseStrength,
     pageLoadAnimation,
     brightness,
+    targetFps,
     handleMouseMove,
   ]);
+
+  // React to the parent's `pause` prop without tearing down the context.
+  useEffect(() => {
+    propPauseRef.current = pause;
+    if (pause) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    } else {
+      restartLoopIfNeeded();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pause]);
+
+  // Pause when the document is hidden (tab change, OS sleep, etc).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const onVis = () => {
+      visibilityPauseRef.current = document.visibilityState === "hidden";
+      if (visibilityPauseRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
+      } else {
+        restartLoopIfNeeded();
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    onVis();
+    return () => document.removeEventListener("visibilitychange", onVis);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Pause when the canvas is offscreen. This is the big one — when
+  // you scroll past the hero, the GPU goes completely idle.
+  useEffect(() => {
+    const ctn = containerRef.current;
+    if (!ctn || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        offscreenPauseRef.current = !entry.isIntersecting;
+        if (offscreenPauseRef.current) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = 0;
+        } else {
+          restartLoopIfNeeded();
+        }
+      },
+      { rootMargin: "100px" }
+    );
+    obs.observe(ctn);
+    return () => obs.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
