@@ -31,7 +31,21 @@ export function TopNav({
       <Link href="/" aria-label="Margin home" style={{ textDecoration: "none" }}>
         <Wordmark size={17} />
       </Link>
-      <div style={{ marginLeft: 40 }}>
+      <div
+        style={{
+          marginLeft: 40,
+          // The React Bits GooeyNav is designed for dark backgrounds
+          // (default text is white, gooey blob uses lighten-blend over a
+          // black inset). We host it inside a dark capsule so the
+          // original colors render correctly on our otherwise-white
+          // top-nav.
+          background: "#0b0b0d",
+          borderRadius: 999,
+          padding: "4px 6px",
+          display: "inline-flex",
+          alignItems: "center",
+        }}
+      >
         <GooeyNav
           items={NAV_ITEMS.map(({ label, href }) => ({ label, href }))}
           initialActiveIndex={initialActiveIndex}
