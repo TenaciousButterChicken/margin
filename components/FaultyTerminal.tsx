@@ -38,6 +38,7 @@ uniform float uChromaticAberration;
 uniform float uDither;
 uniform float uCurvature;
 uniform vec3  uTint;
+uniform vec3  uBackground;
 uniform vec2  uMouse;
 uniform float uMouseStrength;
 uniform float uUseMouse;
@@ -203,15 +204,20 @@ void main() {
       col.b = getColor(p - ca).b;
     }
 
-    col *= uTint;
-    col *= uBrightness;
+// col here is essentially a grayscale digit-intensity from getColor().
+    // Mix between the background and tint by that intensity. With
+    // background = black this matches the original dark CRT look;
+    // with background = white you get clay digits on a white field
+    // (fits a light-themed page).
+    float intensity = clamp(max(max(col.r, col.g), col.b) * uBrightness, 0.0, 1.0);
+    vec3 finalColor = mix(uBackground, uTint, intensity);
 
     if(uDither > 0.0){
       float rnd = hash21(gl_FragCoord.xy);
-      col += (rnd - 0.5) * (uDither * 0.003922);
+      finalColor += (rnd - 0.5) * (uDither * 0.003922);
     }
 
-    gl_FragColor = vec4(col, 1.0);
+    gl_FragColor = vec4(finalColor, 1.0);
 }
 `;
 
@@ -240,6 +246,7 @@ export type FaultyTerminalProps = {
   dither?: number | boolean;
   curvature?: number;
   tint?: string;
+  background?: string;
   mouseReact?: boolean;
   mouseStrength?: number;
   dpr?: number;
@@ -263,6 +270,7 @@ export default function FaultyTerminal({
   dither = 0,
   curvature = 0.2,
   tint = "#ffffff",
+  background = "#000000",
   mouseReact = true,
   mouseStrength = 0.2,
   dpr,
@@ -285,6 +293,7 @@ export default function FaultyTerminal({
   const timeOffsetRef = useRef(Math.random() * 100);
 
   const tintVec = useMemo(() => hexToRgb(tint), [tint]);
+  const bgVec = useMemo(() => hexToRgb(background), [background]);
 
   const ditherValue = useMemo(
     () => (typeof dither === "boolean" ? (dither ? 1 : 0) : dither),
@@ -341,6 +350,7 @@ export default function FaultyTerminal({
         uDither: { value: ditherValue },
         uCurvature: { value: curvature },
         uTint: { value: new Color(tintVec[0], tintVec[1], tintVec[2]) },
+        uBackground: { value: new Color(bgVec[0], bgVec[1], bgVec[2]) },
         uMouse: {
           value: new Float32Array([
             smoothMouseRef.current.x,
@@ -438,6 +448,7 @@ export default function FaultyTerminal({
     ditherValue,
     curvature,
     tintVec,
+    bgVec,
     mouseReact,
     mouseStrength,
     pageLoadAnimation,

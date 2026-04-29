@@ -14,12 +14,12 @@ export default async function LandingPage() {
     <main style={{ background: "var(--neutral-0)" }}>
       <TopNav signedIn={!!user} />
 
-      {/* Hero — FaultyTerminal as full-width background, foreground text on top */}
+      {/* Hero — FaultyTerminal (clay digits on white) as full-width background */}
       <section
         style={{
           position: "relative",
-          padding: "120px 56px 220px",
-          background: "#000",
+          padding: "120px 56px 160px",
+          background: "var(--neutral-0)",
           overflow: "hidden",
           isolation: "isolate",
         }}
@@ -43,24 +43,24 @@ export default async function LandingPage() {
             dither={0}
             curvature={0.1}
             tint="#B5532A"
+            background="#FFFFFF"
             mouseReact
             mouseStrength={0.5}
             pageLoadAnimation
-            brightness={0.8}
+            brightness={0.85}
           />
         </div>
 
-        {/* Bottom fade — softens the transition into the white page below */}
+        {/* Soft white wash so headline + paragraph sit on a calmer field
+            and the busiest digit areas don't fight the type. Sides stay
+            fully visible; readability zone gets a gentle mask. */}
         <div
           aria-hidden
           style={{
             position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 220,
+            inset: 0,
             background:
-              "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 55%, var(--neutral-0) 100%)",
+              "radial-gradient(ellipse 60% 90% at 30% 50%, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.4) 55%, rgba(255,255,255,0) 100%)",
             zIndex: 1,
             pointerEvents: "none",
           }}
@@ -86,7 +86,6 @@ export default async function LandingPage() {
               letterSpacing: "-0.025em",
               margin: "12px 0 24px",
               maxWidth: 980,
-              color: "#fff",
             }}
           >
             Machine learning,
@@ -97,7 +96,7 @@ export default async function LandingPage() {
             style={{
               fontSize: 19,
               lineHeight: 1.55,
-              color: "rgba(255,255,255,0.78)",
+              color: "var(--neutral-700)",
               margin: 0,
               maxWidth: 600,
               textWrap: "pretty",
@@ -110,15 +109,7 @@ export default async function LandingPage() {
               <button className="btn btn-primary btn-lg">Start with Session 01</button>
             </Link>
             <Link href="/sessions/rolling-downhill">
-              <button
-                className="btn btn-lg"
-                style={{
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#fff",
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(2px)",
-                }}
-              >
+              <button className="btn btn-secondary btn-lg">
                 See Session 06 — gradient descent
               </button>
             </Link>
