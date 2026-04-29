@@ -139,8 +139,8 @@ export default async function LandingPage() {
               body: "Read for 10 minutes, then build for 15. Code runs in your browser — no setup, no environment to break.",
             },
             {
-              kicker: "Built by a high school senior in 2026",
-              body: "I'm one person. The course is free for now. If it gets popular enough to need infrastructure, that may change.",
+              kicker: "Built by a small team",
+              body: "Founded by Neil Moudgil. The course is in active development and free for now. If it grows enough to need infrastructure, that may change.",
             },
           ].map((c, i) => (
             <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
