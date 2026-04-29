@@ -421,12 +421,18 @@ export default function FaultyTerminal({
     rafRef.current = requestAnimationFrame(update);
     ctn.appendChild(gl.canvas);
 
-    if (mouseReact) ctn.addEventListener("mousemove", handleMouseMove);
+    // Listen at the window level so cursor events still reach us when
+    // foreground UI sits ON TOP of the canvas (e.g. when this component
+    // is used as a hero background). handleMouseMove computes its
+    // position against the canvas's bounding rect, so points outside
+    // the canvas just produce a far-away mouse coord (no ripple), which
+    // is the desired behavior.
+    if (mouseReact) window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
       resizeObserver.disconnect();
-      if (mouseReact) ctn.removeEventListener("mousemove", handleMouseMove);
+      if (mouseReact) window.removeEventListener("mousemove", handleMouseMove);
       if (gl.canvas.parentElement === ctn) ctn.removeChild(gl.canvas);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gl.getExtension("WEBGL_lose_context") as any)?.loseContext();

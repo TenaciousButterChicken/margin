@@ -51,22 +51,10 @@ export default async function LandingPage() {
           />
         </div>
 
-        {/* Soft white wash so headline + paragraph sit on a calmer field
-            and the busiest digit areas don't fight the type. Sides stay
-            fully visible; readability zone gets a gentle mask. */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse 60% 90% at 30% 50%, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.4) 55%, rgba(255,255,255,0) 100%)",
-            zIndex: 1,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Foreground content */}
+        {/* Foreground card — translucent white with backdrop blur so the
+            headline + buttons sit on a clean field instead of fighting
+            the digit pattern. Card hugs its content with padding; the
+            full-width terminal stays visible to the sides and below. */}
         <div
           style={{
             position: "relative",
@@ -75,44 +63,58 @@ export default async function LandingPage() {
             margin: "0 auto",
           }}
         >
-          <span className="t-meta" style={{ color: "var(--accent)" }}>
-            16 sessions · self-paced
-          </span>
-          <h1
+          <div
             style={{
-              fontSize: 72,
-              fontWeight: 600,
-              lineHeight: 1.02,
-              letterSpacing: "-0.025em",
-              margin: "12px 0 24px",
-              maxWidth: 980,
+              display: "inline-block",
+              maxWidth: 1080,
+              padding: "40px 48px",
+              background: "rgba(255, 255, 255, 0.78)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.6)",
+              borderRadius: 16,
+              boxShadow: "0 8px 40px rgba(20, 12, 4, 0.08)",
             }}
           >
-            Machine learning,
-            <br />
-            <span style={{ color: "var(--accent)" }}>by hand,</span> from scratch.
-          </h1>
-          <p
-            style={{
-              fontSize: 19,
-              lineHeight: 1.55,
-              color: "var(--neutral-700)",
-              margin: 0,
-              maxWidth: 600,
-              textWrap: "pretty",
-            }}
-          >
-            A 16-session course where every concept lands twice — once in the lesson, once in a Lab where you write code that runs. No black boxes.
-          </p>
-          <div style={{ display: "flex", gap: 12, marginTop: 36 }}>
-            <Link href="/sessions/machines-that-learn">
-              <button className="btn btn-primary btn-lg">Start with Session 01</button>
-            </Link>
-            <Link href="/sessions/rolling-downhill">
-              <button className="btn btn-secondary btn-lg">
-                See Session 06 — gradient descent
-              </button>
-            </Link>
+            <span className="t-meta" style={{ color: "var(--accent)" }}>
+              16 sessions · self-paced
+            </span>
+            <h1
+              style={{
+                fontSize: 72,
+                fontWeight: 600,
+                lineHeight: 1.02,
+                letterSpacing: "-0.025em",
+                margin: "12px 0 24px",
+                maxWidth: 980,
+              }}
+            >
+              Machine learning,
+              <br />
+              <span style={{ color: "var(--accent)" }}>by hand,</span> from scratch.
+            </h1>
+            <p
+              style={{
+                fontSize: 19,
+                lineHeight: 1.55,
+                color: "var(--neutral-700)",
+                margin: 0,
+                maxWidth: 600,
+                textWrap: "pretty",
+              }}
+            >
+              A 16-session course where every concept lands twice — once in the lesson, once in a Lab where you write code that runs. No black boxes.
+            </p>
+            <div style={{ display: "flex", gap: 12, marginTop: 36 }}>
+              <Link href="/sessions/machines-that-learn">
+                <button className="btn btn-primary btn-lg">Start with Session 01</button>
+              </Link>
+              <Link href="/sessions/rolling-downhill">
+                <button className="btn btn-secondary btn-lg">
+                  See Session 06 — gradient descent
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
