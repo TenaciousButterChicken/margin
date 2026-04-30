@@ -16,6 +16,7 @@ import { PredictPanel } from "./widgets/PredictPanel";
 import { DirectionChoice } from "./widgets/DirectionChoice";
 import { StepControls } from "./widgets/StepControls";
 import { MathStrip } from "./widgets/MathStrip";
+import { LabCapstone } from "./widgets/LabCapstone";
 import { useChannel, usePublish, usePulseToken } from "@/lib/lab/LabContext";
 import { DATASET, gradient, loss } from "@/lib/lab/sim/gradient-descent";
 
@@ -457,6 +458,10 @@ export function BeatJourney() {
           }}
         />
       )}
+
+      {/* Beat 9 capstone view: replaces the dual-panel grid with the
+          long-form code + recap study guide. */}
+      {beat === "9" && <LabCapstone />}
 
       {/* Beat-specific UI below the panels */}
       {cfg.unlocks.showDirectionChoice && (

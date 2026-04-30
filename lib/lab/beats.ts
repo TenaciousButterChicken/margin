@@ -341,14 +341,15 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "9": {
     id: "9",
-    kicker: "Beat 9 - The cliffhanger",
-    prompt: "[Coming soon] Drop the hiker anywhere. They always end up here.",
+    kicker: "Beat 9 - This is the code",
+    prompt:
+      "Every step you took with the hiker is one iteration of this loop. Read the code. You'll recognize every line.",
+    reveal:
+      "That's it. That's the entire algorithm. Same loop trains ChatGPT - just bigger arrays. There's no other trick.",
     unlocks: {
+      // Beat 9 is the capstone: no widgets render. The lab area swaps to
+      // a long-form code + recap view (LabCapstone) inside BeatJourney.
       ...DEFAULT_UNLOCKS,
-      showBowl: true,
-      showStepFour: true,
-      showLrSlider: "unlocked",
-      showHikerTrail: true,
     },
     completion: { kind: "always" },
   },
