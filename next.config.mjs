@@ -1,5 +1,17 @@
+import { execSync } from "node:child_process";
+
+let GIT_SHA = "unknown";
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
+try {
+  GIT_SHA = execSync("git rev-parse --short HEAD").toString().trim();
+} catch {}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_GIT_SHA: GIT_SHA,
+    NEXT_PUBLIC_BUILD_DATE: BUILD_DATE,
+  },
   // Canonicalise www.margin.school → margin.school. The www DNS still
   // points at the tunnel (so links don't dead-end), but anyone who lands
   // on www gets a permanent redirect to the apex so the address bar

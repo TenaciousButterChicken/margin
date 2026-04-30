@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
+import { VersionBadge } from "@/components/VersionBadge";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,7 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ["--font-mono" as string]: `var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, Consolas, monospace`,
       }}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <VersionBadge />
+      </body>
     </html>
   );
 }
