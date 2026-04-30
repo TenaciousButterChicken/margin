@@ -109,6 +109,8 @@ export function BeatJourney() {
   const [progress, setProgress] = useState<Progress>(DEFAULT_PROGRESS);
   const [revealOpen, setRevealOpen] = useState(false);
   const [pulseGreen, setPulseGreen] = useState(false);
+  const [savingLabComplete, setSavingLabComplete] = useState(false);
+  const [labCompleteSaved, setLabCompleteSaved] = useState(false);
   const pos = useChannel<Pos>("w_position");
   const pub = usePublish();
   const resetToken = usePulseToken("do_reset");
@@ -218,6 +220,61 @@ export function BeatJourney() {
   function rewind() {
     const idx = BEAT_ORDER.indexOf(beat);
     if (idx > 0) setBeat(BEAT_ORDER[idx - 1]);
+  }
+
+  async function finishLab() {
+    if (savingLabComplete || labCompleteSaved) return;
+    setSavingLabComplete(true);
+    try {
+      const res = await fetch("/api/lab-events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: "phase:linear-regression",
+          lab_id: "linear-regression",
+          outcome: "completed",
+        }),
+      });
+      if (!res.ok && res.status !== 204) {
+        // Approved-status RLS or auth missing. Surface in console; the
+        // user is mid-celebration so don't yank the UI.
+        // eslint-disable-next-line no-console
+        console.warn("lab-events POST failed:", res.status);
+      }
+      setLabCompleteSaved(true);
+      // Confetti burst. Lazy-import keeps it out of the initial bundle.
+      const { default: confetti } = await import("canvas-confetti");
+      confetti({
+        particleCount: 140,
+        spread: 80,
+        startVelocity: 45,
+        origin: { x: 0.5, y: 0.7 },
+        scalar: 0.9,
+      });
+      // Two follow-up bursts from the sides for a fuller effect.
+      setTimeout(
+        () =>
+          confetti({
+            particleCount: 70,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.7 },
+          }),
+        180,
+      );
+      setTimeout(
+        () =>
+          confetti({
+            particleCount: 70,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.7 },
+          }),
+        180,
+      );
+    } finally {
+      setSavingLabComplete(false);
+    }
   }
 
   function handleNudge() {
@@ -493,9 +550,17 @@ export function BeatJourney() {
             >
               Next →
             </button>
-          ) : (
+          ) : labCompleteSaved ? (
             <button className="btn btn-secondary" disabled>
-              Lab complete
+              ✓ Lab complete
+            </button>
+          ) : (
+            <button
+              className="btn btn-primary"
+              onClick={finishLab}
+              disabled={savingLabComplete}
+            >
+              {savingLabComplete ? "Saving…" : "Finish lab →"}
             </button>
           )}
         </div>

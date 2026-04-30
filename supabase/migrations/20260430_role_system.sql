@@ -4,8 +4,24 @@
 -- is_teacher() to mean "any non-student role" so RLS policies keep
 -- working without renaming the function across the codebase.
 
--- 1. Replace the CHECK constraint.
+-- 1. Drop the old constraint first so we can migrate rows out of 'teacher'.
 ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+
+-- 2. Migrate the two seeded accounts. The hardcoded role-seeds map in
+--    lib/auth/role-seeds.ts re-asserts these on every sign-in, so
+--    these UPDATEs are belt-and-suspenders against the first sign-in
+--    after deploy.
+UPDATE profiles SET role = 'co-founder'
+WHERE email = 'ryan.lai27@ycdsbk12.ca';
+
+UPDATE profiles SET role = 'founder'
+WHERE email = 'neil.moudgil27@ycdsbk12.ca';
+
+-- 2b. Catch-all: any other 'teacher' rows that aren't seeded get demoted
+--     to 'student'. Promote them via the roster UI if needed.
+UPDATE profiles SET role = 'student' WHERE role = 'teacher';
+
+-- 3. Add the new constraint now that no row violates it.
 ALTER TABLE profiles ADD CONSTRAINT profiles_role_check
   CHECK (role IN (
     'student',
@@ -17,16 +33,6 @@ ALTER TABLE profiles ADD CONSTRAINT profiles_role_check
     'treasurer',
     'teacher-sponsor'
   ));
-
--- 2. Migrate the two seeded accounts. The hardcoded role-seeds map in
---    lib/auth/role-seeds.ts re-asserts these on every sign-in, so
---    these UPDATEs are belt-and-suspenders against the first sign-in
---    after deploy.
-UPDATE profiles SET role = 'co-founder'
-WHERE email = 'ryan.lai27@ycdsbk12.ca';
-
-UPDATE profiles SET role = 'founder'
-WHERE email = 'neil.moudgil27@ycdsbk12.ca';
 
 -- 3. Redefine is_teacher() as "any non-student role". The function name
 --    is kept (legacy) so existing RLS policies on session_heartbeats,
