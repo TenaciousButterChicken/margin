@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 // Beat 9 capstone view. Replaces the dual-panel grid + math strip with
 // a single-column long-form study guide: bridges grade-9 y = mx + b to
 // the 3D bowl, walks the gradient descent loop in numpy line-by-line,
@@ -464,7 +465,7 @@ function Capstone() {
         starts with that problem.
       </Prose>
       <Prose>
-        For now, click &ldquo;Finish lab.&rdquo; You earned it.
+        For now, click "Finish lab." You earned it.
       </Prose>
     </SectionFrame>
   );
