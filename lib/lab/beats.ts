@@ -13,8 +13,7 @@ export type BeatId =
   | "5"
   | "6"
   | "7"
-  | "8"
-  | "9";
+  | "8";
 
 export type BeatUnlocks = {
   showLine: boolean;
@@ -62,6 +61,10 @@ export type BeatUnlocks = {
 
   showHikerTrail: boolean;
   showMinimumMarker: boolean;
+
+  // Beat 7 - parameter-space-emergence demo
+  showWeightSliders: boolean; // m (always) + b (when in phase 2)
+  showParabola: boolean;      // 2D (m, error) plot, dots accumulate
 };
 
 const DEFAULT_UNLOCKS: BeatUnlocks = {
@@ -87,6 +90,8 @@ const DEFAULT_UNLOCKS: BeatUnlocks = {
   showPredictPanel: false,
   showHikerTrail: false,
   showMinimumMarker: true,
+  showWeightSliders: false,
+  showParabola: false,
 };
 
 export type Beat = {
@@ -312,42 +317,33 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "7": {
     id: "7",
-    kicker: "Beat 7 - The edge",
-    prompt: "[Coming soon] Try lr = 0.45. Watch carefully. Chaos that converges.",
+    kicker: "Beat 7 - Where the bowl came from",
+    prompt:
+      "Force the line through the origin (b = 0). Slide m. Every position plots a dot at (m, total error). Watch the curve appear.",
+    reveal:
+      "Two knobs, two floor axes. The 2D parabola became a 3D bowl - same idea, one extra dimension because one extra parameter. From here on we'll call them 'w' (weight, the slope) and 'b' (bias, the intercept) - the names you'll see in every neural network.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
-      showBowl: true,
-      showStepFour: true,
-      showLrSlider: "locked-display",
-      lrLockedAt: 0.45,
-      showHikerTrail: true,
+      showLine: true,
+      lineDraggable: false,
+      showWeightSliders: true,
+      showParabola: true,
+      // Phase 2 unlocks the bowl + b slider via progress.phase, handled
+      // in BeatJourney. Default unlocks here are phase-1 state.
     },
-    completion: { kind: "always" },
+    completion: { kind: "phase_count", needed: 2 },
+    resetOnEnter: true,
   },
 
   "8": {
     id: "8",
-    kicker: "Beat 8 - The reward",
-    prompt: "[Coming soon] Find an lr that gets to the bottom in under 18 steps.",
-    unlocks: {
-      ...DEFAULT_UNLOCKS,
-      showBowl: true,
-      showStepFour: true,
-      showLrSlider: "unlocked",
-      showHikerTrail: true,
-    },
-    completion: { kind: "always" },
-  },
-
-  "9": {
-    id: "9",
-    kicker: "Beat 9 - This is the code",
+    kicker: "Beat 8 - This is the code",
     prompt:
       "Every step you took with the hiker is one iteration of this loop. Read the code. You'll recognize every line.",
     reveal:
       "That's it. That's the entire algorithm. Same loop trains ChatGPT - just bigger arrays. There's no other trick.",
     unlocks: {
-      // Beat 9 is the capstone: no widgets render. The lab area swaps to
+      // Beat 8 is the capstone: no widgets render. The lab area swaps to
       // a long-form code + recap view (LabCapstone) inside BeatJourney.
       ...DEFAULT_UNLOCKS,
     },
@@ -368,7 +364,6 @@ export const BEAT_ORDER: BeatId[] = [
   "6",
   "7",
   "8",
-  "9",
 ];
 
 export function nextBeat(current: BeatId): BeatId | null {

@@ -25,10 +25,14 @@ export const DATASET: ReadonlyArray<Point> = [
 // landscape to be friendly.
 const xs = DATASET.map(([x]) => x);
 const ys = DATASET.map(([, y]) => y);
-const xMean = xs.reduce((a, b) => a + b, 0) / xs.length;
-const xStd = Math.sqrt(xs.reduce((a, b) => a + (b - xMean) ** 2, 0) / xs.length);
-const yMean = ys.reduce((a, b) => a + b, 0) / ys.length;
-const yStd = Math.sqrt(ys.reduce((a, b) => a + (b - yMean) ** 2, 0) / ys.length);
+export const X_MEAN = xs.reduce((a, b) => a + b, 0) / xs.length;
+export const X_STD = Math.sqrt(xs.reduce((a, b) => a + (b - X_MEAN) ** 2, 0) / xs.length);
+export const Y_MEAN = ys.reduce((a, b) => a + b, 0) / ys.length;
+export const Y_STD = Math.sqrt(ys.reduce((a, b) => a + (b - Y_MEAN) ** 2, 0) / ys.length);
+const xMean = X_MEAN;
+const xStd = X_STD;
+const yMean = Y_MEAN;
+const yStd = Y_STD;
 
 const xn = xs.map((x) => (x - xMean) / xStd);
 const yn = ys.map((y) => (y - yMean) / yStd);

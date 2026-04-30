@@ -17,6 +17,9 @@ import { DirectionChoice } from "./widgets/DirectionChoice";
 import { StepControls } from "./widgets/StepControls";
 import { MathStrip } from "./widgets/MathStrip";
 import { LabCapstone } from "./widgets/LabCapstone";
+import { CoordReadout } from "./widgets/CoordReadout";
+import { Parabola2D } from "./widgets/Parabola2D";
+import { WeightSliders } from "./widgets/WeightSliders";
 import { useChannel, usePublish, usePulseToken } from "@/lib/lab/LabContext";
 import { DATASET, gradient, loss } from "@/lib/lab/sim/gradient-descent";
 
@@ -371,71 +374,109 @@ export function BeatJourney() {
         </p>
       </header>
 
-      {/* Linked panels */}
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            cfg.unlocks.showLine && cfg.unlocks.showBowl
-              ? "1fr 1fr"
-              : "1fr",
-          gridAutoRows: "max-content",
-          alignItems: "start",
-          gap: 12,
-          flex: "none",
-        }}
-      >
-        {cfg.unlocks.showLine && (
-          <PanelFrame title="Data" kicker="study hours × exam score">
-            <DataScatter2D
-              draggable={cfg.unlocks.lineDraggable}
-              pulseOnce={pulseGreen}
-              successThreshold={
-                cfg.completion.kind === "loss_below"
-                  ? cfg.completion.threshold
-                  : undefined
-              }
-              onLineDragged={() =>
-                setProgress((p) => (p.draggedLine ? p : { ...p, draggedLine: true }))
-              }
-              highlightDotIndex={cfg.unlocks.highlightDotIndex}
-              showAllPullArrows={cfg.unlocks.showAllPullArrows}
-              boldErrorBars={cfg.unlocks.boldErrorBars}
-            />
-          </PanelFrame>
-        )}
+      {(() => {
+        // Beat 7 swaps its right panel between Parabola2D (phase 1) and
+        // Surface3D (phase 2). showBowl on Beat 7's config is left false;
+        // the bowl is granted by the phase advance.
+        const beat7Phase2 = beat === "7" && progress.phase >= 2;
+        const showParamPanel =
+          cfg.unlocks.showBowl || cfg.unlocks.showParabola || beat7Phase2;
+        const dualGrid = cfg.unlocks.showLine && showParamPanel;
 
-        {cfg.unlocks.showBowl && (
-          <PanelFrame
-            title="Cost surface"
-            kicker={
-              cfg.unlocks.bowlDraggable
-                ? "drag the marker"
-                : cfg.unlocks.fogged
-                ? "you can only feel the slope"
-                : "3D · w₀ × w₁"
-            }
-            slideIn={beat === "2"}
+        return (
+          <section
+            style={{
+              display: "grid",
+              gridTemplateColumns: dualGrid ? "1fr 1fr" : "1fr",
+              gridAutoRows: "max-content",
+              alignItems: "start",
+              gap: 12,
+              flex: "none",
+            }}
           >
-            <Surface3D
-              draggable={cfg.unlocks.bowlDraggable}
-              mode={cfg.unlocks.showHikerTrail ? "trail" : "marker"}
-              showGradient={cfg.unlocks.showGradientArrow ? "single" : "none"}
-              arrowDirection={progress.arrowDirection}
-              fogIntensity={fogIntensity}
-              showMinimumMarker={cfg.unlocks.showMinimumMarker}
-              hikerGlow={cfg.unlocks.hikerGlow}
-            />
-            {cfg.unlocks.bowlDraggable && (
-              <BowlDragWatcher
-                onDrag={() =>
-                  setProgress((p) => (p.draggedBowl ? p : { ...p, draggedBowl: true }))
-                }
-              />
+            {cfg.unlocks.showLine && (
+              <PanelFrame title="Data" kicker="study hours × exam score">
+                <DataScatter2D
+                  draggable={cfg.unlocks.lineDraggable}
+                  pulseOnce={pulseGreen}
+                  successThreshold={
+                    cfg.completion.kind === "loss_below"
+                      ? cfg.completion.threshold
+                      : undefined
+                  }
+                  onLineDragged={() =>
+                    setProgress((p) =>
+                      p.draggedLine ? p : { ...p, draggedLine: true },
+                    )
+                  }
+                  highlightDotIndex={cfg.unlocks.highlightDotIndex}
+                  showAllPullArrows={cfg.unlocks.showAllPullArrows}
+                  boldErrorBars={cfg.unlocks.boldErrorBars}
+                />
+              </PanelFrame>
             )}
-          </PanelFrame>
+
+            {beat === "7" && progress.phase < 2 ? (
+              <PanelFrame
+                title="Parameter space"
+                kicker="every line, scored"
+              >
+                <Parabola2D onAdvance={handlePhaseAdvance} />
+              </PanelFrame>
+            ) : (cfg.unlocks.showBowl || beat7Phase2) && (
+              <PanelFrame
+                title="Cost surface"
+                kicker={
+                  cfg.unlocks.bowlDraggable || beat7Phase2
+                    ? "drag the marker"
+                    : cfg.unlocks.fogged
+                    ? "you can only feel the slope"
+                    : "3D · w₀ × w₁"
+                }
+                slideIn={beat === "2" || beat7Phase2}
+              >
+                <Surface3D
+                  draggable={cfg.unlocks.bowlDraggable || beat7Phase2}
+                  mode={
+                    cfg.unlocks.showHikerTrail || beat7Phase2
+                      ? "trail"
+                      : "marker"
+                  }
+                  showGradient={
+                    cfg.unlocks.showGradientArrow ? "single" : "none"
+                  }
+                  arrowDirection={progress.arrowDirection}
+                  fogIntensity={fogIntensity}
+                  showMinimumMarker={cfg.unlocks.showMinimumMarker}
+                  hikerGlow={cfg.unlocks.hikerGlow}
+                />
+                {(cfg.unlocks.bowlDraggable || beat7Phase2) && (
+                  <BowlDragWatcher
+                    onDrag={() =>
+                      setProgress((p) =>
+                        p.draggedBowl ? p : { ...p, draggedBowl: true },
+                      )
+                    }
+                  />
+                )}
+              </PanelFrame>
+            )}
+          </section>
+        );
+      })()}
+
+      {/* Beat 7 sliders - m always, b unlocked in phase 2 */}
+      {beat === "7" && (
+        <WeightSliders bUnlocked={progress.phase >= 2} />
+      )}
+
+      {/* Live coord readout - shown whenever data + parameter-space are
+          both visible, so the bowl-marker / data-line link is numerical
+          and not just visual. */}
+      {cfg.unlocks.showLine &&
+        (cfg.unlocks.showBowl || cfg.unlocks.showParabola) && (
+          <CoordReadout />
         )}
-      </section>
 
       {/* Math strip - beat 4.5+ */}
       {cfg.unlocks.showMathStrip && cfg.unlocks.mathStripBeat && (
@@ -459,9 +500,9 @@ export function BeatJourney() {
         />
       )}
 
-      {/* Beat 9 capstone view: replaces the dual-panel grid with the
+      {/* Beat 8 capstone view: replaces the dual-panel grid with the
           long-form code + recap study guide. */}
-      {beat === "9" && <LabCapstone />}
+      {beat === "8" && <LabCapstone />}
 
       {/* Beat-specific UI below the panels */}
       {cfg.unlocks.showDirectionChoice && (
