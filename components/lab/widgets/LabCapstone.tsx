@@ -464,7 +464,7 @@ function Capstone() {
         starts with that problem.
       </Prose>
       <Prose>
-        For now, click "Finish lab." You earned it.
+        For now, click &ldquo;Finish lab.&rdquo; You earned it.
       </Prose>
     </SectionFrame>
   );
