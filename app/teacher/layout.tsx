@@ -77,6 +77,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
           <NavLink href="/teacher/roster" label="Roster" />
           <NavLink href="/teacher/sessions" label="Sessions" />
           <NavLink href="/teacher/hints" label="Hints" />
+          <NavLink href="/teacher/club" label="Club state" />
           <div style={{ marginTop: 16, fontSize: 11, fontWeight: 600, color: "var(--neutral-500)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
             Site
           </div>

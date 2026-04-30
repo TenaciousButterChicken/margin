@@ -3,9 +3,15 @@ import { TopNav } from "@/components/public/TopNav";
 import { SessionCard } from "@/components/public/SessionCard";
 import { PHASES, sessionsByPhase } from "@/lib/sessions";
 import { getCurrentProfile } from "@/lib/auth/profile";
+import { getCurrentSessionSlug } from "@/lib/club/state";
+
+export const dynamic = "force-dynamic";
 
 export default async function SessionsIndexPage() {
-  const profile = await getCurrentProfile().catch(() => null);
+  const [profile, currentSlug] = await Promise.all([
+    getCurrentProfile().catch(() => null),
+    getCurrentSessionSlug().catch(() => null),
+  ]);
   const grouped = sessionsByPhase();
 
   return (
@@ -107,7 +113,12 @@ export default async function SessionsIndexPage() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
                 {sessions.map((s) => (
-                  <SessionCard key={s.n} s={s} phaseName={name} />
+                  <SessionCard
+                    key={s.n}
+                    s={s}
+                    phaseName={name}
+                    featured={currentSlug === s.slug}
+                  />
                 ))}
               </div>
             </div>

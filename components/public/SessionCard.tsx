@@ -9,9 +9,18 @@ import { Motif } from "@/components/illustrations/motifs";
 // approach from design package's landing-page.jsx so the visual
 // matches the source of truth exactly.
 
-export function SessionCard({ s, phaseName }: { s: SessionMeta; phaseName: string }) {
+export function SessionCard({
+  s,
+  phaseName,
+  featured: featuredProp,
+}: {
+  s: SessionMeta;
+  phaseName: string;
+  /** Runtime override for the featured treatment (e.g. "currently teaching this"). */
+  featured?: boolean;
+}) {
   const [hover, setHover] = useState(false);
-  const featured = s.featured;
+  const featured = featuredProp ?? s.featured ?? false;
   return (
     <Link
       href={`/sessions/${s.slug}`}
@@ -80,7 +89,7 @@ export function SessionCard({ s, phaseName }: { s: SessionMeta; phaseName: strin
                 margin: "10px 0 0",
               }}
             >
-              The marquee Lab. A blindfolded hiker, a real cost surface, the learning rate as a slider.
+              We&rsquo;re on this session right now. Pick up where the club is.
             </p>
           )}
         </div>
@@ -95,7 +104,7 @@ export function SessionCard({ s, phaseName }: { s: SessionMeta; phaseName: strin
           }}
         >
           <span>{s.estimatedMinutes} min</span>
-          {featured && <span style={{ color: "var(--accent)", fontWeight: 600 }}>featured →</span>}
+          {featured && <span style={{ color: "var(--accent)", fontWeight: 600 }}>now →</span>}
         </div>
       </div>
     </Link>
