@@ -6,10 +6,13 @@ import { PHASE_HEADERS } from "@/components/illustrations/phase-headers";
 import { getSession, SESSIONS, PHASES } from "@/lib/sessions";
 import { lessonMdxComponents } from "@/lib/mdx/components";
 import { loadSessionNotes } from "@/lib/mdx/loader";
-import { getCurrentUser } from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { TimeOnPage } from "@/components/lab/TimeOnPage";
+import { MarkComplete } from "@/components/lab/MarkComplete";
 import { LessonShell, PlaceholderCard } from "./LessonShell";
 
-export const dynamicParams = false;
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   return SESSIONS.map((s) => ({ slug: s.slug }));
@@ -19,7 +22,22 @@ export default async function LessonPage({ params }: { params: { slug: string } 
   const session = getSession(params.slug);
   if (!session) notFound();
 
-  const user = await getCurrentUser().catch(() => null);
+  const profile = await getCurrentProfile();
+  const isApproved = profile?.status === "approved";
+
+  // Fetch completion only for approved users (RLS would block others anyway).
+  let alreadyCompleted = false;
+  if (isApproved) {
+    const supabase = createSupabaseServerClient();
+    const { data } = await supabase
+      .from("session_completions")
+      .select("user_id")
+      .eq("user_id", profile.id)
+      .eq("session_id", session.slug)
+      .maybeSingle();
+    alreadyCompleted = !!data;
+  }
+
   const PhaseHeader = PHASE_HEADERS[session.phase];
   const phaseName = PHASES[session.phase - 1].name;
   const notes = await loadSessionNotes(session.slug);
@@ -72,6 +90,20 @@ export default async function LessonPage({ params }: { params: { slug: string } 
           <PlaceholderCard session={session} />
         </div>
       )}
+
+      {isApproved && (
+        <div
+          style={{
+            marginTop: 64,
+            paddingTop: 32,
+            borderTop: "1px solid var(--neutral-200)",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <MarkComplete sessionId={session.slug} alreadyCompleted={alreadyCompleted} />
+        </div>
+      )}
     </article>
   );
 
@@ -84,7 +116,8 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         background: "var(--neutral-0)",
       }}
     >
-      <TopNav signedIn={!!user} current="sessions" />
+      {isApproved && <TimeOnPage sessionId={session.slug} />}
+      <TopNav signedIn={!!profile} current="sessions" />
       <LessonShell session={session} notesNode={notesNode} hasLab={hasLab} />
     </div>
   );

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isYcdsbEmail } from "@/lib/auth/domain";
+import { syncProfileForAuthUser } from "@/lib/auth/sync";
+import { getCurrentProfile, landingPathForProfile } from "@/lib/auth/profile";
 
 export type AuthState = { error?: string };
 
@@ -13,11 +15,15 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   if (!email || !password) return { error: "Email and password are required." };
 
   const supabase = createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: error.message };
 
+  // Re-sync profile on every sign-in (refreshes email, applies teacher promotion).
+  if (data.user) await syncProfileForAuthUser(data.user);
+
+  const profile = await getCurrentProfile();
   revalidatePath("/", "layout");
-  redirect("/me");
+  redirect(landingPathForProfile(profile));
 }
 
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -30,11 +36,14 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   }
 
   const supabase = createSupabaseServerClient();
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) return { error: error.message };
 
+  if (data.user) await syncProfileForAuthUser(data.user);
+
+  const profile = await getCurrentProfile();
   revalidatePath("/", "layout");
-  redirect("/me");
+  redirect(landingPathForProfile(profile));
 }
 
 export async function signOut() {
