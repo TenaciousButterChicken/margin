@@ -52,7 +52,7 @@ export const SESSIONS: SessionMeta[] = [
   // Phase 2 - Linear Regression
   { n: 4,  slug: "drawing-lines",           title: "Drawing Lines Through Dots",   phase: 2, estimatedMinutes: 50, motif: "data_point",  hasCodeCell: true },
   { n: 5,  slug: "how-wrong-are-we",        title: "How Wrong Are We?",            phase: 2, estimatedMinutes: 50, motif: "cost_surface",hasCodeCell: true },
-  { n: 6,  slug: "rolling-downhill",        title: "Rolling Downhill",             phase: 2, estimatedMinutes: 60, motif: "hiker", featured: true, hasCodeCell: true },
+  { n: 6,  slug: "rolling-downhill",        title: "Rolling Downhill",             phase: 2, estimatedMinutes: 60, motif: "hiker", hasCodeCell: true },
   { n: 7,  slug: "real-world-regression",   title: "Real-World Regression",        phase: 2, estimatedMinutes: 50, motif: "data_point",  hasCodeCell: true },
   // Phase 3 - Classification
   { n: 8,  slug: "cats-or-dogs",            title: "Cats or Dogs?",                phase: 3, estimatedMinutes: 50, motif: "decision_boundary", hasCodeCell: true },

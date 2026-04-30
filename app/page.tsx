@@ -109,11 +109,6 @@ export default async function LandingPage() {
               <Link href="/sessions/machines-that-learn">
                 <button className="btn btn-primary btn-lg">Start with Session 01</button>
               </Link>
-              <Link href="/sessions/rolling-downhill">
-                <button className="btn btn-secondary btn-lg">
-                  See Session 06 - gradient descent
-                </button>
-              </Link>
             </div>
           </div>
         </div>
