@@ -9,7 +9,7 @@ export default async function TeacherSessionsPage() {
     getAllSessionAggregates(),
     getOverviewStats(),
   ]);
-  const cohort = stats.approved_students;
+  const cohort = stats.approved_members;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -18,8 +18,8 @@ export default async function TeacherSessionsPage() {
           Sessions
         </h1>
         <p style={{ fontSize: 14, color: "var(--neutral-500)", margin: "6px 0 0" }}>
-          Aggregate progress across all 16 sessions for the current cohort
-          ({cohort} approved {cohort === 1 ? "student" : "students"}).
+          Aggregate progress across all 16 sessions
+          ({cohort} approved {cohort === 1 ? "member" : "members"}).
         </p>
       </div>
 
@@ -40,14 +40,12 @@ export default async function TeacherSessionsPage() {
               <Th align="right">Visited</Th>
               <Th align="right">Completed</Th>
               <Th align="right">Avg min</Th>
-              <Th>Completion bar</Th>
             </tr>
           </thead>
           <tbody>
             {SESSIONS.map((s) => {
               const agg = aggregates.get(s.slug);
               const completed = agg?.students_completed ?? 0;
-              const completionPct = cohort > 0 ? Math.round((completed / cohort) * 100) : 0;
               return (
                 <tr key={s.slug} style={{ borderTop: "1px solid var(--neutral-200)" }}>
                   <Td>{String(s.n).padStart(2, "0")}</Td>
@@ -67,33 +65,6 @@ export default async function TeacherSessionsPage() {
                   <Td align="right">{agg?.students_visited ?? 0}</Td>
                   <Td align="right">{completed}</Td>
                   <Td align="right">{agg?.avg_minutes ?? 0}</Td>
-                  <Td>
-                    <div
-                      style={{
-                        position: "relative",
-                        height: 8,
-                        background: "var(--neutral-100)",
-                        borderRadius: 4,
-                        overflow: "hidden",
-                        minWidth: 120,
-                      }}
-                      title={`${completionPct}% completion`}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: `${completionPct}%`,
-                          background: "var(--accent)",
-                        }}
-                      />
-                    </div>
-                    <span style={{ fontSize: 11, color: "var(--neutral-500)", marginLeft: 4 }}>
-                      {completionPct}%
-                    </span>
-                  </Td>
                 </tr>
               );
             })}

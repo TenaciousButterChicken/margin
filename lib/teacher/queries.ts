@@ -43,8 +43,8 @@ export async function getRoster(): Promise<RosterRow[]> {
 }
 
 export type OverviewStats = {
-  total_students: number;
-  approved_students: number;
+  total_members: number;
+  approved_members: number;
   pending: number;
   rejected: number;
   active_this_week: number;
@@ -62,18 +62,18 @@ export async function getOverviewStats(): Promise<OverviewStats> {
   monthStart.setHours(0, 0, 0, 0);
 
   const [
-    studentsTotal,
-    studentsApproved,
-    studentsPending,
-    studentsRejected,
+    membersTotal,
+    membersApproved,
+    membersPending,
+    membersRejected,
     activeUsers,
     progress,
     completions,
     labAttempts,
     hintsMonth,
   ] = await Promise.all([
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student"),
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student").eq("status", "approved"),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "approved"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "rejected"),
     supabase.from("session_heartbeats").select("user_id").gte("bucket_ts", oneWeekAgo),
@@ -90,10 +90,10 @@ export async function getOverviewStats(): Promise<OverviewStats> {
   );
 
   return {
-    total_students: studentsTotal.count ?? 0,
-    approved_students: studentsApproved.count ?? 0,
-    pending: studentsPending.count ?? 0,
-    rejected: studentsRejected.count ?? 0,
+    total_members: membersTotal.count ?? 0,
+    approved_members: membersApproved.count ?? 0,
+    pending: membersPending.count ?? 0,
+    rejected: membersRejected.count ?? 0,
     active_this_week: activeSet.size,
     total_minutes_cohort: Math.round(totalSeconds / 60),
     sessions_completed_cohort: completions.count ?? 0,

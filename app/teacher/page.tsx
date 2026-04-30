@@ -11,8 +11,8 @@ export default async function TeacherOverviewPage() {
     .slice(0, 8);
 
   const avgMinutesPerStudent =
-    stats.approved_students > 0
-      ? Math.round(stats.total_minutes_cohort / stats.approved_students)
+    stats.approved_members > 0
+      ? Math.round(stats.total_minutes_cohort / stats.approved_members)
       : 0;
 
   return (
@@ -30,7 +30,7 @@ export default async function TeacherOverviewPage() {
       <section>
         <SectionLabel>Cohort</SectionLabel>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
-          <StatCard label="Approved" value={stats.approved_students} />
+          <StatCard label="Approved" value={stats.approved_members} />
           <StatCard label="Pending" value={stats.pending} accent={stats.pending > 0} />
           <StatCard label="Rejected" value={stats.rejected} muted />
           <StatCard label="Active this week" value={stats.active_this_week} />
