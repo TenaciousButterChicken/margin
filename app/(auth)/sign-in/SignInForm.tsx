@@ -1,18 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { signIn, type AuthState } from "../actions";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/illustrations/Wordmark";
 
-const initial: AuthState = {};
-
 export function SignInForm() {
-  const [state, formAction] = useFormState(signIn, initial);
   const params = useSearchParams();
-  const checkEmail = params.get("check_email") === "1";
+  const [pending, setPending] = useState(false);
+  const error = params.get("error");
+
+  async function signInWithGoogle() {
+    setPending(true);
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { hd: "ycdsbk12.ca" },
+      },
+    });
+    if (error) {
+      setPending(false);
+      console.error("OAuth init error:", error);
+    }
+  }
 
   return (
     <div
@@ -47,11 +61,11 @@ export function SignInForm() {
             Sign in
           </h1>
           <p style={{ fontSize: 14, color: "var(--neutral-500)", margin: "6px 0 0" }}>
-            Resume your sessions across devices.
+            Use your YCDSB school account.
           </p>
         </div>
 
-        {checkEmail && (
+        {error === "domain" && (
           <div
             style={{
               fontSize: 13,
@@ -62,56 +76,34 @@ export function SignInForm() {
               lineHeight: 1.5,
             }}
           >
-            Check your email for a confirmation link, then sign in.
+            Please sign in with a @ycdsbk12.ca account.
           </div>
         )}
 
-        <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <Field label="Email" name="email" type="email" autoComplete="email" required />
-          <Field label="Password" name="password" type="password" autoComplete="current-password" required />
-          {state.error && (
-            <p style={{ color: "var(--danger)", fontSize: 13, margin: 0 }}>{state.error}</p>
-          )}
-          <SubmitButton />
-        </form>
+        {error === "oauth" && (
+          <div
+            style={{
+              fontSize: 13,
+              color: "var(--danger)",
+              background: "var(--neutral-100)",
+              borderRadius: 6,
+              padding: "10px 12px",
+              lineHeight: 1.5,
+            }}
+          >
+            Sign-in failed. Please try again.
+          </div>
+        )}
 
-        <p style={{ fontSize: 13, color: "var(--neutral-500)", margin: 0, textAlign: "center" }}>
-          New here?{" "}
-          <Link href="/sign-up" style={{ color: "var(--accent)", fontWeight: 600 }}>
-            Create an account
-          </Link>
-        </p>
+        <Button
+          type="button"
+          variant="primary"
+          disabled={pending}
+          onClick={signInWithGoogle}
+        >
+          {pending ? "Redirecting…" : "Sign in with Google"}
+        </Button>
       </div>
     </div>
-  );
-}
-
-function Field({
-  label,
-  name,
-  type,
-  autoComplete,
-  required,
-}: {
-  label: string;
-  name: string;
-  type: string;
-  autoComplete?: string;
-  required?: boolean;
-}) {
-  return (
-    <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--neutral-900)" }}>{label}</span>
-      <input className="input" name={name} type={type} autoComplete={autoComplete} required={required} />
-    </label>
-  );
-}
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="primary" disabled={pending}>
-      {pending ? "Signing in…" : "Sign in"}
-    </Button>
   );
 }
