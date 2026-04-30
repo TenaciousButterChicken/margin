@@ -107,7 +107,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
       }}
     >
       {isApproved && <TimeOnPage sessionId={session.slug} />}
-      <TopNav signedIn={!!profile} current="sessions" />
+      <TopNav signedIn={!!profile} email={profile?.email} role={profile?.role} current="sessions" />
       <LessonShell session={session} notesNode={notesNode} />
     </div>
   );

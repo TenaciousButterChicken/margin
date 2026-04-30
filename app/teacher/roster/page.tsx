@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getRoster } from "@/lib/teacher/queries";
 import { approveStudent, rejectStudent, approveAllPending } from "../actions";
+import { isAdmin } from "@/lib/auth/profile";
+import { RoleCell } from "@/components/public/RoleCell";
 
 export const dynamic = "force-dynamic";
 
@@ -131,9 +133,7 @@ export default async function RosterPage({
                   </Td>
                   <Td><StatusPill status={r.status} /></Td>
                   <Td>
-                    <span style={{ fontSize: 13, color: r.role === "teacher" ? "var(--accent)" : "var(--neutral-700)", fontWeight: r.role === "teacher" ? 600 : 400 }}>
-                      {r.role}
-                    </span>
+                    <RoleCell userId={r.id} initialRole={r.role} />
                   </Td>
                   <Td>{r.cohort_year}</Td>
                   <Td align="right">{r.sessions_completed}/16</Td>
@@ -144,7 +144,7 @@ export default async function RosterPage({
                     </span>
                   </Td>
                   <Td>
-                    {r.status === "pending" && r.role !== "teacher" && (
+                    {r.status === "pending" && !isAdmin(r.role) && (
                       <div style={{ display: "flex", gap: 6 }}>
                         <ApproveButton userId={r.id} />
                         <RejectButton userId={r.id} />

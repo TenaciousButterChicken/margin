@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Wordmark } from "@/components/illustrations/Wordmark";
 import { Button } from "@/components/ui/Button";
 import { GooeyNav } from "@/components/GooeyNav";
+import UserAvatar from "@/components/public/UserAvatar";
 import { signOut } from "@/app/(auth)/actions";
 
 // Top nav appears on every public-register page. Per design brief §6.1:
@@ -17,9 +18,13 @@ const NAV_ITEMS: { label: string; href: string; key: "sessions" | "simulations" 
 export function TopNav({
   current,
   signedIn,
+  email,
+  role,
 }: {
   current?: "sessions" | "simulations" | "about";
   signedIn: boolean;
+  email?: string;
+  role?: import("@/lib/auth/profile").RoleSlug;
 }) {
   return (
     <header className="topnav" style={{ padding: "0 56px" }}>
@@ -37,11 +42,14 @@ export function TopNav({
       </div>
       <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }}>
         {signedIn ? (
-          <form action={signOut}>
-            <Button type="submit" variant="ghost" size="sm">
-              Sign out
-            </Button>
-          </form>
+          <>
+            {email && role && <UserAvatar email={email} role={role} />}
+            <form action={signOut}>
+              <Button type="submit" variant="ghost" size="sm">
+                Sign out
+              </Button>
+            </form>
+          </>
         ) : (
           <>
             <Link href="/sign-in">

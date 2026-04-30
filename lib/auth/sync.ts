@@ -1,18 +1,21 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { isTeacherEmail } from "@/lib/auth/teachers";
+import { seedRoleForEmail } from "@/lib/auth/role-seeds";
 import { cohortYearForDate } from "@/lib/auth/cohort";
 
 // Ensures a profile row exists for the given auth user, with role/status
-// kept in sync with TEACHER_EMAILS. Uses the service-role key - bypasses
+// kept in sync with EMAIL_TO_ROLE. Uses the service-role key - bypasses
 // RLS. Server-only.
 //
 // Idempotent: safe to call on every sign-in.
 //
-// - First-time sign-up: inserts profile. role/status come from TEACHER_EMAILS.
-// - Returning student: refreshes email (in case Supabase Auth has updated it).
-// - Student promoted to teacher (added to TEACHER_EMAILS): updates role.
-// - Teacher demoted (removed from TEACHER_EMAILS): NOT auto-demoted. Spec
-//   intentionally requires manual SQL to demote, to prevent lockouts.
+// - First-time sign-up: inserts profile. role/status come from EMAIL_TO_ROLE.
+// - Returning user: refreshes email/full_name/avatar_url.
+// - Seeded promotion: if their email is in EMAIL_TO_ROLE but the row's role
+//   doesn't match, we update to the seed role and set status='approved'.
+//   (This re-asserts the founder/co-founder seats on every sign-in - the
+//   anti-lockout safety net.)
+// - Other roles (president, VP, secretary, treasurer, teacher-sponsor) are
+//   never overwritten by sync. Those come from the roster UI.
 
 export async function syncProfileForAuthUser(authUser: {
   id: string;
@@ -30,7 +33,7 @@ export async function syncProfileForAuthUser(authUser: {
     .eq("id", authUser.id)
     .maybeSingle();
 
-  const isTeacher = isTeacherEmail(email);
+  const seedRole = seedRoleForEmail(email);
 
   if (!existing) {
     // First sign-in: insert.
@@ -40,9 +43,9 @@ export async function syncProfileForAuthUser(authUser: {
       full_name: authUser.user_metadata?.full_name ?? null,
       avatar_url: authUser.user_metadata?.avatar_url ?? null,
       cohort_year: cohortYearForDate(new Date()),
-      role: isTeacher ? "teacher" : "student",
-      status: isTeacher ? "approved" : "pending",
-      approved_at: isTeacher ? new Date().toISOString() : null,
+      role: seedRole ?? "student",
+      status: seedRole ? "approved" : "pending",
+      approved_at: seedRole ? new Date().toISOString() : null,
     } as never);
     return;
   }
@@ -57,12 +60,12 @@ export async function syncProfileForAuthUser(authUser: {
     } as never)
     .eq("id", authUser.id);
 
-  // Teacher promotion: if they're now a teacher but the row says student.
-  if (isTeacher && (existing as { role: string }).role !== "teacher") {
+  // Seeded role re-assertion: if the seed map says X but the row says Y, fix it.
+  if (seedRole && (existing as { role: string }).role !== seedRole) {
     await admin
       .from("profiles")
       .update({
-        role: "teacher",
+        role: seedRole,
         status: "approved",
         approved_at: new Date().toISOString(),
       } as never)

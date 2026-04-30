@@ -1,11 +1,17 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isAdmin, type RoleSlug } from "@/lib/auth/role";
+
+// Re-export for backwards compatibility with existing import paths.
+// New client-side imports should pull from "@/lib/auth/role" directly so
+// they don't transitively load next/headers via createSupabaseServerClient.
+export { isAdmin, ADMIN_ROLES, ROLE_LABEL, type RoleSlug } from "@/lib/auth/role";
 
 export type Profile = {
   id: string;
   email: string;
   full_name: string | null;
   avatar_url: string | null;
-  role: "student" | "teacher";
+  role: RoleSlug;
   status: "pending" | "approved" | "rejected";
   cohort_year: number;
   created_at: string;
@@ -41,6 +47,6 @@ export function landingPathForProfile(p: Profile | null): string {
   if (!p) return "/awaiting-approval";
   if (p.status === "rejected") return "/access-denied";
   if (p.status === "pending") return "/awaiting-approval";
-  if (p.role === "teacher") return "/teacher";
+  if (isAdmin(p.role)) return "/teacher";
   return "/sessions";
 }

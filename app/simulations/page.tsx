@@ -1,14 +1,14 @@
 import { TopNav } from "@/components/public/TopNav";
 import { SimulationCard } from "@/components/public/SimulationCard";
 import { SIMULATIONS } from "@/lib/simulations";
-import { getCurrentUser } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
 
 export default async function SimulationsIndexPage() {
-  const user = await getCurrentUser().catch(() => null);
+  const profile = await getCurrentProfile().catch(() => null);
 
   return (
     <main style={{ background: "var(--neutral-0)", minHeight: "100vh" }}>
-      <TopNav signedIn={!!user} current="simulations" />
+      <TopNav signedIn={!!profile} email={profile?.email} role={profile?.role} current="simulations" />
 
       <section
         style={{

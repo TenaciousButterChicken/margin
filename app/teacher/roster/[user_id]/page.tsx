@@ -4,6 +4,7 @@ import { getStudentDetail } from "@/lib/teacher/queries";
 import { SESSIONS } from "@/lib/sessions";
 import { approveStudent, rejectStudent } from "../../actions";
 import { PerSessionMinutesChart, DailyActivityChart } from "./StudentCharts";
+import { isAdmin, ROLE_LABEL } from "@/lib/auth/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -50,10 +51,10 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
             {profile.full_name || profile.email}
           </h1>
           <p style={{ fontSize: 14, color: "var(--neutral-500)", margin: "6px 0 0" }}>
-            {profile.email} · cohort {profile.cohort_year} · status {profile.status} · role {profile.role}
+            {profile.email} · cohort {profile.cohort_year} · status {profile.status} · role {ROLE_LABEL[profile.role]}
           </p>
         </div>
-        {profile.status === "pending" && profile.role !== "teacher" && (
+        {profile.status === "pending" && !isAdmin(profile.role) && (
           <div style={{ display: "flex", gap: 8 }}>
             <form action={approveStudent.bind(null, profile.id)}>
               <button

@@ -2,15 +2,15 @@ import Link from "next/link";
 import { TopNav } from "@/components/public/TopNav";
 import { SessionCard } from "@/components/public/SessionCard";
 import { PHASES, sessionsByPhase } from "@/lib/sessions";
-import { getCurrentUser } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
 
 export default async function SessionsIndexPage() {
-  const user = await getCurrentUser().catch(() => null);
+  const profile = await getCurrentProfile().catch(() => null);
   const grouped = sessionsByPhase();
 
   return (
     <main style={{ background: "var(--neutral-0)" }}>
-      <TopNav signedIn={!!user} current="sessions" />
+      <TopNav signedIn={!!profile} email={profile?.email} role={profile?.role} current="sessions" />
 
       <section
         style={{

@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { TopNav } from "@/components/public/TopNav";
-import { getCurrentUser } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
 import { HowItWorks } from "./HowItWorks";
 
 // TF.js is heavy - dynamic import keeps it off any other route's bundle.
@@ -34,11 +34,11 @@ const TeachableMachine = dynamic(
 );
 
 export default async function TeachableMachinePage() {
-  const user = await getCurrentUser().catch(() => null);
+  const profile = await getCurrentProfile().catch(() => null);
 
   return (
     <main style={{ background: "var(--neutral-0)", minHeight: "100vh" }}>
-      <TopNav signedIn={!!user} current="simulations" />
+      <TopNav signedIn={!!profile} email={profile?.email} role={profile?.role} current="simulations" />
 
       <section style={{ maxWidth: 1024, margin: "0 auto", padding: "48px 24px 24px" }}>
         <Link
