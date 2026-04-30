@@ -4,10 +4,10 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { ChannelBus, type ChannelValue } from "./channels";
 
 // React glue around ChannelBus. Provides:
-//  • <LabProvider>           — owns one ChannelBus instance for a lab session
-//  • useChannel(name)        — reactive read of the current value
-//  • usePulseToken(name)     — reactive read of the most recent pulse counter
-//  • usePublish()            — returns set/pulse/reset functions
+//  • <LabProvider>           - owns one ChannelBus instance for a lab session
+//  • useChannel(name)        - reactive read of the current value
+//  • usePulseToken(name)     - reactive read of the most recent pulse counter
+//  • usePublish()            - returns set/pulse/reset functions
 //
 // Every widget mounts inside <LabProvider> and uses these hooks. No props
 // drilling, no prop-passing between siblings.

@@ -7,8 +7,8 @@ import { HIKER_START } from "@/lib/lab/beats";
 // Step controls for beats 4 and 5. Owns the gradient-step logic; the
 // parent passes config and gets a step counter back.
 //
-// Beat 4: variant="single" — one click = one step (lr usually 0.08).
-// Beat 5: variant="four"   — one click = four steps (lr locked at 0.001).
+// Beat 4: variant="single" - one click = one step (lr usually 0.08).
+// Beat 5: variant="four"   - one click = four steps (lr locked at 0.001).
 //                            Also renders a progress bar.
 
 type Pos = { w0: number; w1: number };

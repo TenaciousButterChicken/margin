@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TopNav } from "@/components/public/TopNav";
 import { SessionCard } from "@/components/public/SessionCard";
 import { PHASES, sessionsByPhase } from "@/lib/sessions";
@@ -36,7 +37,7 @@ export default async function SessionsIndexPage() {
       </section>
 
       <section style={{ padding: "32px 56px 96px", maxWidth: 1280, margin: "0 auto" }}>
-        {grouped.map(({ phase, name, sessions }, i) => {
+        {grouped.map(({ phase, slug, name, sessions, lab }, i) => {
           const phaseMeta = PHASES[phase - 1];
           return (
             <div key={phase} style={{ marginBottom: i === grouped.length - 1 ? 0 : 56 }}>
@@ -62,6 +63,37 @@ export default async function SessionsIndexPage() {
                   Phase {phase}
                 </span>
                 <span style={{ fontSize: 16, fontWeight: 600, color: "var(--neutral-900)" }}>{name}</span>
+
+                {lab ? (
+                  <Link
+                    href={`/phases/${slug}/lab`}
+                    style={{
+                      padding: "4px 12px",
+                      borderRadius: 6,
+                      border: "1px solid var(--accent)",
+                      color: "var(--accent)",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      textDecoration: "none",
+                    }}
+                  >
+                    Open Lab →
+                  </Link>
+                ) : (
+                  <span
+                    style={{
+                      padding: "4px 12px",
+                      borderRadius: 6,
+                      border: "1px solid var(--neutral-200)",
+                      color: "var(--neutral-400)",
+                      fontSize: 12,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Lab - coming soon
+                  </span>
+                )}
+
                 <span
                   style={{
                     fontSize: 13,

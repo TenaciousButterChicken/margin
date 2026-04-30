@@ -29,7 +29,7 @@ const config: Config = {
         success: "var(--success)",
         warning: "var(--warning)",
         danger:  "var(--danger)",
-        // Lab-only — never reference these from components/public/**
+        // Lab-only - never reference these from components/public/**
         "lab-cyan": "var(--lab-cyan)",
         "lab-warm": "var(--lab-warm)",
         "lab-teal": "var(--lab-teal)",

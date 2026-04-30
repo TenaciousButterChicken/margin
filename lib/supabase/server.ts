@@ -22,7 +22,7 @@ export function createSupabaseServerClient() {
               cookieStore.set(name, value, options);
             }
           } catch {
-            // Server Component context — cookies are read-only here.
+            // Server Component context - cookies are read-only here.
             // Auth cookie refresh happens in middleware.ts.
           }
         },

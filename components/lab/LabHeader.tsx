@@ -2,15 +2,15 @@
 
 import { usePublish } from "@/lib/lab/LabContext";
 
-// Lab chrome — 48px header per design brief §9.3.
+// Lab chrome - 48px header per design brief §9.3.
 
 export function LabHeader({
   title,
-  sessionN,
+  phaseLabel,
   onClose,
 }: {
   title: string;
-  sessionN: number;
+  phaseLabel: string;
   onClose?: () => void;
 }) {
   const pub = usePublish();
@@ -38,7 +38,7 @@ export function LabHeader({
         </button>
       )}
       <span style={{ fontSize: 12, color: "var(--neutral-500)", fontFamily: "var(--font-mono)" }}>
-        Session {String(sessionN).padStart(2, "0")}
+        {phaseLabel}
       </span>
       <div style={{ width: 1, height: 16, background: "var(--neutral-200)" }} />
       <span style={{ fontSize: 14, fontWeight: 600, color: "var(--neutral-900)" }}>{title}</span>

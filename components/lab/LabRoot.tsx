@@ -3,33 +3,41 @@
 import { LabProvider } from "@/lib/lab/LabContext";
 import { LabHeader } from "./LabHeader";
 import { BeatJourney } from "./BeatJourney";
+import { getPhaseBySlug } from "@/lib/sessions";
 
-// Sprint 1.5: Lab is a beat-driven journey, not a static grid of widgets.
-// Sprint 3 will read the beat sequence from lab.config.json. For now
-// Session 6 hardcodes its 9 beats in lib/lab/beats.ts.
+// Phase-level lab. Phase metadata (title, summary) is read from
+// PHASES in lib/sessions.ts via the phaseSlug prop. The internal
+// beat sequence is still hardcoded in lib/lab/beats.ts; sprint 3
+// will read it from lab.config.json per phase.
 
 export function LabRoot({
-  sessionN = 6,
-  title = "The hiker's descent",
+  phaseSlug,
   onClose,
 }: {
-  sessionN?: number;
-  title?: string;
+  phaseSlug: string;
   onClose?: () => void;
 }) {
+  const phase = getPhaseBySlug(phaseSlug);
+  if (!phase || !phase.lab) return null;
+
   return (
     <LabProvider>
       <div
         data-register="lab"
         style={{
+          flex: 1,
+          minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          height: "100%",
           background: "var(--neutral-50)",
           overflow: "hidden",
         }}
       >
-        <LabHeader title={title} sessionN={sessionN} onClose={onClose} />
+        <LabHeader
+          title={phase.lab.title}
+          phaseLabel={`Phase ${phase.n}`}
+          onClose={onClose}
+        />
         <BeatJourney />
       </div>
     </LabProvider>

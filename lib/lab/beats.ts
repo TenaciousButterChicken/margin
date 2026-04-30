@@ -1,4 +1,4 @@
-// Session 6 — "Rolling Downhill" beat journey.
+// Session 6 - "Rolling Downhill" beat journey.
 // IDs are strings so we can insert beats between integers (4.5, 4.6, …).
 
 export type BeatId =
@@ -42,20 +42,20 @@ export type BeatUnlocks = {
   showDirectionChoice: boolean;
   correctChoicesNeeded: number;
 
-  // Beat 4 — visible gradient arrow
+  // Beat 4 - visible gradient arrow
   showGradientArrow: boolean;
   /** Direction of the visible arrow. Default downhill (-gradient). 4.7 phase 2 toggles. */
   arrowDirection?: "downhill" | "uphill";
 
-  // Beat 4.6 — show small pull arrows on each dot's residual
+  // Beat 4.6 - show small pull arrows on each dot's residual
   showAllPullArrows: boolean;
   /** Bold/visible error bars on all dots even when not in highlight mode (4.6, 4.8). */
   boldErrorBars: boolean;
 
-  // Beat 4.7 — glow the hiker (visually anchors "this is your position")
+  // Beat 4.7 - glow the hiker (visually anchors "this is your position")
   hikerGlow: boolean;
 
-  // Beat 6 — predict + diverge
+  // Beat 6 - predict + diverge
   showPredictPanel: boolean;
   autoRunOnPredict?: boolean;
   shakeCameraOnDiverge?: boolean;
@@ -111,30 +111,30 @@ export type Beat = {
   startPosition?: { w0: number; w1: number };
 };
 
-// Center-ish dot in the dataset — gives a clean error bar on screen.
+// Center-ish dot in the dataset. Gives a clean error bar on screen.
 // DATASET[4] = (study_hours=5, exam_score=90).
 const FOCUS_DOT_INDEX = 4;
 
-// Starting line for beat 4.5: slope ~10, intercept ~50 — gives a
+// Starting line for beat 4.5: slope ~10, intercept ~50. Gives a
 // near-fit that's visibly off, so the focus dot has a clear error.
 const BEAT45_START = { w0: 0.438, w1: 1.133 };
 
 export const BEATS: Record<BeatId, Beat> = {
   "1": {
     id: "1",
-    kicker: "Beat 1 — The hook",
+    kicker: "Beat 1 - The hook",
     prompt: "Drag the line to fit the dots. Get the loss below 0.05.",
     reveal:
-      "Nice. You did that with two numbers — slope and intercept. What if there were a million?",
+      "Nice. You did that with two numbers, slope and intercept. What if there were a million?",
     unlocks: { ...DEFAULT_UNLOCKS, showLine: true, lineDraggable: true },
     completion: { kind: "loss_below", threshold: 0.05 },
   },
 
   "2": {
     id: "2",
-    kicker: "Beat 2 — The bowl appears",
+    kicker: "Beat 2 - The bowl appears",
     prompt:
-      "Every point on this bowl is one possible line. Low = good fit. High = bad. Drag either side — they're the same thing.",
+      "Every point on this bowl is one possible line. Low = good fit. High = bad. Drag either side. They're the same thing.",
     reveal:
       "The bowl-position and the line-on-data are the same thing in two costumes. The bowl IS every possible line, mapped to its loss.",
     unlocks: {
@@ -149,11 +149,11 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "3": {
     id: "3",
-    kicker: "Beat 3 — Blindfolded",
+    kicker: "Beat 3 - Blindfolded",
     prompt:
       "Now imagine you can't see the bowl. You only feel the slope under your feet. Which way do you walk?",
     reveal:
-      "The slope you feel is the gradient. It points uphill — so you walk the other way. That's the entire algorithm: at every step, take the direction opposite the gradient.",
+      "The slope you feel is the gradient. It points uphill, so you walk the other way. That's the entire algorithm: at every step, take the direction opposite the gradient.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
       showBowl: true,
@@ -168,10 +168,10 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "4": {
     id: "4",
-    kicker: "Beat 4 — Watch it shrink",
+    kicker: "Beat 4 - Watch it shrink",
     prompt: "Take a few steps. Watch the arrow.",
     reveal:
-      "The arrow is the gradient. It shrinks as the ground flattens. At the bottom, there's no slope — so no step. That's how it knows when to stop.",
+      "The arrow is the gradient. It shrinks as the ground flattens. At the bottom, there's no slope, so no step. That's how it knows when to stop.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
       showBowl: true,
@@ -187,7 +187,7 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "4.5": {
     id: "4.5",
-    kicker: "Beat 4.5 — One dot, one nudge",
+    kicker: "Beat 4.5 - One dot, one nudge",
     prompt: "Let's zoom in on one dot.",
     reveal:
       "One dot pulls the line one way. But we have ten dots, all pulling at once.",
@@ -208,11 +208,11 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "5": {
     id: "5",
-    kicker: "Beat 5 — Painfully small",
+    kicker: "Beat 5 - Painfully small",
     prompt:
       "Each step is lr × gradient. lr is yours to set. Try it locked at 0.001. Click Step ×4 ten times.",
     reveal:
-      "At lr = 0.001, you'd need ~340 more clicks to reach the bottom. Too small. The step size matters — which is what beat 6 is about to break.",
+      "At lr = 0.001, you'd need ~340 more clicks to reach the bottom. Too small. The step size matters, which is what beat 6 is about to break.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
       showBowl: true,
@@ -228,11 +228,11 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "6": {
     id: "6",
-    kicker: "Beat 6 — The cliff",
+    kicker: "Beat 6 - The cliff",
     prompt:
       "Now try lr = 0.6. Predict first: does it (a) converge faster, (b) bounce around, (c) fly off?",
     reveal:
-      "Not slower — different. A tiny bit too high doesn't make it worse, it makes it break. The cliff between 'works' and 'chaos' is sharper than it looks.",
+      "Not slower, different. A tiny bit too high doesn't make it worse, it makes it break. The cliff between 'works' and 'chaos' is sharper than it looks.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
       showBowl: true,
@@ -249,7 +249,7 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "4.6": {
     id: "4.6",
-    kicker: "Beat 4.6 — Ten dots, one direction",
+    kicker: "Beat 4.6 - Ten dots, one direction",
     prompt: "Each dot pulls the line. Let's see all ten pulls at once.",
     reveal:
       "That's the arrow you've been seeing on the bowl. Two numbers telling the algorithm: 'shift this much, tilt this much.'",
@@ -271,10 +271,10 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "4.7": {
     id: "4.7",
-    kicker: "Beat 4.7 — The full step, built piece by piece",
+    kicker: "Beat 4.7 - The full step, built piece by piece",
     prompt: "Now we know which way to move. How do we actually take a step?",
     reveal:
-      "That's the whole algorithm. w_new = w − lr × gradient. Three things you already know — your position, the pull from the data, and how big a step to take.",
+      "That's the whole algorithm. w_new = w − lr × gradient. Three things you already know: your position, the pull from the data, and how big a step to take.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
       showBowl: true,
@@ -290,10 +290,10 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "4.8": {
     id: "4.8",
-    kicker: "Beat 4.8 — Why steps shrink",
+    kicker: "Beat 4.8 - Why steps shrink",
     prompt: "Remember how the steps got smaller near the bottom? Now you can see why.",
     reveal:
-      "It doesn't stop. There's just nothing to subtract. When the gradient is zero, w − lr × 0 = w — you stay put forever. That's how the algorithm knows it's done.",
+      "It doesn't stop. There's just nothing to subtract. When the gradient is zero, w − lr × 0 = w. You stay put forever. That's how the algorithm knows it's done.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
       showLine: true,
@@ -312,8 +312,8 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "7": {
     id: "7",
-    kicker: "Beat 7 — The edge",
-    prompt: "[Coming soon] Try lr = 0.45. Watch carefully — chaos that converges.",
+    kicker: "Beat 7 - The edge",
+    prompt: "[Coming soon] Try lr = 0.45. Watch carefully. Chaos that converges.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
       showBowl: true,
@@ -327,7 +327,7 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "8": {
     id: "8",
-    kicker: "Beat 8 — The reward",
+    kicker: "Beat 8 - The reward",
     prompt: "[Coming soon] Find an lr that gets to the bottom in under 18 steps.",
     unlocks: {
       ...DEFAULT_UNLOCKS,
@@ -341,7 +341,7 @@ export const BEATS: Record<BeatId, Beat> = {
 
   "9": {
     id: "9",
-    kicker: "Beat 9 — The cliffhanger",
+    kicker: "Beat 9 - The cliffhanger",
     prompt: "[Coming soon] Drop the hiker anywhere. They always end up here.",
     unlocks: {
       ...DEFAULT_UNLOCKS,

@@ -1,5 +1,5 @@
 <BigIdea>
-The simplest "learning" task: given dots on a graph, find the line that fits them best. Linear regression — derived as a direct extension of <Math tex="y = mx + b" /> from algebra class.
+The simplest "learning" task: given dots on a graph, find the line that fits them best. Linear regression, derived as a direct extension of <Math tex="y = mx + b" /> from algebra class.
 </BigIdea>
 
 <Objectives>
@@ -76,7 +76,7 @@ Quick exercise: for each row of (w, b, x), compute ŷ.
 
 You'll compute predictions three ways, in increasing levels of abstraction.
 
-### Way 1 — pure Python
+### Way 1 - pure Python
 
 Write the formula directly.
 
@@ -90,7 +90,7 @@ y_hat = w * x + b
 print("Prediction:", y_hat)   # 90
 ```
 
-### Way 2 — multiple predictions with numpy
+### Way 2 - multiple predictions with numpy
 
 Real datasets have many inputs. You use arrays.
 
@@ -111,7 +111,7 @@ print(y_hat_array)
 
 What just happened: numpy's array multiplication is element-wise. Adding 50 adds 50 to each element. You computed 7 predictions in one line.
 
-### Way 3 — plot the line
+### Way 3 - plot the line
 
 ```python
 import matplotlib.pyplot as plt
@@ -135,7 +135,7 @@ plt.show()
 
 The plot shows the dots and your guessed line. Some dots are above the line, some below. Your line is approximately right, but not perfect.
 
-Pause and look at it. Could you do better? Drag the line in your imagination — slope up a bit, intercept down a bit. The question for next chapter is: how do you *measure* how good a line is? Without that measurement, "better" has no meaning.
+Pause and look at it. Could you do better? Drag the line in your imagination: slope up a bit, intercept down a bit. The question for next chapter is: how do you *measure* how good a line is? Without that measurement, "better" has no meaning.
 
 ## When linear regression makes sense
 
@@ -149,7 +149,7 @@ Linear regression assumes the relationship between x and y is roughly a straight
 It does **not** make sense when:
 
 - The relationship is wildly non-linear (a thrown ball's trajectory, a parabola)
-- The output is a category (spam vs not spam — classification, Phase 3)
+- The output is a category (spam vs not spam, classification, Phase 3)
 
 ## Fit a line with scikit-learn
 
@@ -219,6 +219,6 @@ Linear regression is one of the most widely used ML algorithms in industry. Fore
   </Q>
 </FAQ>
 
-<Bridge to="Chapter 5 — How wrong are we?">
+<Bridge to="Chapter 5 - How wrong are we?">
 Today you drew a line through dots. Next, we make "best fit" precise. We define what it means for one line to be better than another, and derive the most important formula in introductory ML: Mean Squared Error.
 </Bridge>

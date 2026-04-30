@@ -146,12 +146,12 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
                       {data?.completed_at ? (
                         <span style={{ color: "#1e7a3a", fontWeight: 600 }}>✓</span>
                       ) : (
-                        <span style={{ color: "var(--neutral-300)" }}>—</span>
+                        <span style={{ color: "var(--neutral-300)" }}>-</span>
                       )}
                     </Td>
                     <Td>
                       <span style={{ color: "var(--neutral-500)", fontSize: 12 }}>
-                        {data?.last_visited_at ? timeAgo(data.last_visited_at) : "—"}
+                        {data?.last_visited_at ? timeAgo(data.last_visited_at) : "-"}
                       </span>
                     </Td>
                   </tr>
@@ -186,7 +186,7 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
                       <span style={{ fontWeight: 600, color: outcomeColor(a.outcome) }}>{a.outcome}</span>
                     </Td>
                     <Td>{new Date(a.started_at).toLocaleString()}</Td>
-                    <Td>{a.ended_at ? new Date(a.ended_at).toLocaleString() : "—"}</Td>
+                    <Td>{a.ended_at ? new Date(a.ended_at).toLocaleString() : "-"}</Td>
                   </tr>
                 ))}
               </tbody>
@@ -214,9 +214,9 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
                   <tr key={h.id} style={{ borderTop: "1px solid var(--neutral-200)" }}>
                     <Td>{timeAgo(h.requested_at)}</Td>
                     <Td>{h.hint_type}</Td>
-                    <Td>{h.lab_id ?? h.session_id ?? "—"}</Td>
+                    <Td>{h.lab_id ?? h.session_id ?? "-"}</Td>
                     <Td>
-                      <span style={{ color: "var(--neutral-700)", fontSize: 12 }}>{h.prompt ?? "—"}</span>
+                      <span style={{ color: "var(--neutral-700)", fontSize: 12 }}>{h.prompt ?? "-"}</span>
                     </Td>
                   </tr>
                 ))}

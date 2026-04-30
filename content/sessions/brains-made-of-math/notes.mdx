@@ -27,7 +27,7 @@ Weighted sum, bias, squish through sigmoid. That structure *is* a neuron.
 
 Each input × its weight, all summed, plus a bias, through an activation function.
 
-**Generalization 1 — any activation function.** The sigmoid was chosen for logistic regression because we wanted the output to be a probability. In a neural network's *hidden* layers, you don't need a probability; you just need some non-linearity. The most common modern choice is **ReLU** ("rectified linear unit"):
+**Generalization 1 - any activation function.** The sigmoid was chosen for logistic regression because we wanted the output to be a probability. In a neural network's *hidden* layers, you don't need a probability; you just need some non-linearity. The most common modern choice is **ReLU** ("rectified linear unit"):
 
 <Math tex="\text{ReLU}(z) = \max(0, z)" display />
 
@@ -37,7 +37,7 @@ Why ReLU instead of sigmoid? Sigmoid's gradient vanishes for big |z| (you saw th
 
 Other activations exist (tanh, LeakyReLU, GELU, Swish), but ReLU and sigmoid cover most of what you need to know.
 
-**Generalization 2 — a neuron's output isn't always a probability.** With ReLU, intermediate neurons' outputs can be any non-negative number. That's fine. They're just internal computations, not final predictions.
+**Generalization 2 - a neuron's output isn't always a probability.** With ReLU, intermediate neurons' outputs can be any non-negative number. That's fine. They're just internal computations, not final predictions.
 
 So a neuron is:
 
@@ -92,7 +92,7 @@ Each layer has its own weight matrix and bias vector. The math:
 
 Layers between input and output are **hidden layers**. They're not directly visible from outside. The whole stack is a **neural network** (or **multi-layer perceptron**, MLP).
 
-## Why depth helps — the Universal Approximation Theorem
+## Why depth helps - the Universal Approximation Theorem
 
 Here's the magical fact. *A network with even one hidden layer can approximate any reasonable function*, given enough neurons. This is the Universal Approximation Theorem. It says that no matter how complex the relationship between inputs and outputs, there's a neural network that represents it.
 
@@ -262,6 +262,6 @@ No. For small datasets or when interpretability matters, simpler tools win. For 
   </Q>
 </FAQ>
 
-<Bridge to="Chapter 12 — Going deep">
+<Bridge to="Chapter 12 - Going deep">
 Today you saw that adding layers helps. Tomorrow we ask why. Each layer learns more abstract features built from the previous layer's features. Edges become shapes. Shapes become objects. We'll train an image classifier and visualize what each layer "sees."
 </Bridge>

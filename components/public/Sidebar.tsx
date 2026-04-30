@@ -2,9 +2,9 @@ import Link from "next/link";
 import { sessionsByPhase } from "@/lib/sessions";
 import { PhasePip } from "@/components/illustrations/PhasePip";
 
-// Lesson-page sidebar. Per design brief §6.1: 240px expanded, 56px
-// collapsed. For v0 we only ship the expanded variant — the side-panel
-// Lab transition will introduce the collapsed mode.
+// Lesson-page sidebar. Per design brief §6.1: 240px expanded.
+// Each phase block: header pip + label, then the phase lab pill
+// (active link or disabled "coming soon"), then the session rows.
 
 export function Sidebar({ currentSlug }: { currentSlug?: string }) {
   const grouped = sessionsByPhase();
@@ -19,7 +19,7 @@ export function Sidebar({ currentSlug }: { currentSlug?: string }) {
         overflow: "auto",
       }}
     >
-      {grouped.map(({ phase, name, sessions }) => (
+      {grouped.map(({ phase, slug, name, sessions, lab }) => (
         <div key={phase} style={{ marginBottom: 20 }}>
           <div
             style={{
@@ -45,6 +45,46 @@ export function Sidebar({ currentSlug }: { currentSlug?: string }) {
               Phase {phase} · {name}
             </span>
           </div>
+
+          {lab ? (
+            <Link
+              href={`/phases/${slug}/lab`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "6px 10px",
+                marginBottom: 8,
+                borderRadius: 6,
+                border: "1px solid var(--accent)",
+                color: "var(--accent)",
+                fontSize: 12,
+                fontWeight: 600,
+                textDecoration: "none",
+                background: "transparent",
+              }}
+            >
+              <span>Open Lab</span>
+              <span aria-hidden>→</span>
+            </Link>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "6px 10px",
+                marginBottom: 8,
+                borderRadius: 6,
+                border: "1px solid var(--neutral-200)",
+                color: "var(--neutral-400)",
+                fontSize: 12,
+                fontStyle: "italic",
+              }}
+            >
+              Lab - coming soon
+            </div>
+          )}
+
           {sessions.map((s) => {
             const active = s.slug === currentSlug;
             return (

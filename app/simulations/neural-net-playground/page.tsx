@@ -3,7 +3,7 @@ import Link from "next/link";
 import { TopNav } from "@/components/public/TopNav";
 import { getCurrentUser } from "@/lib/supabase/server";
 
-// Canvas + SVG everything — needs the DOM, no SSR.
+// Canvas + SVG everything - needs the DOM, no SSR.
 const NeuralNetPlayground = dynamic(
   () =>
     import("@/components/simulations/NeuralNetPlayground").then(
@@ -76,7 +76,7 @@ export default async function NeuralNetPlaygroundPage() {
           >
             Train a small neural network on a 2D classification problem and
             watch the decision boundary form, frame by frame. Each hidden
-            neuron also shows what shape it has individually learned — that&rsquo;s
+            neuron also shows what shape it has individually learned, and that&rsquo;s
             usually the most interesting part.
           </p>
         </div>
@@ -100,7 +100,7 @@ export default async function NeuralNetPlaygroundPage() {
           What you&rsquo;re seeing
         </h2>
         <p style={{ margin: "0 0 12px" }}>
-          The plot on the left shows a 2D dataset and a colored background — that
+          The plot on the left shows a 2D dataset and a colored background. That
           background is the network&rsquo;s prediction at every point in space. Orange
           regions are where it predicts class &minus;1, blue regions are class +1.
           Soft = uncertain, saturated = confident.
@@ -109,7 +109,7 @@ export default async function NeuralNetPlaygroundPage() {
           The diagram on the right is the network. Each circle is a neuron; each
           line is a weight. Line thickness encodes magnitude, color encodes sign.
           Inside each hidden neuron is a tiny version of that neuron&rsquo;s output
-          across the input space — so you can see what shape that one neuron has
+          across the input space, so you can see what shape that one neuron has
           learned to detect.
         </p>
         <p style={{ margin: 0 }}>
@@ -141,7 +141,7 @@ export default async function NeuralNetPlaygroundPage() {
           >
             Daniel Smilkov and Shan Carter&rsquo;s TensorFlow Playground
           </a>{" "}
-          (Apache 2.0). Math rebuilt natively for Margin in TypeScript — no
+          (Apache 2.0). Math rebuilt natively for Margin in TypeScript, with no
           TF.js dependency for this page.
         </p>
       </footer>

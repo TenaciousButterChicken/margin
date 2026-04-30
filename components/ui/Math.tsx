@@ -1,8 +1,8 @@
 import katex from "katex";
 
 // Server-rendered KaTeX. Two flavors:
-//  • <Math tex="..." />          — inline, used inside prose
-//  • <Math tex="..." display />  — centered block, larger, breathing room
+//  • <Math tex="..." />          - inline, used inside prose
+//  • <Math tex="..." display />  - centered block, larger, breathing room
 
 export function Math({
   tex,

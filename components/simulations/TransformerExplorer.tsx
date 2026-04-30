@@ -27,7 +27,7 @@ const DEFAULT_TEMP = 1.0;
 const TOP_K = 10;
 
 // Tight client-side blocklist. Substring match (case-insensitive). Only
-// obvious slurs / explicit profanity — kept short to avoid false positives
+// obvious slurs / explicit profanity - kept short to avoid false positives
 // on normal academic words.
 const BLOCKED_TERMS = [
   "nigger", "nigga",
@@ -115,7 +115,7 @@ export function TransformerExplorer() {
   }, []);
 
   function showFilterToast() {
-    setFilterToast("Let's keep this school-appropriate — try a different prompt.");
+    setFilterToast("Let's keep this school-appropriate. Try a different prompt.");
   }
 
   // Auto-dismiss the filter toast after a few seconds.
@@ -207,7 +207,7 @@ export function TransformerExplorer() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-      {/* Filter toast — appears above input when blocked content is detected */}
+      {/* Filter toast - appears above input when blocked content is detected */}
       {filterToast && (
         <div
           role="status"
@@ -316,7 +316,7 @@ export function TransformerExplorer() {
 
           {/* Predictions */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span style={metaLabel}>NEXT-TOKEN PREDICTIONS — TOP {TOP_K}</span>
+            <span style={metaLabel}>NEXT-TOKEN PREDICTIONS - TOP {TOP_K}</span>
             <Predictions predictions={resolvedTop ?? []} />
           </div>
 
@@ -328,7 +328,7 @@ export function TransformerExplorer() {
             generating={generating || inferring}
           />
 
-          {/* Embedding visualizer — lazy-loaded when scrolled into view */}
+          {/* Embedding visualizer - lazy-loaded when scrolled into view */}
           <div
             style={{
               marginTop: 16,

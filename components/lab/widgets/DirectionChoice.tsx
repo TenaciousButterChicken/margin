@@ -3,13 +3,13 @@
 import { useChannel, usePublish } from "@/lib/lab/LabContext";
 import { gradient, loss } from "@/lib/lab/sim/gradient-descent";
 
-// Beat 3 — the "blindfolded" UI. Two big arrow buttons. Picking the
+// Beat 3 - the "blindfolded" UI. Two big arrow buttons. Picking the
 // downhill arrow steps the hiker downhill (and counts as a correct
-// choice — the parent uses correctChoices to clear fog). Picking
+// choice; the parent uses correctChoices to clear fog). Picking
 // uphill steps the hiker uphill (no progress, no fog clearing).
 //
 // We compute the gradient at the current position and act on it
-// directly — no slider involved here.
+// directly. No slider involved here.
 
 const STEP_LR = 0.18; // big enough for the hiker to clearly move
 
@@ -64,7 +64,7 @@ export function DirectionChoice({
         <ChoiceButton label="Walk downhill" arrow="↓" onClick={() => step("downhill")} disabled={disabled} />
       </div>
       <p style={{ fontSize: 12, color: "var(--neutral-500)", margin: 0, lineHeight: 1.45 }}>
-        You can&rsquo;t see the bowl. You can only feel the slope under your feet — that&rsquo;s the gradient. Pick a direction and the hiker takes a step.
+        You can&rsquo;t see the bowl. You can only feel the slope under your feet. That&rsquo;s the gradient. Pick a direction and the hiker takes a step.
       </p>
     </div>
   );

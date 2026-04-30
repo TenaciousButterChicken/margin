@@ -1,5 +1,5 @@
 <BigIdea>
-Until now, every model had labels. Most data in the world has no labels. Unsupervised learning finds patterns in unlabeled data. You'll derive the k-means clustering algorithm, code it from scratch, and meet word embeddings — the bridge to language models in Chapter 15.
+Until now, every model had labels. Most data in the world has no labels. Unsupervised learning finds patterns in unlabeled data. You'll derive the k-means clustering algorithm, code it from scratch, and meet word embeddings, the bridge to language models in Chapter 15.
 </BigIdea>
 
 <Objectives>
@@ -145,7 +145,7 @@ for K in [2, 4, 5]:
 
 K=2 merges two of the clusters. K=4 splits one cluster. K=5 splits more. K-means doesn't know how many clusters are "right." That's a hyperparameter you set. Tools like the elbow method or silhouette score help pick K.
 
-## Word embeddings — where unsupervised gets cool
+## Word embeddings - where unsupervised gets cool
 
 Now the bridge to language models. How do you represent a word as numbers in a way that captures meaning?
 
@@ -157,7 +157,7 @@ Who decides similarity? Here's the unsupervised part: you let the model figure i
 
 The classic algorithm is **word2vec** (Mikolov et al., 2013). The idea: train a tiny neural network to predict the words around a given word. The "embedding" of each word is the network's internal representation after training.
 
-## Word arithmetic — the famous demo
+## Word arithmetic - the famous demo
 
 Once you have embeddings, weird and wonderful things happen.
 
@@ -295,6 +295,6 @@ The embedding learned that doctor associates more with male contexts, nurse with
   </Q>
 </FAQ>
 
-<Bridge to="Chapter 15 — How ChatGPT works">
-Word embeddings are how language models start understanding text. But what happens after the embedding step? How does ChatGPT actually generate sentences? Next: the architecture that powers all modern AI — the transformer — and we'll derive its central mechanism, attention.
+<Bridge to="Chapter 15 - How ChatGPT works">
+Word embeddings are how language models start understanding text. But what happens after the embedding step? How does ChatGPT actually generate sentences? Next: the architecture that powers all modern AI, the transformer, and we'll derive its central mechanism, attention.
 </Bridge>

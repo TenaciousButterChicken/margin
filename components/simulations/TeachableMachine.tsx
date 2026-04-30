@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Teachable Machine — webcam-based image classifier, KNN over MobileNet
+// Teachable Machine - webcam-based image classifier, KNN over MobileNet
 // features. The technique:
 //   1. Load MobileNet (pretrained on ImageNet, ~16MB).
 //   2. For each frame the user records: extract MobileNet's penultimate-
@@ -212,7 +212,7 @@ export function TeachableMachine() {
         features.dispose();
 
         // result.confidences is keyed by class id (number). KNN may return
-        // string keys depending on version — handle both.
+        // string keys depending on version - handle both.
         const confs: Record<string, number> = result.confidences as Record<string, number>;
         const next = classesRef.current.map((c) => {
           const k = c.id.toString();
@@ -252,7 +252,7 @@ export function TeachableMachine() {
       try {
         knnRef.current.clearClass(id);
       } catch {
-        // class may not exist yet — ignore
+        // class may not exist yet - ignore
       }
     }
     setClasses((prev) =>
@@ -459,7 +459,7 @@ function CameraPlaceholder({ state, onEnable }: { state: CameraState; onEnable: 
         }}
       >
         Train a webcam classifier in 30 seconds. Click below to enable your
-        camera — nothing leaves your browser.
+        camera. Nothing leaves your browser.
       </p>
       <button onClick={onEnable} className="btn btn-primary" disabled={state === "requesting"}>
         {state === "requesting" ? "requesting access…" : "Enable camera"}

@@ -53,13 +53,13 @@ type Progress = {
   wrongChoices: number;
   stepClicks: number;
   nudgeClicks: number;
-  /** Beat 4.6 + 4.7 — current phase index (1-indexed). */
+  /** Beat 4.6 + 4.7 - current phase index (1-indexed). */
   phase: number;
-  /** Beat 4.7 — descent vs ascent toggle (drives Surface3D arrowDirection). */
+  /** Beat 4.7 - descent vs ascent toggle (drives Surface3D arrowDirection). */
   arrowDirection: "downhill" | "uphill";
-  /** Beat 4.8 — locked-in predict answer */
+  /** Beat 4.8 - locked-in predict answer */
   predictAnswer: "a" | "b" | "c" | null;
-  /** Beat 4.8 — full algorithm steps taken */
+  /** Beat 4.8 - full algorithm steps taken */
   algoSteps: number;
 };
 
@@ -236,7 +236,7 @@ export function BeatJourney() {
   }
 
   function handleTakeStep() {
-    // Beat 4.7 phase 3 — apply w_new = w − lr × g and advance the hiker.
+    // Beat 4.7 phase 3 - apply w_new = w − lr × g and advance the hiker.
     if (!pos) return;
     const LR = 0.08;
     const [g0, g1] = gradient(pos.w0, pos.w1);
@@ -245,13 +245,13 @@ export function BeatJourney() {
   }
 
   function handleAlgoStep() {
-    // Beat 4.8 — full algorithm step.
+    // Beat 4.8 - full algorithm step.
     if (!pos) return;
     const LR = 0.08;
     const [g0, g1] = gradient(pos.w0, pos.w1);
     const mag = Math.hypot(g0, g1);
     if (mag < 0.01) {
-      // At minimum — w − lr × 0 = w. The "no movement" moment.
+      // At minimum - w − lr × 0 = w. The "no movement" moment.
       setProgress((p) => ({ ...p, algoSteps: p.algoSteps + 1 }));
       return;
     }
@@ -282,7 +282,8 @@ export function BeatJourney() {
         minHeight: 0,
         padding: 16,
         gap: 14,
-        overflow: "auto",
+        overflowY: "auto",
+        overflowX: "hidden",
       }}
     >
       {/* Beat header */}
@@ -320,8 +321,10 @@ export function BeatJourney() {
             cfg.unlocks.showLine && cfg.unlocks.showBowl
               ? "1fr 1fr"
               : "1fr",
+          gridAutoRows: "max-content",
+          alignItems: "start",
           gap: 12,
-          minHeight: 0,
+          flex: "none",
         }}
       >
         {cfg.unlocks.showLine && (
@@ -376,7 +379,7 @@ export function BeatJourney() {
         )}
       </section>
 
-      {/* Math strip — beat 4.5+ */}
+      {/* Math strip - beat 4.5+ */}
       {cfg.unlocks.showMathStrip && cfg.unlocks.mathStripBeat && (
         <MathStrip
           beat={cfg.unlocks.mathStripBeat}
@@ -456,8 +459,8 @@ export function BeatJourney() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginTop: "auto",
-          paddingTop: 8,
+          paddingTop: 16,
+          flex: "none",
         }}
       >
         <button

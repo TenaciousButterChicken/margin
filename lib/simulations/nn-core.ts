@@ -1,9 +1,9 @@
-// Neural Net Playground — math core.
+// Neural Net Playground - math core.
 //
 // Ported from tensorflow/playground/src/nn.ts in spirit (Apache 2.0).
 // Supports two modes:
-//   • classification — 2 inputs, tanh output, ±1 labels (existing)
-//   • regression     — 1 input,  linear output, real-valued targets
+//   • classification - 2 inputs, tanh output, ±1 labels (existing)
+//   • regression     - 1 input,  linear output, real-valued targets
 //
 // Loss: 0.5 * (output - target)² in both modes. With tanh output and
 // ±1 labels, that's the standard binary squared-error setup. With linear

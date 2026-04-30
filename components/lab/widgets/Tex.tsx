@@ -4,8 +4,8 @@ import katex from "katex";
 import "katex/dist/katex.min.css";
 
 // KaTeX-rendered math, lazy-loaded with the Lab. Two flavors:
-//  • <Math tex="..." />        — inline (e.g. for symbol mentions in prose)
-//  • <Math tex="..." display />— centered block, larger size
+//  • <Math tex="..." />        - inline (e.g. for symbol mentions in prose)
+//  • <Math tex="..." display />- centered block, larger size
 
 export function Tex({
   tex,
@@ -14,7 +14,7 @@ export function Tex({
 }: {
   tex: string;
   display?: boolean;
-  /** Multiplier on KaTeX's default size — 1 = default, 1.4 = 40% larger */
+  /** Multiplier on KaTeX's default size - 1 = default, 1.4 = 40% larger */
   scale?: number;
 }) {
   const html = katex.renderToString(tex, {

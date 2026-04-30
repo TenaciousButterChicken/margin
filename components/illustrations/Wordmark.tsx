@@ -1,4 +1,4 @@
-// Direction A — pure typographic wordmark, Inter, tight tracking.
+// Direction A - pure typographic wordmark, Inter, tight tracking.
 // Per design brief §13: confirmed wordmark-only, no separate logomark.
 
 export function Wordmark({

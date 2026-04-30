@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Polynomial Playground — bias-variance tradeoff, made visible.
+// Polynomial Playground - bias-variance tradeoff, made visible.
 //
 // Math: ordinary least squares on polynomial features [1, x, x², …, xⁿ].
 // Build the design matrix X (N rows × (D+1) cols), solve the normal
@@ -63,7 +63,7 @@ function solveLinear(A: number[][], b: number[]): number[] {
   const n = A.length;
   const M: number[][] = A.map((row, i) => [...row, b[i]]);
   for (let k = 0; k < n; k++) {
-    // partial pivot — swap in the row with the largest |M[i][k]|
+    // partial pivot - swap in the row with the largest |M[i][k]|
     let pivotRow = k;
     let pivotMag = Math.abs(M[k][k]);
     for (let i = k + 1; i < n; i++) {
@@ -194,7 +194,7 @@ export function PolynomialPlayground() {
     return () => clearTimeout(t);
   }, [atExactFitThreshold]);
 
-  // Reveal caption — fires once dots ≥ 6, degree ≥ 10, and error ~ 0.
+  // Reveal caption - fires once dots ≥ 6, degree ≥ 10, and error ~ 0.
   const overfittingMoment =
     dots.length >= 6 && degree >= 10 && error < 0.01;
 
@@ -253,7 +253,7 @@ export function PolynomialPlayground() {
       // to it from far away (avoids ugly diagonal jumps).
       const inView = yClamped >= Y_DOMAIN[0] - 4 && yClamped <= Y_DOMAIN[1] + 4;
       if (!inView) {
-        // Still draw, but pen lifts and rejoins later — gives a fragmented
+        // Still draw, but pen lifts and rejoins later - gives a fragmented
         // curve when it shoots off-screen, which is exactly what overfitting
         // looks like.
         segments.push(`${pen} ${sx} ${sy}`);
@@ -279,7 +279,7 @@ export function PolynomialPlayground() {
       >
         {testMode ? (
           <>
-            <strong>Test mode.</strong> Click anywhere — a question mark drops at
+            <strong>Test mode.</strong> Click anywhere, and a question mark drops at
             that x and the curve&rsquo;s prediction at that x lights up.
           </>
         ) : (

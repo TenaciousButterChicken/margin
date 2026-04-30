@@ -108,7 +108,7 @@ export type SessionAggregate = {
   students_completed: number;
   total_minutes: number;
   avg_minutes: number;
-  // distribution: 6 buckets — 0-5, 5-10, 10-20, 20-30, 30-60, 60+ minutes
+  // distribution: 6 buckets - 0-5, 5-10, 10-20, 20-30, 30-60, 60+ minutes
   histogram: { label: string; count: number }[];
 };
 
@@ -320,7 +320,7 @@ export async function getStudentDetail(userId: string): Promise<StudentDetail | 
         .gte("bucket_ts", thirtyDaysAgo.toISOString()),
     ]);
 
-  // Build the daily activity series — 30 days, even when zero.
+  // Build the daily activity series - 30 days, even when zero.
   const activityByDate = new Map<string, number>();
   for (const h of heartbeats ?? []) {
     const ts = (h as { bucket_ts: string }).bucket_ts;

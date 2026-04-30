@@ -1,4 +1,4 @@
-// Phase headers — wide horizontal motifs at the top of phase-opener lessons.
+// Phase headers - wide horizontal motifs at the top of phase-opener lessons.
 // 280 × 140 nominal. Two colors max: --accent + --neutral-700.
 
 type PhaseHeaderProps = { width?: number; style?: React.CSSProperties };
@@ -6,7 +6,7 @@ type PhaseHeaderProps = { width?: number; style?: React.CSSProperties };
 export function PhaseHeaderFoundations({ width = 280, style }: PhaseHeaderProps) {
   const h = Math.round(width * 0.5);
   return (
-    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 1 — Foundations">
+    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 1 - Foundations">
       <circle cx="140" cy="70" r="56" stroke="var(--neutral-300)" strokeWidth="1" />
       <circle cx="140" cy="70" r="34" stroke="var(--neutral-400)" strokeWidth="1.25" />
       <circle cx="140" cy="70" r="14" stroke="var(--accent)" strokeWidth="1.75" />
@@ -21,7 +21,7 @@ export function PhaseHeaderFoundations({ width = 280, style }: PhaseHeaderProps)
 export function PhaseHeaderLinearRegression({ width = 280, style }: PhaseHeaderProps) {
   const h = Math.round(width * 0.5);
   return (
-    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 2 — Linear Regression">
+    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 2 - Linear Regression">
       <path d="M24 116 L256 116" stroke="var(--neutral-300)" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M24 24 L24 116" stroke="var(--neutral-300)" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M28 104 L252 32" stroke="var(--accent)" strokeWidth="2.25" strokeLinecap="round" />
@@ -46,7 +46,7 @@ export function PhaseHeaderLinearRegression({ width = 280, style }: PhaseHeaderP
 export function PhaseHeaderClassification({ width = 280, style }: PhaseHeaderProps) {
   const h = Math.round(width * 0.5);
   return (
-    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 3 — Classification">
+    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 3 - Classification">
       <path d="M40 116 L240 24" stroke="var(--accent)" strokeWidth="2.25" strokeLinecap="round" />
       {[[60, 96], [82, 108], [78, 80], [102, 102], [120, 110], [98, 88], [134, 116]].map(([x, y], i) => (
         <circle key={"a" + i} cx={x} cy={y} r="3.5" fill="var(--neutral-700)" />
@@ -77,7 +77,7 @@ export function PhaseHeaderNetworks({ width = 280, style }: PhaseHeaderProps) {
   );
   L[1].forEach((a) => L[2].forEach((b) => edges.push([a, b, 0.7])));
   return (
-    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 4 — Networks">
+    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 4 - Networks">
       {edges.map(([[x1, y1], [x2, y2], w], i) => (
         <line
           key={i}
@@ -100,7 +100,7 @@ export function PhaseHeaderNetworks({ width = 280, style }: PhaseHeaderProps) {
 export function PhaseHeaderSequence({ width = 280, style }: PhaseHeaderProps) {
   const h = Math.round(width * 0.5);
   return (
-    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 5 — Modern Era">
+    <svg width={width} height={h} viewBox="0 0 280 140" fill="none" style={style} aria-label="Phase 5 - Modern Era">
       <path d="M28 70 L252 70" stroke="var(--neutral-200)" strokeWidth="1" strokeDasharray="2 4" />
       {[60, 140, 220].map((x, i) => (
         <g key={i}>

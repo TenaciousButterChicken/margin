@@ -1,4 +1,4 @@
-// Activity motifs — small inline marks (64 × 64 nominal) per master plan §7.1.
+// Activity motifs - small inline marks (64 × 64 nominal) per master plan §7.1.
 // Names match the LabConfig motif enum: hiker, neuron, data_point,
 // decision_boundary, cost_surface, attention, embedding, training.
 

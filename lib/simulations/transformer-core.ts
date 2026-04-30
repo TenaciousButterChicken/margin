@@ -1,4 +1,4 @@
-// Transformer Explorer core — wraps @huggingface/transformers (which
+// Transformer Explorer core - wraps @huggingface/transformers (which
 // runs ONNX Runtime Web internally) for tokenization, GPT-2 small
 // inference, and downstream math (softmax-with-temperature, sampling).
 //
@@ -10,7 +10,7 @@
 //     per-head attention. Standard Xenova/gpt2 ONNX exports do NOT
 //     include attention as named outputs, so we always provide a fallback
 //     attention matrix derived from the K tensors (which ARE exposed via
-//     past_key_values). This is not exact softmax(Q·Kᵀ) — it's a
+//     past_key_values). This is not exact softmax(Q·Kᵀ) - it's a
 //     key-similarity heat we treat as a visualization proxy. Flagged
 //     explicitly via `attentionSource` so the UI can be honest.
 //   • Temperature math + sampling live here so the components stay thin.
@@ -39,7 +39,7 @@ export type TokenInfo = {
 
 export type InferenceResult = {
   tokens: TokenInfo[];
-  // Logits for the LAST token only — that's what predictions need.
+  // Logits for the LAST token only - that's what predictions need.
   // Float32, length = vocab size.
   lastLogits: Float32Array;
   // attentions[layer][head] is a Float32Array of length seq * seq,
@@ -71,7 +71,7 @@ export async function loadModel(
   // Next.js's SWC loader runs before our `javascript/esm` rule and bails
   // on `import.meta` in the package. The `webpackIgnore` magic comment
   // tells webpack to leave this dynamic import alone and emit it
-  // verbatim — the browser handles it natively. Same package, same
+  // verbatim - the browser handles it natively. Same package, same
   // version we have in node_modules for type-checking.
   const transformersUrl =
     "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
@@ -163,7 +163,7 @@ export async function runInference(text: string): Promise<InferenceResult> {
     // Fallback: compute key-similarity from past_key_values (shape per
     // layer: [1, num_heads, seq, head_dim]). We compute K·Kᵀ / √d, mask
     // causally, and softmax-normalize per row. This isn't real softmax(QKᵀ)
-    // — it's a key-key affinity that uses real GPT-2 internal state and
+    // - it's a key-key affinity that uses real GPT-2 internal state and
     // gives a meaningful per-head visualization while we wait for a custom
     // ONNX export that exposes the true attention tensors.
     attentions = computeKeySimilarityAttentions(outputs, seq);
@@ -180,7 +180,7 @@ export async function runInference(text: string): Promise<InferenceResult> {
   };
 }
 
-/** Look for `decoder_attentions` / `attentions` in the model output —
+/** Look for `decoder_attentions` / `attentions` in the model output -
  *  transformers.js (and the underlying ONNX graph) may or may not include
  *  them depending on how the model was exported. */
 function extractAttentions(outputs: any, seq: number): Float32Array[][] | null {
@@ -230,7 +230,7 @@ function extractAttentions(outputs: any, seq: number): Float32Array[][] | null {
 
 /** Fallback attention approximation using K·Kᵀ from past_key_values.
  *  Returns a 12×12 array of [seq*seq] matrices, normalized per row with
- *  causal masking — same shape contract as real attention so the UI is
+ *  causal masking - same shape contract as real attention so the UI is
  *  oblivious. */
 function computeKeySimilarityAttentions(outputs: any, seq: number): Float32Array[][] {
   const layers: Float32Array[][] = [];
@@ -240,7 +240,7 @@ function computeKeySimilarityAttentions(outputs: any, seq: number): Float32Array
     const headBlocks: Float32Array[] = [];
     const kTensor = pickKeyTensor(pkv, outputs, li);
     if (!kTensor) {
-      // No key tensor available — emit zeros so the graph still has shape
+      // No key tensor available - emit zeros so the graph still has shape
       // and the UI shows "no attention" gracefully.
       for (let h = 0; h < NUM_HEADS; h++) {
         headBlocks.push(new Float32Array(seq * seq));

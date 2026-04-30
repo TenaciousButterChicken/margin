@@ -63,7 +63,7 @@ export function PredictPanel({
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = null;
 
-        // Trigger camera shake when we diverge — the visceral moment.
+        // Trigger camera shake when we diverge - the visceral moment.
         if (next.status === "diverged") {
           pub.pulse("camera_shake");
         }
@@ -159,9 +159,9 @@ export function PredictPanel({
             }`,
           }}
         >
-          {verdict === "right" && "Right — it flies off. With lr that high the step overshoots the valley and lands higher up the other side. Then it overshoots that, and so on, until the cost explodes."}
-          {verdict === "close" && "Closer to (c). At lr = 0.6 the bouncing doesn't stay bounded — it grows each time. Real bouncing-but-converging behavior happens around lr = 0.45 (we'll see that in beat 7)."}
-          {verdict === "wrong" && "It didn't converge faster — it diverged. With a step that big, gradient descent overshoots so badly that each step makes things worse. Cost goes up, not down."}
+          {verdict === "right" && "Right. It flies off. With lr that high the step overshoots the valley and lands higher up the other side. Then it overshoots that, and so on, until the cost explodes."}
+          {verdict === "close" && "Closer to (c). At lr = 0.6 the bouncing doesn't stay bounded; it grows each time. Real bouncing-but-converging behavior happens around lr = 0.45 (we'll see that in beat 7)."}
+          {verdict === "wrong" && "It didn't converge faster. It diverged. With a step that big, gradient descent overshoots so badly that each step makes things worse. Cost goes up, not down."}
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-// Real gradient descent on a real toy dataset. No animation, no UI — pure
+// Real gradient descent on a real toy dataset. No animation, no UI. Pure
 // math. The Lab page wires this up via channels so sliders can drive it.
 //
 // Model:  y_hat = w0 + w1 * x          (slope=w1, intercept=w0)
@@ -6,7 +6,7 @@
 // Grads:  dL/dw0 = 2 * mean(y_hat - y)
 //         dL/dw1 = 2 * mean((y_hat - y) * x)
 //
-// Dataset is "study hours vs exam score" — the same shape as Session 4's
+// Dataset is "study hours vs exam score", the same shape as Session 4's
 // drag-the-line activity, picked so the cost surface has a clear single
 // minimum that the hiker can visibly walk to.
 
@@ -20,7 +20,7 @@ export const DATASET: ReadonlyArray<Point> = [
   [6, 98], [7, 107], [8, 113], [9, 122], [10, 131],
 ];
 
-// Normalize x so gradient descent isn't pathological — Session 7 will
+// Normalize x so gradient descent isn't pathological. Session 7 will
 // teach feature scaling formally; for the Session 6 vis we want the
 // landscape to be friendly.
 const xs = DATASET.map(([x]) => x);
@@ -115,7 +115,7 @@ export function stepN(s: SimState, n: number): SimState {
   return cur;
 }
 
-// True optimum (analytic) — used by the challenge checker to verify
+// True optimum (analytic) - used by the challenge checker to verify
 // "did the student actually converge" rather than just "did Δ get small".
 export const TRUE_W0 = 0;
 export const TRUE_W1 = 1; // because we standardized x and y; in standardized

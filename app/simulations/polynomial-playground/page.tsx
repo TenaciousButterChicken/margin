@@ -76,7 +76,7 @@ export default async function PolynomialPlaygroundPage() {
             }}
           >
             Drop a few dots. Slide the polynomial degree from 1 to 15. The curve
-            morphs in real time — and somewhere around degree 10, you watch
+            morphs in real time, and somewhere around degree 10, you watch
             overfitting happen with your own eyes.
           </p>
         </div>
@@ -108,13 +108,13 @@ export default async function PolynomialPlaygroundPage() {
         <p style={{ margin: "0 0 12px" }}>
           When the degree is <strong>low</strong>, the curve is too rigid to capture
           real patterns. When the degree is <strong>too high</strong>, the curve
-          wiggles to pass through every dot perfectly — including all the noise.
+          wiggles to pass through every dot perfectly, including all the noise.
           Training error goes to zero, but the curve has memorized the data instead
           of learning the underlying shape.
         </p>
         <p style={{ margin: 0 }}>
-          The sweet spot — the degree that captures the pattern without chasing the
-          noise — is what most of machine learning is about. This same principle
+          The sweet spot, the degree that captures the pattern without chasing the
+          noise, is what most of machine learning is about. This same principle
           shows up in every model you&rsquo;ll meet: linear regression, neural nets,
           transformers. Same lesson, different scale.
         </p>

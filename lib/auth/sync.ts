@@ -3,7 +3,7 @@ import { isTeacherEmail } from "@/lib/auth/teachers";
 import { cohortYearForDate } from "@/lib/auth/cohort";
 
 // Ensures a profile row exists for the given auth user, with role/status
-// kept in sync with TEACHER_EMAILS. Uses the service-role key — bypasses
+// kept in sync with TEACHER_EMAILS. Uses the service-role key - bypasses
 // RLS. Server-only.
 //
 // Idempotent: safe to call on every sign-in.

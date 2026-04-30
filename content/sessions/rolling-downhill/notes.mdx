@@ -255,13 +255,13 @@ The gradient points in the direction of *steepest increase*. You want to *decrea
 It always *runs*. Whether it converges to the actual best parameters depends on the cost surface. For convex problems (like linear regression), yes. For non-convex (neural networks), it might find a local minimum that isn't the global one. In practice, deep learning works well anyway.
   </Q>
   <Q q="What if there are multiple valleys?">
-Big issue in deep learning. There are many local minima, and gradient descent finds *some* valley. In practice, most local minima of huge networks turn out to be roughly equally good — an empirical surprise. Still an open research area.
+Big issue in deep learning. There are many local minima, and gradient descent finds *some* valley. In practice, most local minima of huge networks turn out to be roughly equally good, an empirical surprise. Still an open research area.
   </Q>
   <Q q="Why not just compute the answer directly?">
-For linear regression, you can — closed-form formula called the normal equation. But for any model with hidden layers (neural networks), no closed-form exists. Gradient descent is the only option.
+For linear regression, you can. There's a closed-form formula called the normal equation. But for any model with hidden layers (neural networks), no closed-form exists. Gradient descent is the only option.
   </Q>
 </FAQ>
 
-<Bridge to="Chapter 7 — Real-world regression">
+<Bridge to="Chapter 7 - Real-world regression">
 You now understand the heart of how machines learn. Every model in this book uses gradient descent. Next: linear regression on real data. Predicting house prices from multiple features at once. We'll generalize the equation to vectors, see why models care about the *scale* of features, and meet a real-world dataset.
 </Bridge>

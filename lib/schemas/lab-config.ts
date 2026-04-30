@@ -294,7 +294,7 @@ export const LabConfig = z.object({
     })
     .optional(),
 
-  // v1.5 forward-compat — runtime ignores until live class mode ships.
+  // v1.5 forward-compat. Runtime ignores until live class mode ships.
   instructorBroadcast: z
     .object({
       enabled: z.boolean(),

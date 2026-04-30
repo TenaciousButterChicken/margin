@@ -1,4 +1,4 @@
-// Phase pip — small motif for sidebar grouping.
+// Phase pip - small motif for sidebar grouping.
 
 export function PhasePip({ phase = 1, size = 16 }: { phase?: number; size?: number }) {
   return (

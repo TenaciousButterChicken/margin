@@ -4,7 +4,7 @@ import { TopNav } from "@/components/public/TopNav";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { HowItWorks } from "./HowItWorks";
 
-// TF.js is heavy — dynamic import keeps it off any other route's bundle.
+// TF.js is heavy - dynamic import keeps it off any other route's bundle.
 const TeachableMachine = dynamic(
   () => import("@/components/simulations/TeachableMachine").then((m) => m.TeachableMachine),
   {

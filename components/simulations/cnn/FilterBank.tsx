@@ -11,7 +11,7 @@ import {
   type Kernel3x3,
 } from "@/lib/simulations/cnn-core";
 
-// Filter Bank — bridges Filter Lab (one kernel) and Layer Explorer (a
+// Filter Bank - bridges Filter Lab (one kernel) and Layer Explorer (a
 // trained network's many learned kernels). Six 3×3 kernels run in
 // parallel against the same input, producing six feature maps at once.
 
@@ -48,7 +48,7 @@ export function FilterBank() {
 
   // All 6 outputs recomputed when the image OR the kernels array changes.
   // Editing one cell only mutates kernels[i], but useMemo's identity check
-  // on the array still triggers — convolve calls for the unchanged kernels
+  // on the array still triggers - convolve calls for the unchanged kernels
   // are cheap on a 128×128 image.
   const outputs = useMemo(
     () => kernels.map((k) => convolve(image, k)),
@@ -117,7 +117,7 @@ export function FilterBank() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <span style={metaLabel}>FILTERS — 6 KERNELS IN PARALLEL</span>
+          <span style={metaLabel}>FILTERS - 6 KERNELS IN PARALLEL</span>
           <div
             style={{
               display: "grid",
@@ -141,7 +141,7 @@ export function FilterBank() {
 
       {/* Bottom: 6 output canvases */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <span style={metaLabel}>OUTPUTS — 6 FEATURE MAPS</span>
+        <span style={metaLabel}>OUTPUTS - 6 FEATURE MAPS</span>
         <div
           style={{
             display: "grid",

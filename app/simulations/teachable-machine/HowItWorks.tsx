@@ -4,7 +4,7 @@ import { useState } from "react";
 
 // Plain-English explainer that lives below the simulation. Collapsed by
 // default. Avoids the words "vector," "tensor," "calculus," "convolution"
-// — keeps the explanation honest but accessible.
+// - keeps the explanation honest but accessible.
 
 export function HowItWorks() {
   const [open, setOpen] = useState(false);
@@ -74,7 +74,7 @@ export function HowItWorks() {
             </li>
             <li>
               <strong>Chop off its last layer.</strong> The last layer is
-              MobileNet&rsquo;s &ldquo;is this a dog or a cat?&rdquo; voice — useless
+              MobileNet&rsquo;s &ldquo;is this a dog or a cat?&rdquo; voice, useless
               for your classes. The layer just before it produces a list of
               roughly a thousand numbers per frame. Those numbers describe
               what&rsquo;s in the picture, in MobileNet&rsquo;s internal

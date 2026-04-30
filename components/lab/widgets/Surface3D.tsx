@@ -8,14 +8,14 @@ import { gradient, loss } from "@/lib/lab/sim/gradient-descent";
 import { useChannel, usePublish, usePulseToken } from "@/lib/lab/LabContext";
 
 // 3D MSE bowl. Modes & overlays:
-//  • draggable        — drag the marker on the surface (publishes w_position)
-//  • mode = "trail"   — render the trail of past w_history positions
-//  • showGradient     — visible 3D arrow at hiker pointing in -gradient
+//  • draggable        - drag the marker on the surface (publishes w_position)
+//  • mode = "trail"   - render the trail of past w_history positions
+//  • showGradient     - visible 3D arrow at hiker pointing in -gradient
 //                       direction. Length proportional to |gradient|. Used
 //                       by beats 3 and 4 to make the gradient visible.
-//  • fogIntensity ∈[0,1]  — blacks out the bowl outside a radius around
+//  • fogIntensity ∈[0,1]  - blacks out the bowl outside a radius around
 //                       the hiker. Used by beat 3 (blindfolded).
-//  • shake on `camera_shake` channel pulse — beat 6 cliff dive
+//  • shake on `camera_shake` channel pulse - beat 6 cliff dive
 
 type Mode = "marker" | "trail";
 type ArrowVariant = "none" | "single";
@@ -466,7 +466,7 @@ export function Surface3D({
     : [];
 
   return (
-    <div style={{ width: "100%", height: 380, background: "var(--neutral-50)" }}>
+    <div style={{ width: "100%", height: 560, background: "var(--neutral-50)" }}>
       <Canvas
         dpr={[1, 2]}
         camera={{ fov: 38, near: 0.1, far: 80 }}

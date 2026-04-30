@@ -140,7 +140,7 @@ export default async function RosterPage({
                   <Td align="right">{r.total_minutes}</Td>
                   <Td>
                     <span style={{ fontSize: 12, color: "var(--neutral-500)" }}>
-                      {r.last_seen ? timeAgo(r.last_seen) : "—"}
+                      {r.last_seen ? timeAgo(r.last_seen) : "-"}
                     </span>
                   </Td>
                   <Td>

@@ -1,4 +1,4 @@
-// Simulations registry — standalone interactive playgrounds, each
+// Simulations registry - standalone interactive playgrounds, each
 // focused on one ML idea. Lives alongside but separate from the 16
 // session journey. Each sim eventually gets a route at /simulations/[slug];
 // for now they're all "coming soon" placeholders.
@@ -12,7 +12,7 @@ export type SimulationMeta = {
   title: string;
   description: string;          // one line, sentence case, no period flourishes
   phase: Phase;                 // shows the audience "this maps to phase N of the course"
-  attribution?: string;         // "Inspired by ..." — small footer line
+  attribution?: string;         // "Inspired by ..." - small footer line
   status: SimulationStatus;
 };
 
@@ -28,7 +28,7 @@ export const SIMULATIONS: SimulationMeta[] = [
   {
     slug: "polynomial-playground",
     title: "Polynomial Playground",
-    description: "Drag points, watch a curve fit them — see overfitting happen live.",
+    description: "Drag points, watch a curve fit them, see overfitting happen live.",
     phase: 2,
     attribution: "Built for Margin. Inspired by classic bias-variance demos.",
     status: "live",

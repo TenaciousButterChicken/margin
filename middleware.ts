@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 // Refreshes Supabase auth cookies on every request so server components
-// see fresh sessions. Public read everywhere — no redirect logic here.
+// see fresh sessions. Public read everywhere - no redirect logic here.
 // Per the auth-gating decision (2026-04-27): saving state, challenge
 // submissions, AI hints, Boss Mode, and code cell persistence each gate
 // themselves at their own request handler.

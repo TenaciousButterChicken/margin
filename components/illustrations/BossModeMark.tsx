@@ -1,4 +1,4 @@
-// Boss Mode marker — distinctive callout marker, NOT an emoji.
+// Boss Mode marker - distinctive callout marker, NOT an emoji.
 // Diamond with inscribed dot suggesting "deeper inside".
 
 export function BossModeMark({

@@ -6,14 +6,14 @@ import { FOCUS_DOT } from "@/lib/lab/beats";
 import { useChannel } from "@/lib/lab/LabContext";
 import { Tex } from "./Tex";
 
-// The math strip — wide panel below the data + bowl, introduced in 4.5
+// The math strip - wide panel below the data + bowl, introduced in 4.5
 // and persisting through end of lesson. All numbers update live.
 //
 // Symbols are introduced only AFTER their concept is on screen:
-//   • Beat 4.5 — no symbols, just words.
-//   • Beat 4.6 — introduces "gradient", w₀, w₁ once the bars finish.
-//   • Beat 4.7 — introduces w, g, lr alongside their meanings.
-//   • Beat 4.8 — reuses everything plus |g|.
+//   • Beat 4.5 - no symbols, just words.
+//   • Beat 4.6 - introduces "gradient", w₀, w₁ once the bars finish.
+//   • Beat 4.7 - introduces w, g, lr alongside their meanings.
+//   • Beat 4.8 - reuses everything plus |g|.
 
 const X_MEAN = 5.5;
 const X_STD = Math.sqrt(8.25);
@@ -61,6 +61,11 @@ export function MathStrip({
         border: "1px solid var(--neutral-200)",
         borderRadius: 12,
         overflow: "hidden",
+        flex: "none",
+        display: "flex",
+        flexDirection: "column",
+        maxHeight: 520,
+        minHeight: 0,
       }}
     >
       <div
@@ -71,6 +76,7 @@ export function MathStrip({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flex: "none",
         }}
       >
         <span style={{ fontSize: 12, fontWeight: 600, color: "var(--neutral-900)" }}>
@@ -81,41 +87,43 @@ export function MathStrip({
         </span>
       </div>
 
-      {beat === "4.5" && (
-        <Beat45Body
-          pos={pos}
-          nudgeCount={nudgeCount}
-          nudgesNeeded={nudgesNeeded}
-          onNudge={callbacks.onNudge!}
-        />
-      )}
-      {beat === "4.6" && (
-        <Beat46Body pos={pos} phase={phase} onPhaseAdvance={callbacks.onPhaseAdvance!} />
-      )}
-      {beat === "4.7" && (
-        <Beat47Body
-          pos={pos}
-          phase={phase}
-          onPhaseAdvance={callbacks.onPhaseAdvance!}
-          onDirectionToggle={callbacks.onDirectionToggle!}
-          onTakeStep={callbacks.onTakeStep!}
-        />
-      )}
-      {beat === "4.8" && (
-        <Beat48Body
-          pos={pos}
-          steps={steps}
-          predictAnswer={predictAnswer}
-          onStep={callbacks.onStep!}
-          onPredict={callbacks.onPredict!}
-        />
-      )}
+      <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+        {beat === "4.5" && (
+          <Beat45Body
+            pos={pos}
+            nudgeCount={nudgeCount}
+            nudgesNeeded={nudgesNeeded}
+            onNudge={callbacks.onNudge!}
+          />
+        )}
+        {beat === "4.6" && (
+          <Beat46Body pos={pos} phase={phase} onPhaseAdvance={callbacks.onPhaseAdvance!} />
+        )}
+        {beat === "4.7" && (
+          <Beat47Body
+            pos={pos}
+            phase={phase}
+            onPhaseAdvance={callbacks.onPhaseAdvance!}
+            onDirectionToggle={callbacks.onDirectionToggle!}
+            onTakeStep={callbacks.onTakeStep!}
+          />
+        )}
+        {beat === "4.8" && (
+          <Beat48Body
+            pos={pos}
+            steps={steps}
+            predictAnswer={predictAnswer}
+            onStep={callbacks.onStep!}
+            onPredict={callbacks.onPredict!}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
 /* ============================================================
-   BEAT 4.5 — No symbols yet, just words. Keep plain typography.
+   BEAT 4.5 - No symbols yet, just words. Keep plain typography.
    ============================================================ */
 function Beat45Body({
   pos,
@@ -190,7 +198,7 @@ function Beat45Body({
         </button>
         <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--neutral-500)" }}>
           {atDot
-            ? `done — ${nudgeCount} nudge${nudgeCount === 1 ? "" : "s"} brought the line to this dot`
+            ? `done - ${nudgeCount} nudge${nudgeCount === 1 ? "" : "s"} brought the line to this dot`
             : `nudges so far: ${nudgeCount}${nudgesNeeded > 0 ? ` · need ${Math.max(0, nudgesNeeded - nudgeCount)} more to advance` : ""}`}
         </span>
       </div>
@@ -199,7 +207,7 @@ function Beat45Body({
 }
 
 /* ============================================================
-   BEAT 4.6 — Ten dots, one direction
+   BEAT 4.6 - Ten dots, one direction
    ============================================================ */
 function Beat46Body({
   pos,
@@ -323,7 +331,7 @@ function Beat46Body({
       >
         {phase === 1 && (isAnimating ? "summing the pulls…" : "What does this tell us? →")}
         {phase === 2 && "Show me the gradient →"}
-        {phase >= 3 && "Done — see the bowl arrow"}
+        {phase >= 3 && "Done - see the bowl arrow"}
       </button>
 
       <style jsx>{`
@@ -406,14 +414,14 @@ function GradientInterpretation({ g0, g1 }: { g0: number; g1: number }) {
             <Tex tex={`w_0`} /> is the line&rsquo;s <strong>height</strong>.{" "}
             {heightHigh ? (
               <>
-                Positive means the line is currently <strong>too high</strong> — to fit
+                Positive means the line is currently <strong>too high</strong>. To fit
                 better, we need to <strong>decrease</strong> <Tex tex="w_0" /> by about{" "}
                 <strong>{heightAbs}</strong> (after scaling by{" "}
                 <Tex tex="\mathit{lr}" />).
               </>
             ) : (
               <>
-                Negative means the line is currently <strong>too low</strong> — to fit
+                Negative means the line is currently <strong>too low</strong>. To fit
                 better, we need to <strong>increase</strong> <Tex tex="w_0" /> by about{" "}
                 <strong>{heightAbs}</strong> (after scaling by{" "}
                 <Tex tex="\mathit{lr}" />).
@@ -449,13 +457,13 @@ function GradientInterpretation({ g0, g1 }: { g0: number; g1: number }) {
             <Tex tex={`w_1`} /> is the line&rsquo;s <strong>tilt</strong>.{" "}
             {tiltSteep ? (
               <>
-                Positive means the line is currently <strong>too steep</strong> — to fit
+                Positive means the line is currently <strong>too steep</strong>. To fit
                 better, we need to <strong>flatten it</strong> by about{" "}
                 <strong>{tiltAbs}</strong>.
               </>
             ) : (
               <>
-                Negative means the line is currently <strong>too flat</strong> — to fit
+                Negative means the line is currently <strong>too flat</strong>. To fit
                 better, we need to <strong>steepen it</strong> by about{" "}
                 <strong>{tiltAbs}</strong>.
               </>
@@ -474,9 +482,9 @@ function GradientInterpretation({ g0, g1 }: { g0: number; g1: number }) {
           borderTop: "1px dashed var(--neutral-300)",
         }}
       >
-        <strong>Quick rule:</strong> the gradient points <em>uphill on the bowl</em> —
+        <strong>Quick rule:</strong> the gradient points <em>uphill on the bowl</em>,
         the direction that makes loss go <em>up</em>. To make loss go <em>down</em>,
-        we walk the <em>other way</em> — we{" "}
+        we walk the <em>other way</em>. We{" "}
         <strong>subtract</strong> the gradient. Beat 4.7 builds that rule.
       </p>
     </div>
@@ -547,7 +555,7 @@ function signedTex(v: number): string {
 }
 
 /* ============================================================
-   BEAT 4.7 — The full step, built piece by piece
+   BEAT 4.7 - The full step, built piece by piece
    ============================================================ */
 function Beat47Body({
   pos,
@@ -593,9 +601,9 @@ function Beat47Body({
 
   return (
     <div style={{ padding: "24px 24px 20px", display: "flex", flexDirection: "column", gap: 16, alignItems: "center" }}>
-      {/* PHASE 1 — introduce w as a name for the hiker's position */}
+      {/* PHASE 1 - introduce w as a name for the hiker's position */}
       <IntroBlock accent="var(--accent)" kicker="meet the first letter">
-        Look at the bowl — the hiker is glowing. Its position is two numbers:
+        Look at the bowl. The hiker is glowing. Its position is two numbers:
         how high the line sits, and how steep it tilts.
         We&rsquo;re going to call that pair <Tex tex="w" scale={1.2} />.
         <br />
@@ -685,7 +693,7 @@ function Beat47Body({
       {phase === 1 && (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <p style={{ margin: 0, fontSize: 13, color: "var(--neutral-700)", maxWidth: 580, textAlign: "center", lineHeight: 1.5 }}>
-            Two numbers in <Tex tex="w" /> — same shape as the gradient. That&rsquo;s
+            Two numbers in <Tex tex="w" />, same shape as the gradient. That&rsquo;s
             because the gradient is also one number per knob.
           </p>
           <button className="btn btn-primary btn-sm" onClick={onPhaseAdvance}>
@@ -694,16 +702,16 @@ function Beat47Body({
         </div>
       )}
 
-      {/* PHASE 2 — introduce g BEFORE adding lines to the equation */}
+      {/* PHASE 2 - introduce g BEFORE adding lines to the equation */}
       {phase === 2 && (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, width: "100%", maxWidth: 680 }}>
           <IntroBlock accent="var(--lab-cyan)" kicker="meet the second letter">
-            The arrow on the bowl — the pull from the data — is what we built in
+            The arrow on the bowl, the pull from the data, is what we built in
             beat 4.6. Two numbers: pull on height, pull on tilt. We&rsquo;re going to
             call that pair <Tex tex="g" scale={1.2} />.
             <br />
             <span style={{ color: "var(--neutral-500)", fontSize: 13 }}>
-              So <Tex tex="g" /> is shorthand for the gradient — &ldquo;which way is uphill,
+              So <Tex tex="g" /> is shorthand for the gradient: &ldquo;which way is uphill,
               and how steeply.&rdquo;
             </span>
           </IntroBlock>
@@ -726,7 +734,7 @@ function Beat47Body({
               {direction === "downhill" ? "↓ descent" : "↑ ascent"}
             </button>
             <span style={{ fontSize: 11, color: "var(--neutral-500)", fontFamily: "var(--font-mono)" }}>
-              (one sign — that&rsquo;s the whole difference)
+              (one sign, that&rsquo;s the whole difference)
             </span>
           </div>
 
@@ -736,26 +744,26 @@ function Beat47Body({
         </div>
       )}
 
-      {/* PHASE 3 — introduce lr BEFORE the full formula appears */}
+      {/* PHASE 3 - introduce lr BEFORE the full formula appears */}
       {phase >= 3 && (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, width: "100%", maxWidth: 680 }}>
           <IntroBlock accent="var(--accent)" kicker="meet the third letter">
             The full <Tex tex="w - g" /> step would land at{" "}
-            <Tex tex={`(${signedTex(wMinusG.w0)}, ${signedTex(wMinusG.w1)})`} /> — way past
+            <Tex tex={`(${signedTex(wMinusG.w0)}, ${signedTex(wMinusG.w1)})`} />, way past
             the minimum. So we take only a <strong>fraction</strong> of the pull.
             That fraction has a name: the <strong>learning rate</strong>, written{" "}
             <Tex tex="\mathit{lr}" scale={1.2} />.
             <br />
             <span style={{ color: "var(--neutral-500)", fontSize: 13 }}>
               So <Tex tex="\mathit{lr}" /> is shorthand for &ldquo;how big a piece of the
-              pull do we actually take.&rdquo; Today, <Tex tex="\mathit{lr} = 0.08" /> —
+              pull do we actually take.&rdquo; Today, <Tex tex="\mathit{lr} = 0.08" />:
               eight percent.
             </span>
           </IntroBlock>
 
           <p style={{ margin: 0, fontSize: 14, color: "var(--neutral-900)", maxWidth: 580, textAlign: "center", lineHeight: 1.55 }}>
             Putting it all together:{" "}
-            <Tex tex="w_{\text{new}} = w - \mathit{lr} \cdot g" /> — old position,
+            <Tex tex="w_{\text{new}} = w - \mathit{lr} \cdot g" />. Old position,
             minus a fraction of the pull. Click below to actually take the step.
           </p>
 
@@ -765,7 +773,7 @@ function Beat47Body({
             disabled={stepTaken}
             style={{ minWidth: 240, opacity: stepTaken ? 0.5 : 1 }}
           >
-            {stepTaken ? "✓ step taken — see the hiker" : "Take this step on the bowl"}
+            {stepTaken ? "✓ step taken - see the hiker" : "Take this step on the bowl"}
           </button>
         </div>
       )}
@@ -861,7 +869,7 @@ function Row({
 }
 
 /* ============================================================
-   BEAT 4.8 — Why steps shrink (the payoff)
+   BEAT 4.8 - Why steps shrink (the payoff)
    ============================================================ */
 function Beat48Body({
   pos,
@@ -1000,14 +1008,14 @@ function Beat48Body({
           <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "var(--neutral-900)" }}>
             {predictAnswer === "b" ? (
               <>
-                <strong>Almost.</strong> It looks like it stops — but it doesn&rsquo;t actually have
+                <strong>Almost.</strong> It looks like it stops, but it doesn&rsquo;t actually have
                 a stopping rule. The step just becomes <Tex tex="w - \mathit{lr} \cdot 0 = w" />,
                 so it stays put. There&rsquo;s nothing to subtract.
               </>
             ) : predictAnswer === "a" ? (
               <>
                 <strong>Right idea, wrong outcome.</strong> The algorithm{" "}
-                <em>does</em> keep stepping — but each step is{" "}
+                <em>does</em> keep stepping, but each step is{" "}
                 <Tex tex="w - \mathit{lr} \cdot 0 = w" />. So nothing actually moves.
               </>
             ) : (
@@ -1023,7 +1031,7 @@ function Beat48Body({
             onClick={onStep}
             style={{ alignSelf: "flex-start" }}
           >
-            Try clicking Step again — see for yourself
+            Try clicking Step again - see for yourself
           </button>
         </div>
       )}

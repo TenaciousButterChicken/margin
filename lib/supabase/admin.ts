@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 // Server-only Supabase client using the service-role key.
-// Bypasses Row Level Security — use ONLY for trusted writes that no
+// Bypasses Row Level Security - use ONLY for trusted writes that no
 // authenticated user could perform on their own behalf (profile creation,
 // teacher promotion).
 //

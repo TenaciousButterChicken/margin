@@ -8,7 +8,7 @@ import {
   type LayerExplorerImageKind,
 } from "@/lib/simulations/cnn-core";
 
-// Layer Explorer — runs MobileNet (TF.js) on a chosen image and shows
+// Layer Explorer - runs MobileNet (TF.js) on a chosen image and shows
 // activations from 4 representative intermediate layers, plus the top-3
 // final classification predictions.
 
@@ -23,7 +23,7 @@ const MOBILENET_INPUT_PX = 224;
 
 type ModelState = "idle" | "loading" | "ready" | "error";
 
-// Lazy types — only imported at runtime when this component mounts.
+// Lazy types - only imported at runtime when this component mounts.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Tf = any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,10 +66,10 @@ export function LayerExplorer() {
   /* -------- Load MobileNet (lazily, on mount) -----------------------
    *
    * Two parallel loads:
-   *   • @tensorflow-models/mobilenet — wraps a GraphModel that has
+   *   • @tensorflow-models/mobilenet - wraps a GraphModel that has
    *     classify() with built-in ImageNet labels. We only use it for
    *     top-K predictions.
-   *   • tf.loadLayersModel(...)      — a LayersModel of MobileNet v1
+   *   • tf.loadLayersModel(...)      - a LayersModel of MobileNet v1
    *     1.0 224. Same weights as the wrapper, different format. Layers
    *     models expose an array of named layers with .output symbolic
    *     tensors, which is what we need to construct an intermediate-
@@ -199,7 +199,7 @@ export function LayerExplorer() {
       if (!tf || !model || !featureModel) return;
 
       // Render the chosen preset image to a 224×224 canvas, then feed it
-      // to MobileNet. Each call disposes its tensors — TF.js is leaky
+      // to MobileNet. Each call disposes its tensors - TF.js is leaky
       // otherwise.
       const sourceCanvas =
         imageKind === "upload"
@@ -287,7 +287,7 @@ export function LayerExplorer() {
     if (!file) return;
 
     if (file.size > MAX_UPLOAD_BYTES) {
-      setUploadError("Image too large — try one under 10MB.");
+      setUploadError("Image too large. Try one under 10MB.");
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -395,7 +395,7 @@ export function LayerExplorer() {
       {/* Layer cards */}
       {modelState === "ready" && activations.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={metaLabel}>FEATURE MAPS — first {NUM_FEATURE_MAPS_PER_LAYER} channels per layer</span>
+          <span style={metaLabel}>FEATURE MAPS - first {NUM_FEATURE_MAPS_PER_LAYER} channels per layer</span>
           {expanded === null ? (
             <div
               style={{
@@ -849,7 +849,7 @@ function PredictionBars({ predictions }: { predictions: Prediction[] }) {
 
 function prettyLayerName(name: string): string {
   // Most MobileNet layer names are like "expanded_conv_3_project_BN" or
-  // "Conv1_relu" — keep them but trim some suffixes.
+  // "Conv1_relu" - keep them but trim some suffixes.
   return name
     .replace(/_BN$/i, "")
     .replace(/_project$/i, "")

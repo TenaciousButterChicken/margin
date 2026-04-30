@@ -74,7 +74,7 @@ export function EmbeddingExplorer() {
       setLoad({ kind: "ready-light" });
       // Kick off the heavy embedding download in the background so the
       // default "king" plot can show its neighbors without requiring a
-      // click. Don't await — the section is interactive in light mode.
+      // click. Don't await - the section is interactive in light mode.
       void ensureHeavyLoaded();
     } catch (e) {
       setLoad({
@@ -127,7 +127,7 @@ export function EmbeddingExplorer() {
     const id = findTokenId(searchTerm);
     if (id === null) {
       setSearchError(
-        "GPT-2 splits this word into multiple tokens — try a more common word."
+        "GPT-2 splits this word into multiple tokens. Try a more common word."
       );
       setSearchedId(null);
       setNeighbors([]);
@@ -153,7 +153,7 @@ export function EmbeddingExplorer() {
         .filter(Boolean)
         .join(", ");
       setArithError(
-        `GPT-2 splits ${bad} into multiple tokens — try a more common word.`
+        `GPT-2 splits ${bad} into multiple tokens. Try a more common word.`
       );
       return;
     }
@@ -246,11 +246,11 @@ export function EmbeddingExplorer() {
             maxWidth: 720,
           }}
         >
-          GPT-2 represents every word as a list of 768 numbers — its{" "}
+          GPT-2 represents every word as a list of 768 numbers, its{" "}
           <em>embedding</em>. Words with similar meanings end up with similar
           number patterns, and the model figured this out on its own, just
           from reading text. Below, you&rsquo;re seeing a 2D map of that
-          space — a shadow of the real 768-dimensional version. The model
+          space, a shadow of the real 768-dimensional version. The model
           doesn&rsquo;t actually see words in 2D; it sees them in 768D. But
           the shadow still reveals real structure: similar words cluster, and
           you can do math on meanings.
@@ -492,7 +492,7 @@ function ScatterPlot({
         )}
         {center && (
           <>
-            {/* Neighbors — lines first, then circles, then labels */}
+            {/* Neighbors - lines first, then circles, then labels */}
             {neighbors.map((n, rank) => {
               const co = coordFor(n.id);
               if (!co) return null;
@@ -555,7 +555,7 @@ function ScatterPlot({
                 </g>
               );
             })}
-            {/* Searched word — large clay accent */}
+            {/* Searched word - large clay accent */}
             <circle
               cx={project(center[0], center[1])[0]}
               cy={project(center[0], center[1])[1]}

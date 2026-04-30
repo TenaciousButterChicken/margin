@@ -1,5 +1,5 @@
 <BigIdea>
-ML doesn't have opinions, it has data. If the data is biased, broken, or unrepresentative, the model's predictions will be too. "Garbage in, garbage out" isn't a slogan — it's the most common cause of ML failure in the real world.
+ML doesn't have opinions, it has data. If the data is biased, broken, or unrepresentative, the model's predictions will be too. "Garbage in, garbage out" isn't a slogan; it's the most common cause of ML failure in the real world.
 </BigIdea>
 
 <Objectives>
@@ -30,15 +30,15 @@ ML models are exactly like this. Their entire understanding of the world is what
 
 ## Three kinds of bias
 
-**1. Historical bias — the data reflects an unfair world.**
+**1. Historical bias - the data reflects an unfair world.**
 
 Amazon's hiring example. Even with perfect data collection, if the historical world was biased, the patterns the model learns will be biased. If you train a "successful CEO" predictor on Fortune 500 CEOs from the past 50 years, you'll get a model that thinks CEOs are mostly white men, because *historically, they were*. The model didn't invent the bias. It faithfully reproduced reality.
 
-**2. Sampling bias — your data isn't representative.**
+**2. Sampling bias - your data isn't representative.**
 
 If you train a face-detection model on photos scraped from Western websites in 2010, the dataset will be heavily skewed toward light-skinned faces. The model will detect those faces well and others badly. This isn't because the algorithm "doesn't like" some faces. It's because the model never *saw* enough of them to learn what they look like.
 
-**3. Label bias — the labels themselves are subjective or wrong.**
+**3. Label bias - the labels themselves are subjective or wrong.**
 
 Imagine labeling tweets as "toxic" or "not toxic." Different labelers will draw the line in different places. If your labelers happen to share a particular cultural background, the model will inherit their definition and apply it to everyone. This is why content moderation ML is so hard. There's no universal definition of "toxic" to label against.
 
@@ -136,13 +136,13 @@ No. Models can pick up the same bias through correlated features. Zip code is a 
 Depends what you mean. The word "bias" has a specific math meaning you'll see in Chapter 4 (the b in y = mx + b is a "bias term"). In that sense, every model has bias, and that's totally fine. The harmful kind of bias is *systematic unfairness toward a group of people*.
   </Q>
   <Q q="Couldn't humans make these decisions instead?">
-Sometimes, but humans have biases too — often the same ones the data has, since the data came from human decisions. The goal isn't "ML or humans." It's "use the right tool with the right oversight."
+Sometimes, but humans have biases too, often the same ones the data has, since the data came from human decisions. The goal isn't "ML or humans." It's "use the right tool with the right oversight."
   </Q>
   <Q q="What's the deal with ChatGPT being 'biased'?">
 Same root cause. ChatGPT learned from a huge slice of the internet, which contains every bias and prejudice humans have ever written down. OpenAI tries to filter and fine-tune those out, with mixed success. Models reflect their training data, including the bad parts.
   </Q>
 </FAQ>
 
-<Bridge to="Chapter 4 — Drawing lines through dots">
-You've spent three chapters on ML at a high level. Next: your first real model. Linear regression — drawing a line through some dots. It's the foundation for almost everything that comes after. We derive the math from y = mx + b, write the code, and have a working predictor by the end of the chapter.
+<Bridge to="Chapter 4 - Drawing lines through dots">
+You've spent three chapters on ML at a high level. Next: your first real model. Linear regression, drawing a line through some dots. It's the foundation for almost everything that comes after. We derive the math from y = mx + b, write the code, and have a working predictor by the end of the chapter.
 </Bridge>

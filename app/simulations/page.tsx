@@ -38,7 +38,7 @@ export default async function SimulationsIndexPage() {
             lineHeight: 1.55,
           }}
         >
-          Standalone interactive playgrounds — each focused on one ML idea.
+          Standalone interactive playgrounds, each focused on one ML idea.
           They&rsquo;re separate from the 16-session journey: no progression, no
           challenges, just open-ended exploration.
         </p>

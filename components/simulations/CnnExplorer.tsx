@@ -5,12 +5,12 @@ import { FilterLab } from "./cnn/FilterLab";
 import { FilterBank } from "./cnn/FilterBank";
 import { LayerExplorer } from "./cnn/LayerExplorer";
 
-// CNN Explorer — top-level shell. Mode toggle (segmented control,
+// CNN Explorer - top-level shell. Mode toggle (segmented control,
 // matches the Classification/Regression toggle in NeuralNetPlayground)
 // switches between three complementary views:
-//   • Filter Lab     — manual 3×3 convolution kernel + grayscale demo image
-//   • Filter Bank    — six 3×3 kernels in parallel, six feature maps at once
-//   • Layer Explorer — pretrained MobileNet feature maps on preset images
+//   • Filter Lab     - manual 3×3 convolution kernel + grayscale demo image
+//   • Filter Bank    - six 3×3 kernels in parallel, six feature maps at once
+//   • Layer Explorer - pretrained MobileNet feature maps on preset images
 
 type Mode = "filter" | "bank" | "layer";
 

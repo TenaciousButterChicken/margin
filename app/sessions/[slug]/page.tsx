@@ -10,7 +10,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { TimeOnPage } from "@/components/lab/TimeOnPage";
 import { MarkComplete } from "@/components/lab/MarkComplete";
-import { LessonShell, PlaceholderCard } from "./LessonShell";
+import { LessonShell } from "./LessonShell";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +41,6 @@ export default async function LessonPage({ params }: { params: { slug: string } 
   const PhaseHeader = PHASE_HEADERS[session.phase];
   const phaseName = PHASES[session.phase - 1].name;
   const notes = await loadSessionNotes(session.slug);
-
-  // Sprint 1 only ships Session 6's lab. Other sessions still show
-  // the lesson but with a "coming soon" affordance.
-  const hasLab = session.slug === "rolling-downhill";
 
   const notesNode = (
     <article style={{ maxWidth: 1080, margin: "0 auto", paddingBottom: 96, paddingTop: 0 }}>
@@ -80,14 +76,8 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <p style={{ fontSize: 17, lineHeight: 1.65, color: "var(--neutral-700)", margin: 0 }}>
             Lesson notes for this session are still being written. The {phaseName} phase covers this
-            material — for now, the lesson outline is available in the master plan.
+            material. For now, the lesson outline is available in the master plan.
           </p>
-        </div>
-      )}
-
-      {!hasLab && (
-        <div style={{ marginTop: 48, display: "flex", justifyContent: "flex-end" }}>
-          <PlaceholderCard session={session} />
         </div>
       )}
 
@@ -118,7 +108,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
     >
       {isApproved && <TimeOnPage sessionId={session.slug} />}
       <TopNav signedIn={!!profile} current="sessions" />
-      <LessonShell session={session} notesNode={notesNode} hasLab={hasLab} />
+      <LessonShell session={session} notesNode={notesNode} />
     </div>
   );
 }

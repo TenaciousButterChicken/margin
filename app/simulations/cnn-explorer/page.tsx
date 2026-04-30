@@ -99,7 +99,7 @@ export default async function CnnExplorerPage() {
         <p style={{ margin: "0 0 12px" }}>
           A convolution slides a small grid of numbers (a <em>kernel</em>) across
           an image, multiplying and summing as it goes. Different kernels detect
-          different things — edges, blurs, sharpenings — without anyone training
+          different things (edges, blurs, sharpenings) without anyone training
           them. The math is small. Filter Lab lets you write the kernel yourself
           and hover any output pixel to see the nine multiplications that produced it.
         </p>
@@ -107,13 +107,13 @@ export default async function CnnExplorerPage() {
           A convolutional <em>network</em> stacks dozens of these, with the
           kernels learned from data instead of hand-written. Early layers tend
           to learn edge-like patterns. Middle layers combine those into textures
-          and parts. Late layers respond to entire shapes — a face, a cat, a
+          and parts. Late layers respond to entire shapes: a face, a cat, a
           car. Layer Explorer shows you those activations at four representative
           depths in a real pretrained model.
         </p>
         <p style={{ margin: 0 }}>
           The classification at the bottom is whatever MobileNet itself thinks
-          your image is — including the surprises. Synthetic images often
+          your image is, including the surprises. Synthetic images often
           confuse it amusingly.
         </p>
       </section>

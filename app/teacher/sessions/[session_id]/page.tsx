@@ -88,7 +88,7 @@ export default async function PerSessionPage({ params }: { params: { session_id:
                         {s.completed_at ? (
                           <span style={{ color: "#1e7a3a", fontWeight: 600 }}>✓</span>
                         ) : (
-                          <span style={{ color: "var(--neutral-300)" }}>—</span>
+                          <span style={{ color: "var(--neutral-300)" }}>-</span>
                         )}
                       </Td>
                     </tr>

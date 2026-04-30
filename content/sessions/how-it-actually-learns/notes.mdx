@@ -57,7 +57,7 @@ Setup: a 2-layer network for binary classification.
 
 Goal: compute ∂J/∂W₁, ∂J/∂b₁, ∂J/∂W₂, ∂J/∂b₂. You'll work backward from the output.
 
-### Step 1 — ∂J/∂z₂
+### Step 1 - ∂J/∂z₂
 
 The combination "log loss + sigmoid" has the beautiful property mentioned in Chapter 8:
 
@@ -69,7 +69,7 @@ This single line is doing the heavy lifting. The derivative of log loss with res
 
 (δ is "delta," used to mean "the error signal at this layer.")
 
-### Step 2 — ∂J/∂W₂ and ∂J/∂b₂
+### Step 2 - ∂J/∂W₂ and ∂J/∂b₂
 
 <Math tex="z_2 = a_1 \cdot W_2 + b_2" />. By the chain rule:
 
@@ -78,7 +78,7 @@ This single line is doing the heavy lifting. The derivative of log loss with res
 
 (Dividing by N because you average over the dataset.)
 
-### Step 3 — propagate the error back to layer 1
+### Step 3 - propagate the error back to layer 1
 
 You want <Math tex="\delta_1 = \partial J / \partial z_1" />. Using chain rule, going through z₂ and a₁:
 
@@ -91,7 +91,7 @@ Read this slowly:
 - <Math tex="\delta_2 \cdot W_2^T" /> is the error at layer 2, "pulled back" through W₂. It tells you how much each hidden activation a₁ affected J.
 - You multiply by ReLU'(z₁) to account for the activation function. If a hidden neuron was inactive (z < 0, ReLU output 0), it didn't contribute to anything, so its error signal is 0.
 
-### Step 4 — ∂J/∂W₁ and ∂J/∂b₁
+### Step 4 - ∂J/∂W₁ and ∂J/∂b₁
 
 <Math tex="z_1 = X \cdot W_1 + b_1" />:
 
@@ -234,7 +234,7 @@ axes[1].set_title('Decision boundary')
 plt.show()
 ```
 
-## The easy way — autograd
+## The easy way - autograd
 
 Frameworks like PyTorch handle backprop automatically.
 
@@ -347,6 +347,6 @@ Almost certainly not. Real neurons don't run anything like backprop. Neural netw
   </Q>
 </FAQ>
 
-<Bridge to="Chapter 14 — Learning without a teacher">
+<Bridge to="Chapter 14 - Learning without a teacher">
 You now understand how a neural network learns: forward pass, compute cost, backprop the gradient, gradient descent update. That's the engine of all modern AI. Next: leave supervised learning behind. What can a model learn when there are no labels at all?
 </Bridge>

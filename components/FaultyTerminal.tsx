@@ -4,7 +4,7 @@ import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef, useMemo, useCallback } from "react";
 import "./FaultyTerminal.css";
 
-// React Bits "Faulty Terminal" — animated CRT-style WebGL background.
+// React Bits "Faulty Terminal" - animated CRT-style WebGL background.
 // Source code provided by the user; converted from JSX to TSX and made
 // SSR-safe for Next.js (the original `dpr` prop default referenced
 // `window.devicePixelRatio` directly, which crashes during server render).
@@ -407,7 +407,7 @@ export default function FaultyTerminal({
     let lastFrameMs = 0;
 
     const update = (t: number) => {
-      // If anything paused us, drop out completely — don't reschedule
+      // If anything paused us, drop out completely - don't reschedule
       // and don't render. The restart helpers below will kick rAF
       // back on when we become visible again.
       if (isEffectivelyPaused()) {
@@ -472,7 +472,7 @@ export default function FaultyTerminal({
       loadAnimationStartRef.current = 0;
       timeOffsetRef.current = Math.random() * 100;
     };
-    // NB: `pause` deliberately NOT in deps — it's read via propPauseRef
+    // NB: `pause` deliberately NOT in deps - it's read via propPauseRef
     // so toggling pause doesn't tear down and recreate the WebGL context.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -528,7 +528,7 @@ export default function FaultyTerminal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Pause when the canvas is offscreen. This is the big one — when
+  // Pause when the canvas is offscreen. This is the big one - when
   // you scroll past the hero, the GPU goes completely idle.
   useEffect(() => {
     const ctn = containerRef.current;

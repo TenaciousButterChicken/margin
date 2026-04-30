@@ -1,4 +1,4 @@
-// Sample console output — a muted-gray "what you'd see in the
+// Sample console output - a muted-gray "what you'd see in the
 // terminal" pre block, distinguishable from input code blocks.
 // Used right after a runnable code block so students can see the
 // expected result without copy-pasting.

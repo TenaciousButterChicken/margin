@@ -1,4 +1,4 @@
-// End-of-session "bridge" banner — italic, accent-tinted, with a small
+// End-of-session "bridge" banner - italic, accent-tinted, with a small
 // arrow. Visually marks the end of the lesson and gestures toward what
 // comes next session.
 

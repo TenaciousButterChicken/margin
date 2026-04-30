@@ -1,4 +1,4 @@
-// The blindfolded hiker — gradient-descent motif (Session 6).
+// The blindfolded hiker - gradient-descent motif (Session 6).
 // Geometric figure with personality, used sparingly. Single line weight.
 
 const ILLO_INK = "#1A1A18";

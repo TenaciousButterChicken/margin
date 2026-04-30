@@ -1,6 +1,6 @@
 // Static code block for lesson notes. Per design brief §8 the syntax
 // palette is defined in tokens.css (.tok-*). Pre-highlighting belongs
-// to a later phase — for v0 the body renders monochrome via .code-block,
+// to a later phase - for v0 the body renders monochrome via .code-block,
 // and MDX authors can wrap tokens in <span className="tok-kw"> manually
 // when they want emphasis (the design package does this).
 

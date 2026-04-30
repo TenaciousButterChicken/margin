@@ -76,7 +76,7 @@ export function NeuralNetPlayground() {
   const [lossHistory, setLossHistory] = useState<number[]>([]);
   const [thumbnailUrls, setThumbnailUrls] = useState<Record<string, string>>({});
 
-  // Network — synchronously rebuilt on architecture/activation/mode change.
+  // Network - synchronously rebuilt on architecture/activation/mode change.
   const network = useMemo(
     () =>
       new Network(
@@ -162,12 +162,12 @@ export function NeuralNetPlayground() {
       drawRegressionCurve(regressionPathRef.current, net);
     }
 
-    // Thumbnails — every N ticks
+    // Thumbnails - every N ticks
     if (tickCountRef.current % THUMB_UPDATE_EVERY === 0) {
       setThumbnailUrls(generateThumbnailUrls(net, mode));
     }
 
-    // React state — throttled
+    // React state - throttled
     if (tickCountRef.current % STATE_UPDATE_EVERY === 0) {
       const l = computeLoss(net, data);
       setEpochDisplay(epochRef.current);
@@ -274,7 +274,7 @@ export function NeuralNetPlayground() {
         : "Click ▶ Play to start training. The fitted curve on the left and the neuron activation curves on the right will update in real time.";
     }
     if (isPlaying) {
-      const l = isFinite(lossDisplay) ? lossDisplay.toFixed(3) : "—";
+      const l = isFinite(lossDisplay) ? lossDisplay.toFixed(3) : "-";
       return `Training… epoch ${epochDisplay}, loss ${l}.`;
     }
     if (epochDisplay >= 200 && lossDisplay > 0.3) {
@@ -297,7 +297,7 @@ export function NeuralNetPlayground() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Mode toggle — top-right */}
+      {/* Mode toggle - top-right */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <ModeToggle mode={mode} onChange={setMode} />
       </div>
@@ -318,7 +318,7 @@ export function NeuralNetPlayground() {
         <div style={{ display: "flex", gap: 28, alignItems: "baseline" }}>
           <Stat
             label="LOSS"
-            value={isFinite(lossDisplay) ? lossDisplay.toFixed(3) : "—"}
+            value={isFinite(lossDisplay) ? lossDisplay.toFixed(3) : "-"}
             accent={lossDisplay < 0.05 ? "var(--success)" : "var(--neutral-900)"}
           />
           <Stat label="EPOCH" value={epochDisplay.toString()} />
@@ -581,7 +581,7 @@ function Sparkline({ values }: { values: number[] }) {
 }
 
 /* =====================================================================
-   Classification plot — canvas boundary + SVG dots overlay
+   Classification plot - canvas boundary + SVG dots overlay
    ===================================================================== */
 
 function ClassificationPlot({
@@ -629,7 +629,7 @@ function ClassificationPlot({
 }
 
 /* =====================================================================
-   Regression plot — SVG with axes, data dots, fitted curve
+   Regression plot - SVG with axes, data dots, fitted curve
    ===================================================================== */
 
 const REG_PAD_L = 36;
@@ -745,7 +745,7 @@ function RegressionPlot({
           </text>
         </g>
 
-        {/* fitted curve — d attribute updated imperatively each step */}
+        {/* fitted curve - d attribute updated imperatively each step */}
         <path
           ref={pathRef}
           fill="none"
@@ -1350,7 +1350,7 @@ function drawRegressionCurve(path: SVGPathElement | null, net: Network | null) {
 }
 
 /* =====================================================================
-   Thumbnail generation — mode-aware
+   Thumbnail generation - mode-aware
    ===================================================================== */
 
 function generateThumbnailUrls(net: Network | null, mode: Mode): Record<string, string> {
@@ -1431,7 +1431,7 @@ function generate1DThumbnailUrls(net: Network): Record<string, string> {
     }
   }
 
-  // Render each curve to a small canvas — big enough that the curve looks
+  // Render each curve to a small canvas - big enough that the curve looks
   // crisp when scaled down inside the neuron circle.
   const W = 96;
   const H = 96;
@@ -1455,7 +1455,7 @@ function generate1DThumbnailUrls(net: Network): Record<string, string> {
         if (v < lo) lo = v;
         if (v > hi) hi = v;
       }
-      // Pad — and if completely flat (e.g. pre-training), give a sensible window
+      // Pad - and if completely flat (e.g. pre-training), give a sensible window
       if (hi - lo < 0.05) {
         lo -= 0.5;
         hi += 0.5;
@@ -1465,7 +1465,7 @@ function generate1DThumbnailUrls(net: Network): Record<string, string> {
         hi += pad;
       }
 
-      // Baseline at y=0 (if visible) — quiet gray
+      // Baseline at y=0 (if visible) - quiet gray
       if (lo <= 0 && hi >= 0) {
         const baseY = H * (1 - (0 - lo) / (hi - lo));
         ctx.strokeStyle = "rgba(120,120,120,0.32)";
@@ -1476,7 +1476,7 @@ function generate1DThumbnailUrls(net: Network): Record<string, string> {
         ctx.stroke();
       }
 
-      // Curve — accent color, thick, rounded joins
+      // Curve - accent color, thick, rounded joins
       ctx.strokeStyle = "rgb(181,83,42)";
       ctx.lineWidth = 3;
       ctx.lineCap = "round";

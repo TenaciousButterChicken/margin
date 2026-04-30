@@ -89,7 +89,7 @@ export default async function HintsPage() {
       </div>
 
       <p style={{ fontSize: 12, color: "var(--neutral-500)", lineHeight: 1.5, margin: 0 }}>
-        Note: hardcoded hints don&apos;t count toward the quota — only AI hints do. The AI hint
+        Note: hardcoded hints don&apos;t count toward the quota. Only AI hints do. The AI hint
         endpoint isn&apos;t wired up yet (it ships with the Lab framework in June), so this page
         stays empty for now.
       </p>

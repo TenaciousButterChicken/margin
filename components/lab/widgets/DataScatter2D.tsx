@@ -7,9 +7,9 @@ import { useChannel, usePublish } from "@/lib/lab/LabContext";
 // Beat 1's load-bearing widget. Renders the dataset (study hours vs
 // exam scores) and a line y = w0 + w1·x over it. Two drag handles on
 // the line endpoints. As they drag, we re-fit (w0,w1) to the line they
-// drew and publish onto the `w_position` channel — the bowl listens.
+// drew and publish onto the `w_position` channel; the bowl listens.
 
-// Coord transforms — keep in sync with the simulator's standardization.
+// Coord transforms - keep in sync with the simulator's standardization.
 const X_MEAN = 5.5;
 const X_STD = Math.sqrt(8.25);
 const Y_VALUES = DATASET.map(([, y]) => y);
@@ -18,7 +18,7 @@ const Y_STD = Math.sqrt(
   Y_VALUES.reduce((a, b) => a + (b - Y_MEAN) ** 2, 0) / Y_VALUES.length
 );
 
-// Plot domain — slightly wider than the data so dots aren't on the edges.
+// Plot domain - slightly wider than the data so dots aren't on the edges.
 const X_DOMAIN: [number, number] = [0, 11];
 const Y_DOMAIN: [number, number] = [30, 150];
 
@@ -285,7 +285,7 @@ export function DataScatter2D({
           </text>
         </g>
 
-        {/* residual ticks (faint, all dots) — drawn while dragging or when
+        {/* residual ticks (faint, all dots) - drawn while dragging or when
             we're in highlight-one-dot mode so the dimmed-out dots still
             have visual context. Bold cyan when boldErrorBars is on. */}
         {(draggable || highlightDotIndex !== null || boldErrorBars) && (
@@ -304,7 +304,7 @@ export function DataScatter2D({
 
               // Pull arrow: chevron with the APEX at the dot, legs flaring
               // back along the residual toward the line. The student reads
-              // this as "the line wants to move TOWARD this dot" — apex
+              // this as "the line wants to move TOWARD this dot"; apex
               // points in the direction of motion.
               //   dot below line (syDot > syLine) → apex at dot, legs up → ↓ arrow
               //   dot above line (syDot < syLine) → apex at dot, legs down → ↑ arrow
@@ -342,7 +342,7 @@ export function DataScatter2D({
           </g>
         )}
 
-        {/* HIGHLIGHTED dot's error bar — bold, with a label */}
+        {/* HIGHLIGHTED dot's error bar - bold, with a label */}
         {highlightDotIndex !== null && (() => {
           const [x, y] = DATASET[highlightDotIndex];
           const sx = xToScreen(x);
@@ -477,7 +477,7 @@ export function DataScatter2D({
           </>
         )}
 
-        {/* loss readout — hidden when one dot is highlighted (math strip
+        {/* loss readout - hidden when one dot is highlighted (math strip
             owns the readout in that mode) */}
         {highlightDotIndex === null && (
         <g style={{ pointerEvents: "none" }}>

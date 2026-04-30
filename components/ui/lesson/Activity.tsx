@@ -1,5 +1,5 @@
 // Boxed "activity" card. Used for in-class activities students will
-// run during a session — bias hunts, drag-the-line labs, Teachable
+// run during a session - bias hunts, drag-the-line labs, Teachable
 // Machine training. Visually marked with the accent color so it pops
 // out of the prose.
 

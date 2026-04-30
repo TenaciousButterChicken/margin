@@ -1,7 +1,7 @@
-// CNN Explorer — math + image generators.
+// CNN Explorer - math + image generators.
 //
 // Filter Lab uses pure CPU 2D convolution on grayscale 128×128 images.
-// Layer Explorer hands tensors to MobileNet (TF.js) — that lives in the
+// Layer Explorer hands tensors to MobileNet (TF.js) - that lives in the
 // React component since it's all async. This file is the synchronous
 // "shape what you can see" layer.
 
@@ -42,7 +42,7 @@ export const KERNEL_PRESETS: { name: string; values: Kernel3x3 }[] = [
    ===================================================================== */
 
 /** Convolve a grayscale image with a 3×3 kernel.
- *  Edge pixels: clamp (replicate) — simplest and good enough for the demo. */
+ *  Edge pixels: clamp (replicate) - simplest and good enough for the demo. */
 export function convolve(img: GrayImage, kernel: Kernel3x3): GrayImage {
   const w = img.width;
   const h = img.height;
@@ -101,7 +101,7 @@ function clampInt(v: number, lo: number, hi: number): number {
 }
 
 /* =====================================================================
-   Filter Lab — preset grayscale image generators
+   Filter Lab - preset grayscale image generators
    ===================================================================== */
 
 /** Render a gray image by drawing onto a canvas, then read back pixels. */
@@ -116,7 +116,7 @@ function drawGray(
   if (!ctx) {
     return { width: size, height: size, data: new Float32Array(size * size) };
   }
-  // Soft cream background — looks better than pure white in the warm palette
+  // Soft cream background - looks better than pure white in the warm palette
   ctx.fillStyle = "#F4F4F2";
   ctx.fillRect(0, 0, size, size);
   draw(ctx, size);
@@ -244,7 +244,7 @@ export function renderGrayToCanvas(
 }
 
 /* =====================================================================
-   Layer Explorer — preset RGB images.
+   Layer Explorer - preset RGB images.
    Procedurally generated 224×224 RGB. Synthetic (no real-photo
    shipping), but visually distinct enough that MobileNet's feature maps
    show interesting structure across layers.
@@ -438,7 +438,7 @@ function drawFaceStylized(ctx: CanvasRenderingContext2D, s: number) {
 }
 
 /* =====================================================================
-   Heatmap colormap — clay-tinted, single hue ramp.
+   Heatmap colormap - clay-tinted, single hue ramp.
    Used by Layer Explorer feature maps.
    ===================================================================== */
 

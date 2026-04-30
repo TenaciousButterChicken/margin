@@ -14,7 +14,7 @@ export default async function LandingPage() {
     <main style={{ background: "var(--neutral-0)" }}>
       <TopNav signedIn={!!user} />
 
-      {/* Hero — FaultyTerminal (clay digits on white) as full-width background */}
+      {/* Hero - FaultyTerminal (clay digits on white) as full-width background */}
       <section
         style={{
           position: "relative",
@@ -51,7 +51,7 @@ export default async function LandingPage() {
           />
         </div>
 
-        {/* Foreground card — translucent white with backdrop blur so the
+        {/* Foreground card - translucent white with backdrop blur so the
             headline + buttons sit on a clean field instead of fighting
             the digit pattern. Card hugs its content with padding; the
             full-width terminal stays visible to the sides and below. */}
@@ -103,7 +103,7 @@ export default async function LandingPage() {
                 textWrap: "pretty",
               }}
             >
-              A 16-session course where every concept lands twice — once in the lesson, once in a Lab where you write code that runs. No black boxes.
+              A 16-session course where every concept lands twice: once in the lesson, once in a Lab where you write code that runs. No black boxes.
             </p>
             <div style={{ display: "flex", gap: 12, marginTop: 36 }}>
               <Link href="/sessions/machines-that-learn">
@@ -111,7 +111,7 @@ export default async function LandingPage() {
               </Link>
               <Link href="/sessions/rolling-downhill">
                 <button className="btn btn-secondary btn-lg">
-                  See Session 06 — gradient descent
+                  See Session 06 - gradient descent
                 </button>
               </Link>
             </div>
@@ -136,7 +136,7 @@ export default async function LandingPage() {
             },
             {
               kicker: "A Lab in every session",
-              body: "Read for 10 minutes, then build for 15. Code runs in your browser — no setup, no environment to break.",
+              body: "Read for 10 minutes, then build for 15. Code runs in your browser. No setup, no environment to break.",
             },
             {
               kicker: "Built by a small team",

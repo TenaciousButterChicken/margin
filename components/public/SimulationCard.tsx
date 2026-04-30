@@ -8,7 +8,7 @@ import type { SimulationMeta } from "@/lib/simulations";
 // Tile in the Simulations grid. Live tiles navigate to
 // /simulations/[slug]. Coming-soon tiles look slightly muted, keep the
 // pointer cursor (so they read as interactive), and pulse the
-// "Coming soon" badge when clicked — no navigation.
+// "Coming soon" badge when clicked - no navigation.
 
 export function SimulationCard({ sim }: { sim: SimulationMeta }) {
   const router = useRouter();

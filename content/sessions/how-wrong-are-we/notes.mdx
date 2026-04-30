@@ -241,13 +241,13 @@ Mental model: every wrong prediction "costs" you something. The model is trying 
 </FAQ>
 
 <Callout variant="note">
-**A small math aside — the 1/2 convention.** Some textbooks (and Andrew Ng's Coursera course) write MSE with a 1/2 in front:
+**A small math aside - the 1/2 convention.** Some textbooks (and Andrew Ng's Coursera course) write MSE with a 1/2 in front:
 
 <Math tex="J(w, b) = \tfrac{1}{2N} \sum_i (\hat{y}_i - y_i)^2" display />
 
 The 1/2 is a math convenience. When you take the derivative for gradient descent, the chain rule will produce a factor of 2 from the squared term, and the 1/2 cancels it out, giving cleaner formulas. The 1/2 doesn't change which (w, b) is best; it just rescales the cost. You'll see it both ways in this book.
 </Callout>
 
-<Bridge to="Chapter 6 — Rolling downhill">
-You can score any line. The best line minimizes MSE. But how do you *find* the (w, b) with the lowest MSE? With infinite possible (w, b) combinations, you can't check them all. Next: gradient descent — the blindfolded hiker. We'll write it from scratch and watch the MSE drop with every step.
+<Bridge to="Chapter 6 - Rolling downhill">
+You can score any line. The best line minimizes MSE. But how do you *find* the (w, b) with the lowest MSE? With infinite possible (w, b) combinations, you can't check them all. Next: gradient descent, the blindfolded hiker. We'll write it from scratch and watch the MSE drop with every step.
 </Bridge>

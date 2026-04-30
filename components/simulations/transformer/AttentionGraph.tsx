@@ -81,7 +81,7 @@ export function AttentionGraph({
           }}
         >
           Approximated from key-tensor similarity. Real per-head attention
-          requires a custom-exported ONNX — coming in v2.
+          requires a custom-exported ONNX. Coming in v2.
         </div>
       )}
       <div style={{ overflow: "auto" }}>

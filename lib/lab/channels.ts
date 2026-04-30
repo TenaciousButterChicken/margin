@@ -1,11 +1,11 @@
-// Tiny channel runtime — the spine that every Lab widget reads/writes through.
+// Tiny channel runtime - the spine that every Lab widget reads/writes through.
 // Per the approved schema, widgets declare `publishes: string[]` and
 // `subscribes: string[]`. The runtime keeps a mutable bag of channel values
 // and notifies subscribers whenever something gets published.
 //
 // Two flavors of write:
-//  • set(channel, value)   — durable; everyone who later subscribes also reads it
-//  • pulse(channel)        — fire-and-forget; current subscribers fire once, no value retained
+//  • set(channel, value)   - durable; everyone who later subscribes also reads it
+//  • pulse(channel)        - fire-and-forget; current subscribers fire once, no value retained
 //
 // Action buttons (Step ×4, Reset) use pulse(). Sliders use set(). Continuous
 // state like the simulator's history uses set().

@@ -6,7 +6,7 @@
 //   • vector arithmetic: a − b + c → top-K nearest token ids
 //   • access to 2D coords for plotting
 //
-// The full 77 MB fp16 matrix is fetched lazily — the visualizer can show
+// The full 77 MB fp16 matrix is fetched lazily - the visualizer can show
 // the scatter plot from coords alone (~400 KB) and only pulls embeddings
 // on the first interaction that needs 768D math.
 
@@ -122,8 +122,8 @@ export async function loadEmbeddings(
 }
 
 /** Try to find a token id for a user-typed word. Tries (in order):
- *   1. " word" — leading-space (most common form in BPE)
- *   2. "word"  — no-space form (sentence-initial)
+ *   1. " word" - leading-space (most common form in BPE)
+ *   2. "word"  - no-space form (sentence-initial)
  *   3. capitalized variants
  *  Returns null if every variant maps to multi-token. */
 export function findTokenId(word: string): number | null {
@@ -218,7 +218,7 @@ export function coordsFor(id: number): [number, number] {
 
 /** Local PCA: project a small subset of token embeddings into 2D using
  *  PCA fit JUST to those vectors. This gives a much better visual layout
- *  for a cluster than the global projection — global PC1/PC2 capture only
+ *  for a cluster than the global projection - global PC1/PC2 capture only
  *  ~2.6% of variance for GPT-2's wte, so a local cluster collapses to a
  *  point. Local PCA chooses the axes that maximize variance within the
  *  cluster, so it spreads naturally across the canvas.
@@ -289,7 +289,7 @@ export function localProjection(ids: number[]): Float32Array {
 
 function powerIter(M: Float32Array, n: number, iters: number): Float32Array {
   // Initialize with deterministic non-zero vector to keep results stable
-  // across page loads — pure-random init makes the plot's orientation
+  // across page loads - pure-random init makes the plot's orientation
   // jitter on every search.
   const v = new Float32Array(n);
   for (let i = 0; i < n; i++) v[i] = Math.cos((i + 1) * 0.7) + 0.1;
@@ -332,7 +332,7 @@ function rayleigh(M: Float32Array, n: number, v: Float32Array): number {
   return num / (den || 1e-12);
 }
 
-/** Bounds of the full PCA projection — used to scale the scatter plot. */
+/** Bounds of the full PCA projection - used to scale the scatter plot. */
 export function coordsBounds(): { xmin: number; xmax: number; ymin: number; ymax: number } {
   if (!coordsCache) return { xmin: 0, xmax: 1, ymin: 0, ymax: 1 };
   let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
@@ -348,7 +348,7 @@ export function coordsBounds(): { xmin: number; xmax: number; ymin: number; ymax
 }
 
 function topK(values: Float32Array, k: number): { id: number; sim: number }[] {
-  // Simple full sort — k small, vocab fits in memory cheaply.
+  // Simple full sort - k small, vocab fits in memory cheaply.
   const indexed = new Array<{ id: number; sim: number }>(values.length);
   for (let i = 0; i < values.length; i++) indexed[i] = { id: i, sim: values[i] };
   indexed.sort((a, b) => b.sim - a.sim);

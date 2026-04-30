@@ -107,15 +107,15 @@ export default async function TransformerExplorerPage() {
           What you&rsquo;re seeing
         </h2>
         <p style={{ margin: "0 0 12px" }}>
-          A transformer language model doesn&rsquo;t see characters or words —
-          it sees <em>tokens</em>: chunks of text from a fixed vocabulary
+          A transformer language model doesn&rsquo;t see characters or words.
+          It sees <em>tokens</em>: chunks of text from a fixed vocabulary
           of about 50,000 entries. The first row shows your sentence after
           GPT-2&rsquo;s byte-pair tokenizer has done its work, including the
           numeric ID each token has in the vocabulary.
         </p>
         <p style={{ margin: "0 0 12px" }}>
           Each layer of GPT-2 has twelve <em>attention heads</em>, and each
-          head decides — for every token — how much to look at every other
+          head decides, for every token, how much to look at every other
           token. The bipartite graph shows one head&rsquo;s attention map at a
           time: line opacity is the attention weight from a token on the
           left to a token on the right. Different heads pick up different
@@ -123,7 +123,7 @@ export default async function TransformerExplorerPage() {
         </p>
         <p style={{ margin: 0 }}>
           The bar chart is what GPT-2 thinks the next token should be.
-          Temperature reshapes the same logits — low temperature is
+          Temperature reshapes the same logits: low temperature is
           confident, high temperature is chaotic. Click Generate to sample
           a token from that distribution and watch the model continue.
         </p>

@@ -18,9 +18,9 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Margin — machine learning, by hand, from scratch",
+  title: "Margin: machine learning, by hand, from scratch",
   description:
-    "A 16-session course where every concept lands twice — once in the lesson, once in a Lab where you write code that runs.",
+    "A 16-session course where every concept lands twice: once in the lesson, once in a Lab where you write code that runs.",
   metadataBase: new URL("https://margin.school"),
 };
 

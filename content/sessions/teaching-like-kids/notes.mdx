@@ -8,7 +8,7 @@ Three fundamentally different ways a computer can learn from data: supervised (f
   <Objective>Predict which "flavor" of ML powers a system you've used</Objective>
 </Objectives>
 
-## Supervised learning — learning from flashcards
+## Supervised learning - learning from flashcards
 
 The metaphor: studying for a vocab quiz with flashcards. You see the front, guess, then flip to check. Adjust. Repeat. After enough cards, you don't need them anymore.
 
@@ -31,7 +31,7 @@ You'll spend Phase 2 on regression and Phase 3 on classification.
 
 **Real examples.** Email spam classifiers (millions of emails labeled spam/not-spam). Medical image diagnosis (X-rays labeled by radiologists). Self-driving car perception (dashcam frames labeled with what's a pedestrian, car, stop sign). The CAPTCHAs you fill out are *labeling training data for Google's self-driving cars*. Free labor. Billions of labels.
 
-## Unsupervised learning — learning by exploring
+## Unsupervised learning - learning by exploring
 
 The metaphor: you walk into a party with no name tags. After 20 minutes you've noticed clusters: engineers by the snacks, artists on the porch, sports kids in the kitchen. Nobody told you the categories existed. You found them.
 
@@ -43,7 +43,7 @@ No labels. The job is to find structure: clusters, patterns, weird outliers. We'
 
 **Real examples.** Spotify's "Discover Weekly" (groups songs by sonic similarity nobody hand-coded). Customer segmentation (marketing teams find natural groups of shoppers). Fraud detection (flag transactions that don't look like the rest). Topic discovery in news articles.
 
-## Reinforcement learning — trial and error
+## Reinforcement learning - trial and error
 
 The metaphor: teaching a dog to sit. No flashcards, no explanation. The dog tries things; when it sits, it gets a treat. Over time it figures out: *the thing I was doing right before the treat, do that more.*
 
@@ -73,7 +73,7 @@ Open `teachablemachine.withgoogle.com`. Pick "Image Project, Standard image mode
 
 Once that works, try the harder version: 5 classes. Try to fool your own model. What confuses it? Why?
 
-**The pedagogical question.** What kind of learning was that, supervised or unsupervised? Supervised — you labeled every example by which class it belonged to. What would unsupervised look like? You'd dump all the webcam frames in without telling it which were which, and the model would have to figure out on its own that there were two distinct groups.
+**The pedagogical question.** What kind of learning was that, supervised or unsupervised? Supervised. You labeled every example by which class it belonged to. What would unsupervised look like? You'd dump all the webcam frames in without telling it which were which, and the model would have to figure out on its own that there were two distinct groups.
 
 </Activity>
 
@@ -117,13 +117,13 @@ It's not training from scratch. It's using a pre-trained model that already know
 Your background was part of the training data. If you trained "thumbs up" in front of a window and "thumbs down" in front of a wall, the model might secretly be classifying the *background*, not your hand. This is a deep ML problem you'll see again: models can learn the wrong thing if your data is sloppy.
   </Q>
   <Q q="Could I build a model that recognizes my friends?">
-Yes — this is "facial recognition." You'd need labeled face photos of each person. (Don't do this without their consent.)
+Yes, this is "facial recognition." You'd need labeled face photos of each person. (Don't do this without their consent.)
   </Q>
   <Q q="Is ChatGPT supervised or unsupervised?">
 Trick question, and a great one. ChatGPT was trained in *stages*. First a self-supervised stage where it learned to predict the next word in massive amounts of text (no human labels needed). Then supervised fine-tuning on human-written examples of good responses. Then reinforcement learning from human feedback. So the answer is: *all three, in sequence*. We'll unpack this in Chapter 15.
   </Q>
 </FAQ>
 
-<Bridge to="Chapter 3 — Data is everything">
+<Bridge to="Chapter 3 - Data is everything">
 You've seen how computers learn from data. But the data is everything. A model trained on bad data is bad, no matter how clever the algorithm. Next: how ML systems can fail when their data is wrong, and how to inspect a real dataset for problems.
 </Bridge>

@@ -53,14 +53,14 @@ export default async function AboutPage() {
         </h2>
 
         <p style={{ fontSize: 17, lineHeight: 1.65, color: "var(--neutral-700)" }}>
-          Sixteen sessions across the school year. Each session is a lesson — eight to twelve minutes
-          to read — and a Lab, where you write code that runs in your browser, watch a real model
+          Sixteen sessions across the school year. Each session is a lesson (eight to twelve minutes
+          to read) and a Lab, where you write code that runs in your browser, watch a real model
           train, and try to break it on purpose. Pyodide for Python, TensorFlow.js for the networks,
           a small AI tutor that gives you Socratic hints when you&rsquo;re stuck.
         </p>
 
         <p style={{ fontSize: 17, lineHeight: 1.65, color: "var(--neutral-700)" }}>
-          No leaderboards. No XP. No streaks. The research is unambiguous on this — heavy
+          No leaderboards. No XP. No streaks. The research is unambiguous on this. Heavy
           gamification harms students who are already curious. Margin is built around explorable
           explanations, not arcade mechanics.
         </p>
@@ -79,7 +79,7 @@ export default async function AboutPage() {
 
         <p style={{ fontSize: 17, lineHeight: 1.65, color: "var(--neutral-700)" }}>
           A real essay, written over the summer as the platform comes together. For now, this is the
-          stub — the placeholder that says <em>this thing is being made carefully and on purpose.</em>
+          stub. The placeholder that says <em>this thing is being made carefully and on purpose.</em>
         </p>
       </article>
     </main>

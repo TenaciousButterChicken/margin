@@ -4,7 +4,7 @@ import { useState } from "react";
 
 // Collapsible FAQ list. Each question shows just its prompt by default;
 // clicking expands the answer. Used for the "likely student questions"
-// section — gives users an inviting, progressive-disclosure UI instead
+// section - gives users an inviting, progressive-disclosure UI instead
 // of a wall of Q/A.
 
 export function FAQ({ children }: { children: React.ReactNode }) {
