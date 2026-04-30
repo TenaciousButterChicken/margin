@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
-import { signIn, type AuthState } from "../actions";
+import { signUp, type AuthState } from "../actions";
 import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/illustrations/Wordmark";
 
 const initial: AuthState = {};
 
-export function SignInForm() {
-  const [state, formAction] = useFormState(signIn, initial);
+export default function SignUpPage() {
+  const [state, formAction] = useFormState(signUp, initial);
 
   return (
     <div
@@ -41,20 +41,20 @@ export function SignInForm() {
         </Link>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0, letterSpacing: "-0.01em" }}>
-            Sign in
+            Create account
           </h1>
           <p style={{ fontSize: 14, color: "var(--neutral-500)", margin: "6px 0 0" }}>
-            Use your @ycdsbk12.ca school account.
+            Use your @ycdsbk12.ca school email. Pick a password (8+ chars).
           </p>
         </div>
 
         <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <Field label="Email" name="email" type="email" autoComplete="email" required />
+          <Field label="School email" name="email" type="email" autoComplete="email" required />
           <Field
             label="Password"
             name="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             required
           />
           {state.error && (
@@ -64,9 +64,9 @@ export function SignInForm() {
         </form>
 
         <p style={{ fontSize: 13, color: "var(--neutral-500)", margin: 0, textAlign: "center" }}>
-          New here?{" "}
-          <Link href="/sign-up" style={{ color: "var(--accent)", fontWeight: 600 }}>
-            Create an account
+          Already have an account?{" "}
+          <Link href="/sign-in" style={{ color: "var(--accent)", fontWeight: 600 }}>
+            Sign in
           </Link>
         </p>
       </div>
@@ -90,7 +90,13 @@ function Field({
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 13, fontWeight: 600, color: "var(--neutral-900)" }}>{label}</span>
-      <input className="input" name={name} type={type} autoComplete={autoComplete} required={required} />
+      <input
+        className="input"
+        name={name}
+        type={type}
+        autoComplete={autoComplete}
+        required={required}
+      />
     </label>
   );
 }
@@ -99,7 +105,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" variant="primary" disabled={pending}>
-      {pending ? "Signing in…" : "Sign in"}
+      {pending ? "Creating…" : "Create account"}
     </Button>
   );
 }
