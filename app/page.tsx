@@ -18,7 +18,7 @@ export default async function LandingPage() {
       <section
         style={{
           position: "relative",
-          padding: "120px 56px 160px",
+          padding: "var(--hero-pad-top) var(--page-pad-x) var(--hero-pad-bottom)",
           background: "var(--neutral-0)",
           overflow: "hidden",
           isolation: "isolate",
@@ -59,7 +59,7 @@ export default async function LandingPage() {
           style={{
             position: "relative",
             zIndex: 2,
-            maxWidth: 1280,
+            maxWidth: "var(--container-max)",
             margin: "0 auto",
           }}
         >
@@ -67,12 +67,12 @@ export default async function LandingPage() {
             style={{
               display: "inline-block",
               maxWidth: 1080,
-              padding: "40px 48px",
+              padding: "var(--hero-card-pad)",
               background: "rgba(255, 255, 255, 0.78)",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
               border: "1px solid rgba(255, 255, 255, 0.6)",
-              borderRadius: 16,
+              borderRadius: "var(--hero-card-radius)",
               boxShadow: "0 8px 40px rgba(20, 12, 4, 0.08)",
             }}
           >
@@ -81,7 +81,7 @@ export default async function LandingPage() {
             </span>
             <h1
               style={{
-                fontSize: 72,
+                fontSize: "var(--hero-h1)",
                 fontWeight: 600,
                 lineHeight: 1.02,
                 letterSpacing: "-0.025em",
@@ -95,7 +95,7 @@ export default async function LandingPage() {
             </h1>
             <p
               style={{
-                fontSize: 19,
+                fontSize: "var(--hero-body)",
                 lineHeight: 1.55,
                 color: "var(--neutral-700)",
                 margin: 0,
@@ -105,7 +105,7 @@ export default async function LandingPage() {
             >
               A 16-session course where every concept lands twice: once in the lesson, once in a Lab where you write code that runs. No black boxes.
             </p>
-            <div style={{ display: "flex", gap: 12, marginTop: 36 }}>
+            <div style={{ display: "flex", gap: 12, marginTop: 36, flexWrap: "wrap" }}>
               <Link href="/sessions/machines-that-learn">
                 <button className="btn btn-primary btn-lg">Start with Session 01</button>
               </Link>
@@ -117,13 +117,13 @@ export default async function LandingPage() {
       {/* Three-promise strip */}
       <section
         style={{
-          padding: "56px 56px",
+          padding: "var(--section-pad-y) var(--page-pad-x)",
           borderBottom: "1px solid var(--neutral-200)",
-          maxWidth: 1280,
+          maxWidth: "var(--container-max)",
           margin: "0 auto",
         }}
       >
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 56 }}>
+        <div className="lp-grid-3">
           {[
             {
               kicker: "Lessons that earn their length",
@@ -153,11 +153,11 @@ export default async function LandingPage() {
       {/* Sessions section header */}
       <section
         style={{
-          padding: "88px 56px 24px",
+          padding: "var(--section-pad-y-lg) var(--page-pad-x) 24px",
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "space-between",
-          maxWidth: 1280,
+          maxWidth: "var(--container-max)",
           margin: "0 auto",
         }}
       >
@@ -165,7 +165,7 @@ export default async function LandingPage() {
           <span className="t-meta">The course</span>
           <h2
             style={{
-              fontSize: 40,
+              fontSize: "var(--section-h2)",
               fontWeight: 600,
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
@@ -181,7 +181,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Sessions grid */}
-      <section style={{ padding: "0 56px 96px", maxWidth: 1280, margin: "0 auto" }}>
+      <section style={{ padding: "0 var(--page-pad-x) var(--section-pad-y-lg)", maxWidth: "var(--container-max)", margin: "0 auto" }}>
         {grouped.map(({ phase, name, sessions }, i) => {
           const phaseMeta = PHASES[phase - 1];
           return (
@@ -190,7 +190,9 @@ export default async function LandingPage() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 16,
+                  flexWrap: "wrap",
+                  gap: 12,
+                  rowGap: 8,
                   padding: "14px 0",
                   marginBottom: 16,
                   borderBottom: "1px solid var(--neutral-200)",
@@ -219,7 +221,7 @@ export default async function LandingPage() {
                   Sessions {phaseMeta.sessions}
                 </span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+              <div className="lp-grid-4">
                 {sessions.map((s) => (
                   <SessionCard key={s.n} s={s} phaseName={name} />
                 ))}
@@ -232,12 +234,12 @@ export default async function LandingPage() {
       {/* About teaser */}
       <section
         style={{
-          padding: "64px 56px",
+          padding: "var(--section-pad-y) var(--page-pad-x)",
           borderTop: "1px solid var(--neutral-200)",
           background: "var(--neutral-50)",
         }}
       >
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        <div style={{ maxWidth: "var(--content-max)", margin: "0 auto" }}>
           <span className="t-meta">A note from me</span>
           <p
             style={{
@@ -270,11 +272,13 @@ export default async function LandingPage() {
       {/* Footer */}
       <footer
         style={{
-          padding: "32px 56px",
+          padding: "32px var(--page-pad-x)",
           borderTop: "1px solid var(--neutral-200)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 12,
+          flexWrap: "wrap",
           fontSize: 13,
           color: "var(--neutral-500)",
         }}

@@ -45,12 +45,12 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
         </Link>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, margin: 0, letterSpacing: "-0.015em" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+        <div style={{ minWidth: 0, flex: "1 1 240px" }}>
+          <h1 style={{ fontSize: 28, fontWeight: 600, margin: 0, letterSpacing: "-0.015em", overflowWrap: "anywhere" }}>
             {profile.full_name || profile.email}
           </h1>
-          <p style={{ fontSize: 14, color: "var(--neutral-500)", margin: "6px 0 0" }}>
+          <p style={{ fontSize: 14, color: "var(--neutral-500)", margin: "6px 0 0", overflowWrap: "anywhere" }}>
             {profile.email} · cohort {profile.cohort_year} · status {profile.status} · role {ROLE_LABEL[profile.role]}
           </p>
         </div>
@@ -111,14 +111,14 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
       <section>
         <h2 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 12px" }}>Sessions detail</h2>
         <div
+          className="scroll-x"
           style={{
             background: "var(--neutral-0)",
             border: "1px solid var(--neutral-200)",
             borderRadius: 8,
-            overflow: "hidden",
           }}
         >
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr style={{ background: "var(--neutral-50)" }}>
                 <Th>#</Th>
@@ -169,8 +169,8 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
           <h2 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 12px" }}>
             Lab attempts ({lab_attempts.length})
           </h2>
-          <div style={{ background: "var(--neutral-0)", border: "1px solid var(--neutral-200)", borderRadius: 8, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <div className="scroll-x" style={{ background: "var(--neutral-0)", border: "1px solid var(--neutral-200)", borderRadius: 8 }}>
+            <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "var(--neutral-50)" }}>
                   <Th>Lab</Th>
@@ -200,8 +200,8 @@ export default async function StudentDetailPage({ params }: { params: { user_id:
       {hints.length > 0 && (
         <section>
           <h2 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 12px" }}>Hints used ({hints.length})</h2>
-          <div style={{ background: "var(--neutral-0)", border: "1px solid var(--neutral-200)", borderRadius: 8, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <div className="scroll-x" style={{ background: "var(--neutral-0)", border: "1px solid var(--neutral-200)", borderRadius: 8 }}>
+            <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "var(--neutral-50)" }}>
                   <Th>When</Th>

@@ -18,13 +18,14 @@ export function LabHeader({
   return (
     <div
       style={{
-        height: 48,
-        padding: "0 16px",
+        minHeight: 48,
+        padding: "8px 12px",
         borderBottom: "1px solid var(--neutral-200)",
         background: "var(--neutral-0)",
         display: "flex",
         alignItems: "center",
-        gap: 12,
+        flexWrap: "wrap",
+        gap: 8,
         flex: "none",
       }}
     >
@@ -37,13 +38,29 @@ export function LabHeader({
           ← Close
         </button>
       )}
-      <span style={{ fontSize: 12, color: "var(--neutral-500)", fontFamily: "var(--font-mono)" }}>
+      <span
+        className="hide-mobile"
+        style={{ fontSize: 12, color: "var(--neutral-500)", fontFamily: "var(--font-mono)" }}
+      >
         {phaseLabel}
       </span>
-      <div style={{ width: 1, height: 16, background: "var(--neutral-200)" }} />
-      <span style={{ fontSize: 14, fontWeight: 600, color: "var(--neutral-900)" }}>{title}</span>
+      <div className="hide-mobile" style={{ width: 1, height: 16, background: "var(--neutral-200)" }} />
+      <span
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          color: "var(--neutral-900)",
+          minWidth: 0,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          flex: "1 1 auto",
+        }}
+      >
+        {title}
+      </span>
 
-      <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
+      <div style={{ marginLeft: "auto", display: "flex", gap: 4, flex: "none" }}>
         <button
           className="btn btn-ghost btn-sm"
           title="Reset the current beat"

@@ -25,7 +25,7 @@ export default async function RosterPage({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 600, margin: 0, letterSpacing: "-0.015em" }}>
             Roster
@@ -34,7 +34,7 @@ export default async function RosterPage({
             {all.length} total · {pendingCount} pending
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <a
             href="/api/teacher/roster.csv"
             style={{
@@ -73,7 +73,7 @@ export default async function RosterPage({
       </div>
 
       {/* Filter pills */}
-      <div style={{ display: "flex", gap: 6 }}>
+      <div className="scroll-x" style={{ display: "flex", gap: 6, paddingBottom: 4 }}>
         <FilterPill label={`All (${all.length})`} active={filter === "all"} href="/teacher/roster" />
         <FilterPill
           label={`Pending (${pendingCount})`}
@@ -93,14 +93,14 @@ export default async function RosterPage({
       </div>
 
       <div
+        className="scroll-x"
         style={{
           background: "var(--neutral-0)",
           border: "1px solid var(--neutral-200)",
           borderRadius: 8,
-          overflow: "hidden",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+        <table style={{ width: "100%", minWidth: 880, borderCollapse: "collapse", fontSize: 14 }}>
           <thead>
             <tr style={{ background: "var(--neutral-50)" }}>
               <Th>Email</Th>
@@ -166,11 +166,13 @@ function FilterPill({ label, active, href }: { label: string; active: boolean; h
     <Link
       href={href}
       style={{
+        flex: "none",
         fontSize: 13,
         fontWeight: 500,
         padding: "6px 12px",
         borderRadius: 999,
         textDecoration: "none",
+        whiteSpace: "nowrap",
         color: active ? "var(--neutral-0)" : "var(--neutral-700)",
         background: active ? "var(--neutral-900)" : "var(--neutral-100)",
         border: active ? "none" : "1px solid var(--neutral-200)",

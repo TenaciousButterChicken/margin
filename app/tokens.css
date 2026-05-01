@@ -55,6 +55,47 @@
   --t-micro: 120ms;
   --t-trans: 200ms;
   --t-big:   280ms;
+
+  /* ── Responsive layout tokens ──
+     Inline styles consume these via var(); the @media block below
+     swaps the values on phones. Single source of truth for "how much
+     room does a section get" / "how big is a headline". */
+  --page-pad-x:        56px;   /* horizontal padding on every section wrapper */
+  --topnav-pad-x:      56px;   /* horizontal padding inside topnav */
+  --section-pad-y:     64px;
+  --section-pad-y-lg:  96px;
+  --hero-pad-top:      120px;
+  --hero-pad-bottom:   160px;
+  --hero-card-pad:     40px 48px;
+  --hero-card-radius:  16px;
+  --hero-h1:           72px;
+  --hero-body:         19px;
+  --section-h1:        56px;   /* about hero */
+  --section-h2:        40px;   /* sessions/simulations index */
+  --section-h3:        24px;   /* sub headings */
+  --container-max:     1280px;
+  --content-max:       720px;
+  --sidebar-w:         240px;
+}
+
+/* Phones: shrink everything that would otherwise crowd the viewport.
+   640px matches Tailwind's sm: breakpoint. */
+@media (max-width: 640px) {
+  :root {
+    --page-pad-x:        20px;
+    --topnav-pad-x:      16px;
+    --section-pad-y:     40px;
+    --section-pad-y-lg:  56px;
+    --hero-pad-top:      56px;
+    --hero-pad-bottom:   72px;
+    --hero-card-pad:     24px 20px;
+    --hero-card-radius:  12px;
+    --hero-h1:           40px;
+    --hero-body:         16px;
+    --section-h1:        32px;
+    --section-h2:        28px;
+    --section-h3:        20px;
+  }
 }
 
 /* Lab scope shifts radii up slightly (warmer, more approachable) */
@@ -206,7 +247,7 @@
   border-bottom: 1px solid var(--neutral-200);
   display: flex;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 var(--topnav-pad-x);
   background: var(--neutral-0);
 }
 

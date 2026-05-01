@@ -95,9 +95,10 @@ export default async function TeacherOverviewPage() {
                 key={r.id}
                 href={`/teacher/roster/${r.id}`}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto auto",
-                  gap: 16,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  columnGap: 16,
+                  rowGap: 4,
                   alignItems: "center",
                   padding: "12px 16px",
                   borderTop: i === 0 ? "none" : "1px solid var(--neutral-200)",
@@ -105,9 +106,20 @@ export default async function TeacherOverviewPage() {
                   color: "var(--neutral-900)",
                 }}
               >
-                <span style={{ fontSize: 14, fontWeight: 500 }}>{r.email}</span>
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 500,
+                    flex: "1 1 200px",
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {r.email}
+                </span>
                 <span style={{ fontSize: 12, color: "var(--neutral-500)" }}>
-                  {r.sessions_completed}/16 sessions · {r.total_minutes} min
+                  {r.sessions_completed}/16 · {r.total_minutes} min
                 </span>
                 <span style={{ fontSize: 12, color: "var(--neutral-500)" }}>
                   {timeAgo(r.last_seen!)}

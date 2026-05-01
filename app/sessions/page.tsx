@@ -20,15 +20,15 @@ export default async function SessionsIndexPage() {
 
       <section
         style={{
-          padding: "64px 56px 24px",
-          maxWidth: 1280,
+          padding: "var(--section-pad-y) var(--page-pad-x) 24px",
+          maxWidth: "var(--container-max)",
           margin: "0 auto",
         }}
       >
         <span className="t-meta">The course</span>
         <h1
           style={{
-            fontSize: 40,
+            fontSize: "var(--section-h2)",
             fontWeight: 600,
             lineHeight: 1.1,
             letterSpacing: "-0.02em",
@@ -42,7 +42,7 @@ export default async function SessionsIndexPage() {
         </p>
       </section>
 
-      <section style={{ padding: "32px 56px 96px", maxWidth: 1280, margin: "0 auto" }}>
+      <section style={{ padding: "32px var(--page-pad-x) var(--section-pad-y-lg)", maxWidth: "var(--container-max)", margin: "0 auto" }}>
         {grouped.map(({ phase, slug, name, sessions, lab }, i) => {
           const phaseMeta = PHASES[phase - 1];
           return (
@@ -51,7 +51,9 @@ export default async function SessionsIndexPage() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 16,
+                  flexWrap: "wrap",
+                  gap: 12,
+                  rowGap: 8,
                   padding: "14px 0",
                   marginBottom: 16,
                   borderBottom: "1px solid var(--neutral-200)",
@@ -111,7 +113,7 @@ export default async function SessionsIndexPage() {
                   Sessions {phaseMeta.sessions}
                 </span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+              <div className="lp-grid-4">
                 {sessions.map((s) => (
                   <SessionCard
                     key={s.n}

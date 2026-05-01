@@ -56,7 +56,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
 
       <h1
         style={{
-          fontSize: 36,
+          fontSize: "var(--section-h2)",
           fontWeight: 600,
           lineHeight: 1.15,
           letterSpacing: "-0.015em",

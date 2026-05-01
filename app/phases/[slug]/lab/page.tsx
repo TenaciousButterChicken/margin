@@ -28,23 +28,25 @@ export default function PhaseLabPage({ params }: { params: { slug: string } }) {
         background: "var(--neutral-0)",
       }}
     >
-      <div className="topnav" style={{ padding: "0 24px" }}>
+      <div className="topnav">
         <Link href="/" aria-label="Margin home" style={{ textDecoration: "none" }}>
           <Wordmark size={17} />
         </Link>
         <Link
           href="/sessions"
           style={{
-            marginLeft: 24,
+            marginLeft: 16,
             fontSize: 13,
             color: "var(--neutral-500)",
             fontFamily: "var(--font-mono)",
             textDecoration: "none",
+            whiteSpace: "nowrap",
           }}
         >
-          ← back to sessions
+          ← back
         </Link>
         <span
+          className="hide-mobile"
           style={{
             marginLeft: "auto",
             fontSize: 12,

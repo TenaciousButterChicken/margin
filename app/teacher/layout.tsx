@@ -9,14 +9,16 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   const profile = await requireTeacher();
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--neutral-50)", display: "flex", flexDirection: "column" }}>
+    <div className="teacher-shell" style={{ minHeight: "100vh", background: "var(--neutral-50)", display: "flex", flexDirection: "column" }}>
       {/* Top bar */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "16px 32px",
+          gap: 12,
+          flexWrap: "wrap",
+          padding: "16px var(--page-pad-x)",
           background: "var(--neutral-0)",
           borderBottom: "1px solid var(--neutral-200)",
         }}
@@ -38,8 +40,13 @@ export default async function TeacherLayout({ children }: { children: React.Reac
             Teacher
           </span>
         </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontSize: 13, color: "var(--neutral-700)" }}>{profile.email}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <span
+            className="hide-mobile"
+            style={{ fontSize: 13, color: "var(--neutral-700)" }}
+          >
+            {profile.email}
+          </span>
           <form action={signOut}>
             <button
               type="submit"
@@ -60,9 +67,10 @@ export default async function TeacherLayout({ children }: { children: React.Reac
         </div>
       </div>
 
-      <div style={{ display: "flex", flex: 1 }}>
-        {/* Side nav */}
+      <div className="teacher-body">
+        {/* Side nav - desktop. Mobile gets the horizontal tab strip below. */}
         <nav
+          className="teacher-sidenav hide-mobile"
           style={{
             width: 220,
             background: "var(--neutral-0)",
@@ -71,6 +79,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
             display: "flex",
             flexDirection: "column",
             gap: 6,
+            flex: "none",
           }}
         >
           <NavLink href="/teacher" label="Overview" />
@@ -84,10 +93,76 @@ export default async function TeacherLayout({ children }: { children: React.Reac
           <NavLink href="/sessions" label="Public sessions →" />
         </nav>
 
+        {/* Mobile tab strip - horizontal scroll under the top bar */}
+        <nav
+          className="show-mobile-only scroll-x"
+          style={{
+            display: "flex",
+            gap: 4,
+            padding: "8px var(--page-pad-x)",
+            background: "var(--neutral-0)",
+            borderBottom: "1px solid var(--neutral-200)",
+          }}
+        >
+          <TabLink href="/teacher" label="Overview" />
+          <TabLink href="/teacher/roster" label="Roster" />
+          <TabLink href="/teacher/sessions" label="Sessions" />
+          <TabLink href="/teacher/hints" label="Hints" />
+          <TabLink href="/teacher/club" label="Club" />
+          <TabLink href="/sessions" label="Public →" />
+        </nav>
+
         {/* Main content */}
-        <main style={{ flex: 1, padding: 32, maxWidth: 1280 }}>{children}</main>
+        <main
+          className="teacher-main"
+          style={{
+            flex: 1,
+            minWidth: 0,
+            padding: "var(--section-pad-y) var(--page-pad-x)",
+            maxWidth: "var(--container-max)",
+          }}
+        >
+          {children}
+        </main>
       </div>
+
+      <style>{`
+        .teacher-body {
+          display: flex;
+          flex: 1;
+          min-height: 0;
+        }
+        @media (max-width: 640px) {
+          .teacher-body {
+            flex-direction: column;
+          }
+          .teacher-main {
+            padding: 24px var(--page-pad-x) 48px !important;
+          }
+        }
+      `}</style>
     </div>
+  );
+}
+
+function TabLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        flex: "none",
+        padding: "8px 14px",
+        borderRadius: 6,
+        fontSize: 13,
+        fontWeight: 600,
+        color: "var(--neutral-700)",
+        background: "var(--neutral-100)",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </Link>
   );
 }
 

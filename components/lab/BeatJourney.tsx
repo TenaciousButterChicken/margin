@@ -32,7 +32,7 @@ function BowlPlaceholder() {
   return (
     <div
       style={{
-        height: 380,
+        height: "clamp(280px, 40vh, 380px)",
         background: "var(--neutral-50)",
         display: "flex",
         alignItems: "center",
@@ -385,9 +385,10 @@ export function BeatJourney() {
 
         return (
           <section
+            className={dualGrid ? "lab-dual-grid" : undefined}
             style={{
               display: "grid",
-              gridTemplateColumns: dualGrid ? "1fr 1fr" : "1fr",
+              gridTemplateColumns: dualGrid ? undefined : "1fr",
               gridAutoRows: "max-content",
               alignItems: "start",
               gap: 12,

@@ -12,15 +12,15 @@ export default async function SimulationsIndexPage() {
 
       <section
         style={{
-          padding: "64px 56px 24px",
-          maxWidth: 1280,
+          padding: "var(--section-pad-y) var(--page-pad-x) 24px",
+          maxWidth: "var(--container-max)",
           margin: "0 auto",
         }}
       >
         <span className="t-meta">Standalone playgrounds</span>
         <h1
           style={{
-            fontSize: 40,
+            fontSize: "var(--section-h2)",
             fontWeight: 600,
             lineHeight: 1.1,
             letterSpacing: "-0.02em",
@@ -46,18 +46,12 @@ export default async function SimulationsIndexPage() {
 
       <section
         style={{
-          padding: "32px 56px 96px",
-          maxWidth: 1280,
+          padding: "32px var(--page-pad-x) var(--section-pad-y-lg)",
+          maxWidth: "var(--container-max)",
           margin: "0 auto",
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-            gap: 16,
-          }}
-        >
+        <div className="lp-grid-auto-320">
           {SIMULATIONS.map((sim) => (
             <SimulationCard key={sim.slug} sim={sim} />
           ))}

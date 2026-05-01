@@ -466,7 +466,7 @@ export function Surface3D({
     : [];
 
   return (
-    <div style={{ width: "100%", height: 560, background: "var(--neutral-50)" }}>
+    <div style={{ width: "100%", height: "clamp(360px, 50vh, 560px)", background: "var(--neutral-50)" }}>
       <Canvas
         dpr={[1, 2]}
         camera={{ fov: 38, near: 0.1, far: 80 }}

@@ -21,14 +21,14 @@ export default async function HintsPage() {
       </div>
 
       <div
+        className="scroll-x"
         style={{
           background: "var(--neutral-0)",
           border: "1px solid var(--neutral-200)",
           borderRadius: 8,
-          overflow: "hidden",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: "var(--neutral-50)" }}>
               <Th>Student</Th>

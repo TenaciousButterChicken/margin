@@ -12,13 +12,13 @@ export default async function AboutPage() {
         style={{
           maxWidth: 680,
           margin: "0 auto",
-          padding: "96px 24px 128px",
+          padding: "var(--section-pad-y-lg) var(--page-pad-x) 128px",
         }}
       >
         <span className="t-meta">A note from me</span>
         <h1
           style={{
-            fontSize: 56,
+            fontSize: "var(--section-h1)",
             fontWeight: 600,
             lineHeight: 1.05,
             letterSpacing: "-0.02em",
@@ -42,7 +42,7 @@ export default async function AboutPage() {
 
         <h2
           style={{
-            fontSize: 24,
+            fontSize: "var(--section-h3)",
             fontWeight: 600,
             lineHeight: 1.25,
             letterSpacing: "-0.01em",
@@ -67,7 +67,7 @@ export default async function AboutPage() {
 
         <h2
           style={{
-            fontSize: 24,
+            fontSize: "var(--section-h3)",
             fontWeight: 600,
             lineHeight: 1.25,
             letterSpacing: "-0.01em",
