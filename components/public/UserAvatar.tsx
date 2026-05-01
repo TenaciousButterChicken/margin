@@ -76,6 +76,7 @@ export default function UserAvatar({ email, role }: UserAvatarProps) {
 
       {open && (
         <div
+          className="user-avatar-popover"
           style={{
             position: "absolute",
             top: 40,

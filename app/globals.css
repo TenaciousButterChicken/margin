@@ -178,3 +178,16 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── User avatar popover ──
+   Desktop: anchor right edge of popover to avatar's right edge so it
+   opens leftward (avatar lives at the top-right of the nav).
+   Mobile: avatar is on the left side of the open menu, so flip to
+   open rightward and clamp width to the viewport. */
+@media (max-width: 640px) {
+  .user-avatar-popover {
+    left: 0 !important;
+    right: auto !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+}
